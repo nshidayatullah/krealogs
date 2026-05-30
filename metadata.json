@@ -1,0 +1,6 @@
+{
+  "name": "Krealogs.com",
+  "description": "Platform pemesanan jasa media dan videografi premium Krealogs.com, lengkap dengan integrasi Google Sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

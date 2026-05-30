@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-serif: "Playfair Display", Georgia, Cambria, serif;
+}
+
+body {
+  background-color: #fcfcfd; /* Warm premium white background */
+  font-family: var(--font-sans);
+  color: #09090b;
+}
+
+/* Custom scrollbar behavior for light sleek UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #fcfcfd;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e4e4e7;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4d4d8;
+}
+
+/* Light mode overrides for Tailwind classes to ensure 100% white theme */
+.bg-zinc-950, 
+.bg-\[\#09090b\], 
+.bg-\[\#0c0c0e\], 
+.bg-\[\#09090b\]\/80, 
+.bg-zinc-900\/60, 
+.bg-zinc-905, 
+.bg-zinc-955,
+.bg-zinc-950\/40, 
+.bg-zinc-950\/30, 
+.bg-zinc-950\/70, 
+.bg-zinc-950\/45,
+.bg-zinc-950\/20,
+.bg-zinc-950\/70,
+.bg-\[\#0c0c0e\], 
+.bg-black\/20 {
+  background-color: #ffffff !important;
+}
+
+.bg-zinc-900, 
+.bg-zinc-900\/75, 
+.bg-zinc-900\/10, 
+.bg-zinc-950\/80,
+.bg-zinc-905,
+.bg-zinc-900\/60,
+.bg-zinc-950\/80 {
+  background-color: #f4f4f5 !important;
+}
+
+.border-zinc-800, 
+.border-zinc-850, 
+.border-zinc-850\/80,
+.border-zinc-900, 
+.border-zinc-700, 
+.border-zinc-750, 
+.border-zinc-800\/80,
+.border-zinc-850 {
+  border-color: #e4e4e7 !important;
+}
+
+.text-white, 
+.text-zinc-100, 
+.text-zinc-150, 
+.text-zinc-200, 
+.text-zinc-300, 
+.text-zinc-350 {
+  color: #09090b !important;
+}
+
+.text-zinc-400, 
+.text-zinc-450 {
+  color: #71717a !important;
+}
+
+.text-zinc-500 {
+  color: #a1a1aa !important;
+}
+
+/* Gradient Adjustments for Hero Section */
+.from-zinc-900.to-black,
+.bg-gradient-to-br.from-zinc-900.to-black {
+  background-image: linear-gradient(to bottom right, #f4f4f5, #ffffff) !important;
+  color: #09090b !important;
+}
+
+/* Input elements focus and states */
+input, select, textarea {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+  border-color: #d4d4d8 !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #f59e0b !important;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+}
+
+/* Specific component tweaks */
+.bg-zinc-950\/80.text-amber-400 {
+  background-color: #fef3c7 !important;
+  color: #d97706 !important;
+  border-color: #fde68a !important;
+}
+
+.bg-zinc-950\/70.border-emerald-500\/20 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.bg-emerald-500\/20 {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+/* Calculator specific light mode adjustments */
+.bg-linear-to-br.from-zinc-900.to-black {
+  background-image: linear-gradient(to bottom right, #ffffff, #f4f4f5) !important;
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+.bg-zinc-900\/40 {
+  background-color: #ffffff !important;
+  color: #09090b !important;
+}
+
+.bg-black\/45,
+.bg-black\/40,
+.bg-black\/50,
+.bg-zinc-950\/60,
+.bg-zinc-900\/40 {
+  background-color: #f4f4f5 !important;
+}
+
+.bg-zinc-800 {
+  background-color: #e4e4e7 !important;
+  color: #09090b !important;
+}
+
+.text-zinc-100 {
+  color: #09090b !important;
+}
+
+/* DP presets and sliders */
+.bg-zinc-900\/40.border-zinc-800\/80 {
+  background-color: #ffffff !important;
+  border-color: #e4e4e7 !important;
+}
+
+.accent-amber-500 {
+  accent-color: #f59e0b !important;
+}
+
+/* Slider line color */
+input[type="range"] {
+  background-color: #e4e4e7 !important;
+}
+
+/* Brand Logo Adjustment: convert white logo to high-contrast black for light theme */
+img[src*="krealogs_logo"] {
+  filter: brightness(0) !important;
+  object-fit: contain !important;
+}
+
+
+
+
