@@ -638,10 +638,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 {packages.map((p) => (
                   <div key={p.id} className="p-5 rounded-2xl border border-zinc-800 bg-zinc-950/40 space-y-4 flex flex-col justify-between hover:border-zinc-700 transition">
                     <div className="space-y-2">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-mono font-bold bg-zinc-900 px-2 py-0.5 rounded text-zinc-400 border border-zinc-850">
-                          {p.id}
-                        </span>
+                      <div className="flex justify-end items-start w-full">
                         <div className="flex space-x-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                             {p.category === "signature" ? "🏆 Signature" : "⚡ Regular"}
