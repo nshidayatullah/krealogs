@@ -641,7 +641,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       <div className="flex justify-end items-start w-full">
                         <div className="flex space-x-1.5">
                           <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
-                            {p.category === "signature" ? "🏆 Signature" : "⚡ Regular"}
+                            {p.category === "signature" ? "Signature" : "Regular"}
                           </span>
                           {p.type !== "both" && (
                             <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
@@ -979,8 +979,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     onChange={(e) => setPkgCategory(e.target.value as any)}
                     className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-[11px] font-medium focus:outline-none"
                   >
-                    <option value="regular">⚡ Regular</option>
-                    <option value="signature">🏆 Signature</option>
+                    <option value="regular">Regular</option>
+                    <option value="signature">Signature</option>
                   </select>
                 </div>
 

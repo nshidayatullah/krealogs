@@ -773,7 +773,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         : "text-zinc-400 hover:text-white"
                                     }`}
                                   >
-                                    <span>🏆 Signature</span>
+                                    <span>Signature</span>
                                   </button>
                                   <button
                                     type="button"
@@ -784,7 +784,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         : "text-zinc-400 hover:text-white"
                                     }`}
                                   >
-                                    <span>⚡ Regular</span>
+                                    <span>Regular</span>
                                   </button>
                                 </div>
                               </div>
