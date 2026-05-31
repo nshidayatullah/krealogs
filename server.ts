@@ -66,6 +66,7 @@ async function startServer() {
   // Get full DB structure
   app.get("/api/db", async (req, res) => {
     try {
+      console.log("Database connection ping to URL: ", process.env.DATABASE_URL ? "URL is defined (starts with " + process.env.DATABASE_URL.substring(0, 15) + ")" : "URL is UNDEFINED");
       const { rows: packages } = await pool.query("SELECT * FROM packages");
       const { rows: addons } = await pool.query("SELECT * FROM addons");
       const { rows: bookingsRows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
@@ -85,9 +86,9 @@ async function startServer() {
       };
 
       res.json({ packages, addons, bookings, coupons, spreadsheetConfig });
-    } catch (error) {
-      console.error("Error fetching database status:", error);
-      res.status(500).json({ error: "Terjadi kesalahan internal server" });
+    } catch (error: any) {
+      console.error("CRITICAL error fetching database status:", error);
+      res.status(500).json({ error: "Terjadi kesalahan internal server", details: error.message, stack: error.stack });
     }
   });
 
