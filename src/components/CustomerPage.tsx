@@ -835,7 +835,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                   <div
                                     key={a.id}
                                     onClick={() => toggleAddonForDay(bd.id, a.id)}
-                                    className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer min-h-[96px] relative select-none ${
+                                    className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer min-h-[105px] relative select-none ${
                                       isSelected ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-zinc-200 bg-white hover:border-zinc-350"
                                     }`}
                                   >
@@ -851,37 +851,37 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                       </div>
 
                                       {/* Middle/Right text content */}
-                                      <div className="flex-1 min-w-0 pb-7">
+                                      <div className="flex-1 min-w-0 pb-8">
                                         <span className="text-xs font-bold text-zinc-900 block leading-tight">{a.name}</span>
                                         <span className="text-[10px] text-zinc-500 block mt-1 leading-normal">{a.description}</span>
-                                        
-                                        {/* Plus Minus Qty Selector */}
-                                        {isSelected && (
-                                          <div className="flex items-center space-x-2 mt-3 bg-white p-1 rounded-lg border border-zinc-200 shadow-sm w-fit shrink-0 relative z-10" onClick={(e) => e.stopPropagation()}>
-                                            <button
-                                              type="button"
-                                              onClick={() => updateAddonQtyForDay(bd.id, a.id, -1)}
-                                              className="w-5 h-5 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-900 flex items-center justify-center font-extrabold text-[10px] cursor-pointer transition"
-                                            >
-                                              -
-                                            </button>
-                                            <span className="text-[10px] font-mono font-bold text-zinc-900 px-1.5 min-w-[14px] text-center select-none">
-                                              {quantity}
-                                            </span>
-                                            <button
-                                              type="button"
-                                              onClick={() => updateAddonQtyForDay(bd.id, a.id, 1)}
-                                              className="w-5 h-5 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-900 flex items-center justify-center font-extrabold text-[10px] cursor-pointer transition"
-                                            >
-                                              +
-                                            </button>
-                                          </div>
-                                        )}
                                       </div>
                                     </div>
 
+                                    {/* Absolute Bottom Left Qty Counter */}
+                                    {isSelected && (
+                                      <div className="absolute bottom-3 left-3.5 flex items-center space-x-1.5 bg-white p-0.5 rounded-lg border border-zinc-200 shadow-sm z-10" onClick={(e) => e.stopPropagation()}>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateAddonQtyForDay(bd.id, a.id, -1)}
+                                          className="w-5 h-5 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-900 flex items-center justify-center font-extrabold text-[10px] cursor-pointer transition"
+                                        >
+                                          -
+                                        </button>
+                                        <span className="text-[10px] font-mono font-bold text-zinc-900 px-1 min-w-[14px] text-center select-none">
+                                          {quantity}
+                                        </span>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateAddonQtyForDay(bd.id, a.id, 1)}
+                                          className="w-5 h-5 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-900 flex items-center justify-center font-extrabold text-[10px] cursor-pointer transition"
+                                        >
+                                          +
+                                        </button>
+                                      </div>
+                                    )}
+
                                     {/* Absolute Bottom Right Price */}
-                                    <div className="absolute bottom-3 right-3 text-right">
+                                    <div className="absolute bottom-3.5 right-3 text-right">
                                       <span className="text-[11px] font-mono font-bold text-amber-600">
                                         +Rp {(a.price * (quantity || 1)).toLocaleString("id-ID")}
                                       </span>
