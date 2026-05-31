@@ -374,7 +374,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       </section>
 
       {/* Admin Tab Handles */}
-      <section className="bg-zinc-950 p-1.5 border border-zinc-850 rounded-2xl shadow-inner flex flex-wrap gap-1">
+      <section className="bg-zinc-950 p-1.5 border border-zinc-850 rounded-2xl shadow-inner flex flex-wrap gap-1 mb-6">
         <button
           onClick={() => setActiveTab("bookings")}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
