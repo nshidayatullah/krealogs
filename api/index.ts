@@ -3,13 +3,18 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
 import pg from "pg";
+import fs from "fs";
 import { Request, Response, NextFunction } from "express";
 
 const { Pool } = pg;
 
+const sslConfig = process.env.NODE_ENV === "production"
+  ? { ca: fs.existsSync("/etc/ssl/certs/ca-certificates.crt") ? fs.readFileSync("/etc/ssl/certs/ca-certificates.crt").toString() : undefined, rejectUnauthorized: true }
+  : { rejectUnauthorized: false };
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: sslConfig,
   max: 5,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
@@ -132,9 +137,9 @@ app.post("/api/bookings", async (req, res) => {
   const id = `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   try {
     await pool.query(
-      `INSERT INTO bookings (id, customer_name, customer_phone, customer_city, event_type, wedding_type, event_date, venue_location, package_id, package_name, package_price, addons, addon_details, days, payment_method, total_price, amount_paid, remaining_payment, status, created_at, coupon_code, discount_amount)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
-      [id, d.customerName, cleanPhone, d.customerCity, d.eventType, d.weddingType || null, d.eventDate, d.venueLocation, d.packageId, d.packageName, d.packagePrice, d.addons, JSON.stringify(d.addonDetails), d.days ? JSON.stringify(d.days) : null, d.paymentMethod, d.totalPrice, d.amountPaid, d.remainingPayment, "pending", new Date().toISOString(), d.couponCode || null, d.discountAmount || 0]
+      `INSERT INTO bookings (id, customer_name, customer_phone, customer_city, event_type, wedding_type, event_date, venue_location, package_id, package_name, package_price, addons, addon_details, days, payment_method, total_price, amount_paid, remaining_payment, status, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+      [id, d.customerName, cleanPhone, d.customerCity, d.eventType, d.weddingType || null, d.eventDate, d.venueLocation, d.packageId, d.packageName, d.packagePrice, d.addons, JSON.stringify(d.addonDetails), d.days ? JSON.stringify(d.days) : null, d.paymentMethod, d.totalPrice, d.amountPaid, d.remainingPayment, "pending", new Date().toISOString()]
     );
     res.json({ success: true, booking: { ...d, id, customerPhone: cleanPhone, status: "pending", createdAt: new Date().toISOString() } });
   } catch { res.status(500).json({ error: "Gagal menyimpan pesanan" }); }
@@ -295,7 +300,9 @@ app.post("/api/migrate", async (req: Request, res: Response) => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS packages (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL, features TEXT[], type VARCHAR(50) NOT NULL DEFAULT 'both', category VARCHAR(50) NOT NULL DEFAULT 'regular')`);
     await pool.query(`CREATE TABLE IF NOT EXISTS addons (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL)`);
-    await pool.query(`CREATE TABLE IF NOT EXISTS bookings (id VARCHAR(100) PRIMARY KEY, customer_name VARCHAR(255) NOT NULL, customer_phone VARCHAR(50) NOT NULL, customer_city VARCHAR(100) NOT NULL, event_type VARCHAR(50) NOT NULL, wedding_type VARCHAR(100), event_date VARCHAR(50) NOT NULL, venue_location TEXT NOT NULL, package_id VARCHAR(100) REFERENCES packages(id), package_name VARCHAR(255) NOT NULL, package_price INT NOT NULL, addons VARCHAR(100)[] NOT NULL, addon_details JSONB NOT NULL, days JSONB, payment_method VARCHAR(50) NOT NULL, total_price INT NOT NULL, amount_paid INT NOT NULL, remaining_payment INT NOT NULL, status VARCHAR(50) NOT NULL DEFAULT 'pending', created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, approved_at TIMESTAMP WITH TIME ZONE, rejected_at TIMESTAMP WITH TIME ZONE, coupon_code VARCHAR(50), discount_amount INT DEFAULT 0)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS bookings (id VARCHAR(100) PRIMARY KEY, customer_name VARCHAR(255) NOT NULL, customer_phone VARCHAR(50) NOT NULL, customer_city VARCHAR(100) NOT NULL, event_type VARCHAR(50) NOT NULL, wedding_type VARCHAR(100), event_date VARCHAR(50) NOT NULL, venue_location TEXT NOT NULL, package_id VARCHAR(100) REFERENCES packages(id), package_name VARCHAR(255) NOT NULL, package_price INT NOT NULL, addons VARCHAR(100)[] NOT NULL, addon_details JSONB NOT NULL, days JSONB, payment_method VARCHAR(50) NOT NULL, total_price INT NOT NULL, amount_paid INT NOT NULL, remaining_payment INT NOT NULL, status VARCHAR(50) NOT NULL DEFAULT 'pending', created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, approved_at TIMESTAMP WITH TIME ZONE, rejected_at TIMESTAMP WITH TIME ZONE)`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(50)`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS discount_amount INT DEFAULT 0`);
     await pool.query(`CREATE TABLE IF NOT EXISTS spreadsheet_config (id INT PRIMARY KEY DEFAULT 1, spreadsheet_id VARCHAR(255), spreadsheet_url TEXT, last_synced_at TIMESTAMP WITH TIME ZONE, CONSTRAINT single_row CHECK (id = 1))`);
     await pool.query(`CREATE TABLE IF NOT EXISTS coupons (code VARCHAR(100) PRIMARY KEY, discount_percent INT NOT NULL, valid_until DATE NOT NULL, is_active BOOLEAN DEFAULT TRUE)`);
 
