@@ -646,9 +646,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                           <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                             {p.category === "signature" ? "🏆 Signature" : "⚡ Regular"}
                           </span>
-                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
-                            {p.type === "wedding" ? "Wedding" : p.type === "event" ? "Event" : "Semua Kategori"}
-                          </span>
+                          {p.type !== "both" && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                              {p.type === "wedding" ? "Wedding" : "Event"}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <h4 className="text-base font-bold text-white">{p.name}</h4>
