@@ -1,13 +1,15 @@
 import express from "express";
 import path from "path";
-import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
 import { Package, Addon, Booking } from "./src/types";
 import { pool } from "./src/db";
 
-dotenv.config();
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
@@ -530,20 +532,23 @@ async function startServer() {
   // ------------------------------------
   // Front-end Asset serving / Vite Setup
   // ------------------------------------
-  if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
-    const viteModuleName = "vite";
-    const { createServer: createViteServer } = await import(viteModuleName);
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), "dist");
-    app.use(express.static(distPath));
-    app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
-    });
+  const isVercel = process.env.VERCEL === "1";
+  if (!isVercel) {
+    if (process.env.NODE_ENV !== "production") {
+      const viteModuleName = "vite";
+      const { createServer: createViteServer } = await import(viteModuleName);
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: "spa",
+      });
+      app.use(vite.middlewares);
+    } else {
+      const distPath = path.join(process.cwd(), "dist");
+      app.use(express.static(distPath));
+      app.get("*", (req, res) => {
+        res.sendFile(path.join(distPath, "index.html"));
+      });
+    }
   }
 
   if (process.env.VERCEL !== "1" && !process.env.VERCEL) {

@@ -289,4 +289,8 @@ async function runMigration() {
   }
 }
 
-runMigration();
+if (process.env.VERCEL !== "1" && !process.env.VERCEL) {
+  runMigration();
+} else {
+  console.log("VERCEL env detected, skipping automatic migration.");
+}

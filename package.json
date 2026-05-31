@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "tsx server.ts",
     "migrate": "tsx src/db/migrate.ts",
-    "prebuild": "npm run migrate",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "prebuild": "if [ \"$VERCEL\" != \"1\" ]; then npm run migrate; fi",
+    "build:frontend": "vite build",
+    "build:server": "esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "build": "npm run build:frontend && npm run build:server",
+    "vercel-build": "npm run build:frontend && npm run build:server",
     "start": "node dist/server.cjs",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
