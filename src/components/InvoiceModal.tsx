@@ -2,8 +2,7 @@ import React from "react";
 import { Booking } from "../types";
 import { X, Printer, CheckCircle } from "lucide-react";
 import { formatEventDate } from "../utils/dateFormatter";
-
-const brandLogo = "/src/assets/images/krealogs_logo_1780149664590.png";
+import brandLogo from "../assets/images/krealogs_logo_1780149664590.png";
 
 interface InvoiceModalProps {
   booking: Booking | null;

@@ -15,7 +15,7 @@ import AdminLogin from "./components/AdminLogin";
 import InvoiceModal from "./components/InvoiceModal";
 import { Booking } from "./types";
 import { Camera, Sliders, Users, ExternalLink, LogOut } from "lucide-react";
-const brandLogo = "/src/assets/images/krealogs_logo_1780149664590.png";
+import brandLogo from "./assets/images/krealogs_logo_1780149664590.png";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"customer" | "admin">("customer");

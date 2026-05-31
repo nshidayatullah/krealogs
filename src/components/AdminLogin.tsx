@@ -12,7 +12,7 @@ import {
   CheckCircle2, 
   ShieldCheck
 } from "lucide-react";
-const brandLogo = "/src/assets/images/krealogs_logo_1780149664590.png";
+import brandLogo from "../assets/images/krealogs_logo_1780149664590.png";
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
