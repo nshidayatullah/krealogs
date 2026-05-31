@@ -5,6 +5,9 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --font-serif: "Playfair Display", Georgia, Cambria, serif;
+  --color-brand: #CC5946;
+  --color-brand-light: #d97a6a;
+  --color-brand-dark: #b84a3a;
 }
 
 body {
@@ -105,14 +108,14 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2) !important;
+  border-color: #CC5946 !important;
+  box-shadow: 0 0 0 2px rgba(204, 89, 70, 0.2) !important;
 }
 
 /* Specific component tweaks */
-.bg-zinc-950\/80.text-amber-400 {
+.bg-zinc-950\/80.text-brand-400 {
   background-color: #fef3c7 !important;
-  color: #d97706 !important;
+  color: #CC5946 !important;
   border-color: #fde68a !important;
 }
 
@@ -161,8 +164,8 @@ input:focus, select:focus, textarea:focus {
   border-color: #e4e4e7 !important;
 }
 
-.accent-amber-500 {
-  accent-color: #f59e0b !important;
+.accent-brand-500 {
+  accent-color: #CC5946 !important;
 }
 
 /* Slider line color */

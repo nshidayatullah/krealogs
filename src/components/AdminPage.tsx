@@ -456,8 +456,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         </div>
 
         <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest block font-mono">REVIEW PENDING</span>
-          <p className="text-3xl font-mono font-extrabold text-amber-500 mt-1.5">
+          <span className="text-[10px] font-bold text-brand-500/80 uppercase tracking-widest block font-mono">REVIEW PENDING</span>
+          <p className="text-3xl font-mono font-extrabold text-brand-500 mt-1.5">
             {bookings.filter((b) => b.status === "pending").length}
           </p>
         </div>
@@ -490,7 +490,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         <button
           onClick={() => setActiveTab("bookings")}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "bookings" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
+            activeTab === "bookings" ? "bg-brand-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
           }`}
         >
           Pemesanan Masuk ({bookings.length})
@@ -498,7 +498,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         <button
           onClick={() => setActiveTab("packages")}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "packages" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
+            activeTab === "packages" ? "bg-brand-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
           }`}
         >
           Kelola Paket ({packages.length})
@@ -506,7 +506,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         <button
           onClick={() => setActiveTab("addons")}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "addons" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
+            activeTab === "addons" ? "bg-brand-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
           }`}
         >
           Kelola Add-Ons ({addons.length})
@@ -514,7 +514,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         <button
           onClick={() => setActiveTab("coupons")}
           className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "coupons" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
+            activeTab === "coupons" ? "bg-brand-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
           }`}
         >
           Kupon Diskon ({coupons.length})
@@ -573,7 +573,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
               {filteredBookings.length === 0 ? (
                 <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
-                  Tidak ditemukan pesanan dengan status: <strong className="text-amber-500">{bookingFilter.toUpperCase()}</strong>
+                  Tidak ditemukan pesanan dengan status: <strong className="text-brand-500">{bookingFilter.toUpperCase()}</strong>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -625,7 +625,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                             )}
                           </td>
                           <td className="py-4 px-4 text-right space-y-1">
-                            <span className="font-mono font-medium text-amber-400 block">
+                            <span className="font-mono font-medium text-brand-400 block">
                               Rp {b.totalPrice.toLocaleString("id-ID")}
                             </span>
                             <span className="text-[10px] text-emerald-400 block">
@@ -647,7 +647,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                                 DP PAID (INVOICE)
                               </span>
                             ) : b.status === "approved" ? (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-amber-500 text-black uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-brand-500 text-black uppercase tracking-widest">
                                 INVOICE (UNPAID)
                               </span>
                             ) : b.status === "rejected" ? (
@@ -747,7 +747,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <button
                   onClick={() => handleOpenPkgModal(null)}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-4 py-2 bg-brand-500 hover:bg-brand-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tambah Paket</span>
@@ -760,11 +760,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     <div className="space-y-2">
                       <div className="flex justify-end items-start w-full">
                         <div className="flex space-x-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-brand-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                             {p.category === "signature" ? "Signature" : "Regular"}
                           </span>
                           {p.type !== "both" && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-brand-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                               {p.type === "wedding" ? "Wedding" : "Event"}
                             </span>
                           )}
@@ -778,7 +778,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                         <ul className="mt-1.5 space-y-1 text-zinc-300 text-xs">
                           {p.features && p.features.map((f, i) => (
                             <li key={i} className="flex items-center gap-1.5">
-                              <Check className="w-3.5 h-3.5 text-amber-500" />
+                              <Check className="w-3.5 h-3.5 text-brand-500" />
                               <span>{f}</span>
                             </li>
                           ))}
@@ -789,7 +789,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     <div className="pt-4 border-t border-zinc-900 flex justify-between items-center">
                       <div>
                         <span className="text-[9px] font-semibold text-zinc-500 block uppercase font-mono">DIPUBLISH DENGAN HARGA</span>
-                        <span className="text-base font-mono font-bold text-amber-400">
+                        <span className="text-base font-mono font-bold text-brand-400">
                           Rp {p.price.toLocaleString("id-ID")}
                         </span>
                       </div>
@@ -830,7 +830,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <button
                   onClick={() => handleOpenAddonModal(null)}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-4 py-2 bg-brand-500 hover:bg-brand-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tambah Add-On</span>
@@ -847,7 +847,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     </div>
 
                     <div className="flex justify-between items-center pt-3 border-t border-zinc-900">
-                      <span className="text-xs font-mono font-bold text-amber-400">
+                      <span className="text-xs font-mono font-bold text-brand-400">
                         Rp {a.price.toLocaleString("id-ID")}
                       </span>
 
@@ -916,12 +916,12 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-900 flex justify-between items-center">
                   <div className="space-y-1">
                     <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">SISA PIUTANG</span>
-                    <p className="text-xl font-bold text-amber-500 font-mono">
+                    <p className="text-xl font-bold text-brand-500 font-mono">
                       Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.remainingPayment, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
-                  <div className="p-2 bg-amber-500/10 rounded-xl">
-                    <TrendingUp className="w-4 h-4 text-amber-400" />
+                  <div className="p-2 bg-brand-500/10 rounded-xl">
+                    <TrendingUp className="w-4 h-4 text-brand-400" />
                   </div>
                 </div>
               </div>
@@ -954,7 +954,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   </div>
                   <button
                     onClick={() => exportPackagesToCSV(packages)}
-                    className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-brand-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"
                   >
                     <Download className="w-4 h-4 text-zinc-450" />
                     <span>Unduh Katalog Paket (.csv)</span>
@@ -970,7 +970,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   </div>
                   <button
                     onClick={() => exportAddonsToCSV(addons)}
-                    className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"
+                    className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-brand-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"
                   >
                     <Download className="w-4 h-4 text-zinc-450" />
                     <span>Unduh Katalog Add-On (.csv)</span>
@@ -1019,7 +1019,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                             <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold font-mono ${
                               b.status === "paid" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" :
                               b.status === "dp_paid" ? "bg-blue-500/10 text-blue-400 border border-blue-500/10" :
-                              b.status === "approved" ? "bg-amber-500/10 text-amber-400 border border-amber-500/10" :
+                              b.status === "approved" ? "bg-brand-500/10 text-brand-400 border border-brand-500/10" :
                               b.status === "rejected" ? "bg-rose-500/10 text-rose-400 border border-rose-500/10" :
                               "bg-zinc-500/10 text-zinc-400 border border-zinc-500/10"
                             }`}>
@@ -1048,7 +1048,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
                 <div>
                   <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Ticket className="w-5 h-5 text-amber-500" />
+                    <Ticket className="w-5 h-5 text-brand-500" />
                     Kelola Kupon Diskon
                   </h2>
                   <p className="text-xs text-zinc-400 mt-1">
@@ -1058,7 +1058,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 
                 <button
                   onClick={() => handleOpenCouponModal(null)}
-                  className="flex items-center gap-1.5 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs transition cursor-pointer"
+                  className="flex items-center gap-1.5 py-2.5 px-4 bg-brand-500 hover:bg-brand-400 text-black font-bold rounded-xl text-xs transition cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" />
                   <span>Buat Kupon Baru</span>
@@ -1107,7 +1107,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       <div className="mt-4 pt-3 border-t border-zinc-900 space-y-2 text-xs">
                         <div className="flex justify-between">
                           <span className="text-zinc-500">Persentase Diskon:</span>
-                          <span className="font-bold text-amber-400 font-mono">{c.discountPercent}%</span>
+                          <span className="font-bold text-brand-400 font-mono">{c.discountPercent}%</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-zinc-500">Berlaku Hingga:</span>
@@ -1170,7 +1170,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: Wedding Cinematic Gold"
                   value={pkgName}
                   onChange={(e) => setPkgName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition"
                 />
               </div>
 
@@ -1180,7 +1180,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: Paket premium cinematografi dilengkapi editing klip highlight..."
                   value={pkgDesc}
                   onChange={(e) => setPkgDesc(e.target.value)}
-                  className="w-full px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition resize-none h-16"
+                  className="w-full px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition resize-none h-16"
                 />
               </div>
 
@@ -1217,7 +1217,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     required
                     value={pkgPrice}
                     onChange={(e) => setPkgPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold text-[11px]"
+                    className="w-full px-3 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition font-mono font-bold text-[11px]"
                   />
                 </div>
               </div>
@@ -1231,7 +1231,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="- 2 Videographer Berpengalaman&#10;- Video Cinematic Highlight 3-5 Menit&#10;- Link Google Drive Selamanya"
                   value={pkgFetStr}
                   onChange={(e) => setPkgFetStr(e.target.value)}
-                  className="w-full p-4 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white font-mono text-[11px] h-28 focus:outline-none"
+                  className="w-full p-4 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white font-mono text-[11px] h-28 focus:outline-none"
                 />
               </div>
 
@@ -1245,7 +1245,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold cursor-pointer transition"
+                  className="px-5 py-2 bg-brand-500 hover:bg-brand-400 text-black rounded-xl font-bold cursor-pointer transition"
                 >
                   Simpan Paket
                 </button>
@@ -1275,7 +1275,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: Drone Shoot Resolusi 4K"
                   value={addonName}
                   onChange={(e) => setAddonName(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition"
                 />
               </div>
 
@@ -1285,7 +1285,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: Klip udara sinematik tambahan selama acara..."
                   value={addonDesc}
                   onChange={(e) => setAddonDesc(e.target.value)}
-                  className="w-full px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition resize-none h-20"
+                  className="w-full px-4 py-2 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition resize-none h-20"
                 />
               </div>
 
@@ -1296,7 +1296,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   required
                   value={addonPrice}
                   onChange={(e) => setAddonPrice(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition font-mono font-bold"
                 />
               </div>
 
@@ -1310,7 +1310,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold cursor-pointer transition"
+                  className="px-5 py-2 bg-brand-500 hover:bg-brand-400 text-black rounded-xl font-bold cursor-pointer transition"
                 >
                   Simpan Add-On
                 </button>
@@ -1341,7 +1341,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: KREALOVE10"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition uppercase font-mono font-bold disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition uppercase font-mono font-bold disabled:opacity-50"
                 />
               </div>
 
@@ -1355,7 +1355,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="10"
                   value={couponPercent}
                   onChange={(e) => setCouponPercent(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition font-mono font-bold"
                 />
               </div>
 
@@ -1366,7 +1366,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   required
                   value={couponExpiry}
                   onChange={(e) => setCouponExpiry(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-brand-500 text-white focus:outline-none transition font-mono font-bold"
                 />
               </div>
 
@@ -1376,7 +1376,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   id="coupon-active-checkbox"
                   checked={couponActive}
                   onChange={(e) => setCouponActive(e.target.checked)}
-                  className="w-4 h-4 accent-amber-500 rounded bg-zinc-950 border border-zinc-800 cursor-pointer"
+                  className="w-4 h-4 accent-brand-500 rounded bg-zinc-950 border border-zinc-800 cursor-pointer"
                 />
                 <label htmlFor="coupon-active-checkbox" className="font-semibold text-zinc-300 cursor-pointer select-none">
                   Kupon Aktif & Dapat Digunakan
@@ -1393,7 +1393,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold cursor-pointer transition"
+                  className="px-5 py-2 bg-brand-500 hover:bg-brand-400 text-black rounded-xl font-bold cursor-pointer transition"
                 >
                   {couponEditCode ? "Simpan Perubahan" : "Buat Kupon"}
                 </button>
@@ -1438,7 +1438,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             >
               <div className="p-6 space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 bg-amber-500/10 rounded-xl text-amber-600 shrink-0">
+                  <div className="p-2.5 bg-brand-500/10 rounded-xl text-brand-600 shrink-0">
                     <AlertCircle className="w-6 h-6" />
                   </div>
                   <h3 className="text-sm font-bold text-zinc-900">{confirmModal.title}</h3>
@@ -1456,7 +1456,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </button>
                 <button
                   onClick={confirmModal.onConfirm}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-bold transition cursor-pointer"
+                  className="px-4 py-2 bg-brand-500 hover:bg-brand-400 text-black rounded-xl text-xs font-bold transition cursor-pointer"
                 >
                   Konfirmasi
                 </button>

@@ -74,7 +74,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
   return (
     <div className="min-h-[60vh] flex items-center justify-center py-6 px-4">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full filter blur-3xl opacity-40 select-none pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-brand-500/5 rounded-full filter blur-3xl opacity-40 select-none pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-zinc-900/40 rounded-full filter blur-3xl opacity-40 select-none pointer-events-none"></div>
 
       <motion.div 
@@ -83,7 +83,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full max-w-md bg-[#0c0c0e] border border-zinc-850 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-amber-600 via-amber-500 to-amber-400"></div>
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-brand-600 via-brand-500 to-brand-400"></div>
 
         <div className="space-y-6 text-center">
           <div className="mx-auto h-10 flex items-center justify-center select-none">
@@ -101,7 +101,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
           <div className="space-y-2">
             <h2 className="text-2xl font-light tracking-tight text-white font-sans">
-              Admin <span className="italic font-serif text-amber-500 font-normal">Login Portal</span>
+              Admin <span className="italic font-serif text-brand-500 font-normal">Login Portal</span>
             </h2>
             <p className="text-xs text-zinc-400">
               Silakan masukkan kredensial untuk mengakses panel manajemen Krealogs.com.
@@ -150,7 +150,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="cth: admin"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-950 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-650"
+                className="w-full pl-10 pr-4 py-3 bg-zinc-950 border border-zinc-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-650"
               />
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-11 py-3 bg-zinc-950 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-650"
+                className="w-full pl-10 pr-11 py-3 bg-zinc-950 border border-zinc-800 focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-650"
               />
               <button
                 type="button"
@@ -185,7 +185,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           <button
             type="submit"
             disabled={isLoading || isSuccess}
-            className="w-full py-3.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-500"
+            className="w-full py-3.5 bg-brand-500 hover:bg-brand-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-500"
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

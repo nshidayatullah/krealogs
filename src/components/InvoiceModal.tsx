@@ -155,7 +155,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
           <div className="flex items-center space-x-2">
             <button
               onClick={handlePrint}
-              className="inline-flex items-center px-4 py-2 text-xs font-black text-black bg-amber-500 hover:bg-amber-400 rounded-xl transition cursor-pointer select-none"
+              className="inline-flex items-center px-4 py-2 text-xs font-black text-black bg-brand-500 hover:bg-brand-400 rounded-xl transition cursor-pointer select-none"
             >
               <Printer className="w-3.5 h-3.5 mr-2 stroke-[2.5]" />
               CETAK / SIMPAN PDF
@@ -195,10 +195,10 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 className="absolute top-[49%] left-[62%] -translate-x-1/2 -translate-y-1/2 rotate-[-14deg] z-0 pointer-events-none select-none opacity-35 scale-105"
                 title="DP TERBAYAR WATERMARK"
               >
-                <div className="border-4 border-double border-amber-600/85 text-amber-650 px-5 py-2.5 rounded-2xl flex flex-col items-center bg-white/45 shadow-sm">
+                <div className="border-4 border-double border-brand-600/85 text-brand-650 px-5 py-2.5 rounded-2xl flex flex-col items-center bg-white/45 shadow-sm">
                   <span className="text-[9px] font-mono font-black tracking-widest opacity-85 leading-none">KREALOGS</span>
                   <span className="text-xl font-black tracking-wide leading-normal py-0.5 uppercase">DP TERBAYAR</span>
-                  <div className="w-full h-px bg-amber-600/50 mb-1"></div>
+                  <div className="w-full h-px bg-brand-600/50 mb-1"></div>
                   <span className="text-[8px] font-mono font-bold tracking-wider leading-none">BOOKING CONFIRMED</span>
                 </div>
               </div>

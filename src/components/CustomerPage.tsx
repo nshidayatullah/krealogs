@@ -430,9 +430,9 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       case "paid":
         return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase tracking-widest">Lunas (Kwitansi)</span>;
       case "approved":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-650 border border-amber-500/20 uppercase tracking-widest">Invoice (Belum Bayar)</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-brand-500/10 text-brand-650 border border-brand-500/20 uppercase tracking-widest">Invoice (Belum Bayar)</span>;
       case "dp_paid":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-700 border border-amber-550/30 uppercase tracking-widest">Invoice (DP Terbayar)</span>;
+        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-brand-500/20 text-brand-700 border border-brand-550/30 uppercase tracking-widest">Invoice (DP Terbayar)</span>;
       case "rejected":
         return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 uppercase tracking-widest">Ditolak</span>;
       default:
@@ -444,15 +444,15 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     <div className="space-y-12">
       {/* Hero Section of Elegant Dark */}
       <section className="relative text-left py-16 px-8 md:px-12 rounded-3xl overflow-hidden bg-linear-to-br from-zinc-900 to-black border border-zinc-800 shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full filter blur-3xl opacity-60"></div>
+        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-500/5 rounded-full filter blur-3xl opacity-60"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-zinc-900/40 rounded-full filter blur-3xl opacity-60"></div>
 
         <div className="relative max-w-2xl space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-zinc-950/80 text-amber-450 font-mono text-[10px] rounded-full border border-zinc-850 tracking-wider uppercase">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-zinc-950/80 text-brand-450 font-mono text-[10px] rounded-full border border-zinc-850 tracking-wider uppercase">
             <span>KREALOGS.COM CINEMATOGRAPHY</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white leading-tight">
-            Ready to <span className="italic font-serif text-amber-500">capture?</span>
+            Ready to <span className="italic font-serif text-brand-500">capture?</span>
           </h1>
           <p className="text-sm md:text-base text-zinc-400 leading-relaxed font-light">Fill in your event details below to initiate a premium, cinematic production request designed for modern requirements.</p>
         </div>
@@ -471,13 +471,13 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
               <div className="mt-3 flex flex-wrap items-center gap-3 text-xs">
                 <span className="font-mono text-zinc-300 bg-zinc-900 px-2 py-1 rounded border border-zinc-800">ID: {submitSuccess.id}</span>
                 <span className="text-zinc-400">
-                  Total Biaya: <strong className="text-amber-500 font-mono">Rp {submitSuccess.totalPrice.toLocaleString("id-ID")}</strong>
+                  Total Biaya: <strong className="text-brand-500 font-mono">Rp {submitSuccess.totalPrice.toLocaleString("id-ID")}</strong>
                 </span>
               </div>
             </div>
           </div>
           <div className="shrink-0 w-full md:w-auto">
-            <span className="inline-flex items-center px-4 py-2.5 text-xs font-mono font-bold rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 uppercase tracking-wider animate-pulse">Menunggu Review Admin</span>
+            <span className="inline-flex items-center px-4 py-2.5 text-xs font-mono font-bold rounded-xl bg-brand-500/10 text-brand-600 border border-brand-500/20 uppercase tracking-wider animate-pulse">Menunggu Review Admin</span>
           </div>
         </div>
       )}
@@ -486,7 +486,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       <section className="bg-zinc-950/30 rounded-3xl p-6 md:p-8 border border-zinc-800 space-y-6">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Search className="w-5 h-5 text-amber-500" />
+            <Search className="w-5 h-5 text-brand-500" />
             Cek Status Pemesanan Anda
           </h2>
           <p className="text-xs text-zinc-500 mt-1">Gunakan nomor ponsel kustomer untuk mengunduh invoice resmi yang disetujui serta melacak progres.</p>
@@ -500,7 +500,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
               placeholder="Masukkan nomor WhatsApp terdaftar (contoh: 08123456789)"
               value={searchWhatsapp}
               onChange={(e) => setSearchWhatsapp(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-500 font-mono"
+              className="w-full pl-10 pr-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-500 font-mono"
             />
           </div>
           <button
@@ -541,7 +541,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                         {b.packageName} • {formatEventDate(b.eventDate, { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                       <p className="text-[11px] text-zinc-400">
-                        Total Tagihan: <span className="text-amber-500 font-mono font-bold">Rp {b.totalPrice.toLocaleString("id-ID")}</span>
+                        Total Tagihan: <span className="text-brand-500 font-mono font-bold">Rp {b.totalPrice.toLocaleString("id-ID")}</span>
                       </p>
                     </div>
 
@@ -555,7 +555,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           Kwitansi Pelunasan
                         </button>
                       ) : b.status === "approved" || b.status === "dp_paid" ? (
-                        <button onClick={() => onOpenInvoice(b)} className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1">
+                        <button onClick={() => onOpenInvoice(b)} className="px-3 py-2 bg-brand-500 hover:bg-brand-600 text-black text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1">
                           <FileText className="w-3.5 h-3.5" />
                           Invoice Resmi
                         </button>
@@ -595,8 +595,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
               <div className="lg:col-span-7 space-y-8">
                 {/* 1. Registrasi Identitas */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-5 h-5 rounded bg-amber-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">A</span>
+                  <h3 className="text-xs font-bold text-brand-500 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-5 h-5 rounded bg-brand-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">A</span>
                     Identitas Pelanggan (Registrasi)
                   </h3>
 
@@ -611,7 +611,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           placeholder="cth: Aditya Pratama"
                           value={namaLengkap}
                           onChange={(e) => setNamaLengkap(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white"
+                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white"
                         />
                       </div>
                     </div>
@@ -626,7 +626,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           placeholder="cth: 0812XXXXXXXX"
                           value={noWhatsapp}
                           onChange={(e) => setNoWhatsapp(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white font-mono"
+                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white font-mono"
                         />
                       </div>
                     </div>
@@ -642,15 +642,15 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                         placeholder="cth: Banjarmasin"
                         value={domisili}
                         onChange={(e) => setDomisili(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white"
+                        className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white"
                       />
                     </div>
                   </div>
                 </div>{" "}
                 {/* 2. Detail Penjadwalan */}
                 <div className="space-y-4 pt-4 border-t border-zinc-900">
-                  <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-5 h-5 rounded bg-amber-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">B</span>
+                  <h3 className="text-xs font-bold text-brand-500 uppercase tracking-widest flex items-center gap-2">
+                    <span className="w-5 h-5 rounded bg-brand-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">B</span>
                     Detail Pemesanan Acara
                   </h3>
 
@@ -662,7 +662,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           type="button"
                           onClick={() => setKeperluan("wedding")}
                           className={`py-3 px-4 rounded-xl text-xs font-bold border transition text-center cursor-pointer ${
-                            keperluan === "wedding" ? "bg-amber-500 border-amber-500 text-black shadow-md shadow-amber-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
+                            keperluan === "wedding" ? "bg-brand-500 border-brand-500 text-black shadow-md shadow-brand-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
                           }`}
                         >
                           Pernikahan (Wedding)
@@ -671,7 +671,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           type="button"
                           onClick={() => setKeperluan("event")}
                           className={`py-3 px-4 rounded-xl text-xs font-bold border transition text-center cursor-pointer ${
-                            keperluan === "event" ? "bg-amber-500 border-amber-500 text-black shadow-md shadow-amber-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
+                            keperluan === "event" ? "bg-brand-500 border-brand-500 text-black shadow-md shadow-brand-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
                           }`}
                         >
                           Komersial (Event)
@@ -689,7 +689,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           placeholder="cth: Gedung Sultan Suriansyah"
                           value={lokasiVenue}
                           onChange={(e) => setLokasiVenue(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white"
+                          className="w-full pl-9 pr-4 py-2.5 bg-zinc-900/75 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white"
                         />
                       </div>
                     </div>
@@ -708,7 +708,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                 type="button"
                                 onClick={() => setWeddingType(type)}
                                 className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition text-center cursor-pointer select-none ${
-                                  isSelected ? "bg-amber-500 border-amber-500 text-black shadow-md shadow-amber-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
+                                  isSelected ? "bg-brand-500 border-brand-500 text-black shadow-md shadow-brand-500/10" : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
                                 }`}
                               >
                                 {type}
@@ -723,8 +723,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                 {/* 3. Rancang Jadwal Acara (Bisa Multi-Hari) */}
                 <div className="space-y-6 pt-4 border-t border-zinc-900">
                   <div className="flex justify-between items-center">
-                    <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
-                      <span className="w-5 h-5 rounded bg-amber-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">C</span>
+                    <h3 className="text-xs font-bold text-brand-500 uppercase tracking-widest flex items-center gap-2">
+                      <span className="w-5 h-5 rounded bg-brand-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">C</span>
                       Jadwal Acara (Bisa Multi-Hari)
                     </h3>
                   </div>
@@ -747,12 +747,12 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                         <div key={bd.id} className="relative p-5 rounded-2xl bg-zinc-950/40 border border-zinc-850 space-y-5 hover:border-zinc-700 transition">
                           {/* Day Header with Delete Button */}
                           <div className="flex justify-between items-center">
-                            <span className="text-[9px] bg-zinc-900 border border-zinc-800 font-mono font-bold px-2.5 py-1 rounded text-amber-400 tracking-wider">ACARA HARI #{idx + 1}</span>
+                            <span className="text-[9px] bg-zinc-900 border border-zinc-800 font-mono font-bold px-2.5 py-1 rounded text-brand-400 tracking-wider">ACARA HARI #{idx + 1}</span>
                             {bookingDays.length > 1 && (
                               <button
                                 type="button"
                                 onClick={() => removeBookingDay(bd.id)}
-                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-500 hover:bg-brand-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
                               >
                                 Hapus Hari Ini
                               </button>
@@ -771,7 +771,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                   required
                                   value={bd.date}
                                   onChange={(e) => updateBookingDay(bd.id, { date: e.target.value })}
-                                  className="w-full pl-9 pr-4 py-2.5 bg-zinc-905 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white"
+                                  className="w-full pl-9 pr-4 py-2.5 bg-zinc-905 border border-zinc-800 focus:border-brand-500 rounded-xl focus:outline-none transition text-xs text-white"
                                 />
                               </div>
                               {bd.date && bookingDays.some((other) => other.id !== bd.id && other.date === bd.date) && (
@@ -790,7 +790,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                     type="button"
                                     onClick={() => setPkgCategoryTabs((prev) => ({ ...prev, [bd.id]: "signature" }))}
                                     className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                                      activeTab === "signature" ? "bg-amber-500 text-black shadow-md" : "text-zinc-400 hover:text-white"
+                                      activeTab === "signature" ? "bg-brand-500 text-black shadow-md" : "text-zinc-400 hover:text-white"
                                     }`}
                                   >
                                     <span>Signature</span>
@@ -799,7 +799,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                     type="button"
                                     onClick={() => setPkgCategoryTabs((prev) => ({ ...prev, [bd.id]: "regular" }))}
                                     className={`flex-1 py-1.5 px-3 rounded-lg text-[10px] font-black uppercase tracking-wider transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                                      activeTab === "regular" ? "bg-amber-500 text-black shadow-md" : "text-zinc-400 hover:text-white"
+                                      activeTab === "regular" ? "bg-brand-500 text-black shadow-md" : "text-zinc-400 hover:text-white"
                                     }`}
                                   >
                                     <span>Regular</span>
@@ -819,8 +819,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         className={`p-5 rounded-2xl border transition-all duration-300 flex flex-col justify-between cursor-pointer relative group ${
                                           isPkgSelected
                                             ? activeTab === "signature"
-                                              ? "bg-zinc-950 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.08)] ring-1 ring-amber-500"
-                                              : "bg-zinc-950 border-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.08)] ring-1 ring-amber-500"
+                                              ? "bg-zinc-950 border-brand-500 shadow-[0_0_20px_rgba(245,158,11,0.08)] ring-1 ring-brand-500"
+                                              : "bg-zinc-950 border-brand-500 shadow-[0_0_20px_rgba(245,158,11,0.08)] ring-1 ring-brand-500"
                                             : "bg-zinc-900/30 border-zinc-850 hover:border-zinc-700/80 hover:bg-zinc-900/50"
                                         }`}
                                       >
@@ -830,12 +830,12 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                             <div className="space-y-1 flex-1">
                                               <h4 className="text-[13px] font-bold text-white tracking-tight flex items-center gap-1.5 flex-wrap">
                                                 {pkg.name}
-                                                {isPkgSelected && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">★ TERPILIH</span>}
+                                                {isPkgSelected && <span className="text-[8px] font-black bg-brand-500 text-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">★ TERPILIH</span>}
                                               </h4>
                                               <p className="text-[10px] text-zinc-400 leading-normal line-clamp-2">{pkg.description}</p>
                                             </div>
                                             <span
-                                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isPkgSelected ? "bg-amber-500 border-amber-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}
+                                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isPkgSelected ? "bg-brand-500 border-brand-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}
                                             >
                                               {isPkgSelected && <Check className="w-2.5 h-2.5 stroke-3" />}
                                             </span>
@@ -847,7 +847,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                             <ul className="space-y-1.5 text-[11px] text-zinc-300">
                                               {pkg.features?.map((feat, fidx) => (
                                                 <li key={fidx} className="flex items-start gap-1.5">
-                                                  <Check className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
+                                                  <Check className="w-3.5 h-3.5 text-brand-500 shrink-0 mt-0.5" />
                                                   <span className="leading-tight text-zinc-300 text-[10px]">{feat}</span>
                                                 </li>
                                               ))}
@@ -859,7 +859,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         <div className="mt-4 pt-3.5 border-t border-zinc-900/60 flex items-center justify-between">
                                           <span className="text-[8px] text-zinc-500 uppercase tracking-wider block font-mono">{isPkgSelected ? "✓ Aktif Dipilih" : " Klik untuk memilih"}</span>
                                           <div className="text-right whitespace-nowrap">
-                                            <span className="text-[11px] sm:text-[13px] font-extrabold text-amber-500 font-mono tracking-tight">Rp {pkg.price.toLocaleString("id-ID")}</span>
+                                            <span className="text-[11px] sm:text-[13px] font-extrabold text-brand-500 font-mono tracking-tight">Rp {pkg.price.toLocaleString("id-ID")}</span>
                                           </div>
                                         </div>
                                       </div>
@@ -885,7 +885,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                     key={a.id}
                                     onClick={() => toggleAddonForDay(bd.id, a.id)}
                                     className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer min-h-[105px] relative select-none ${
-                                      isSelected ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-zinc-200 bg-white hover:border-zinc-350"
+                                      isSelected ? "border-brand-500 bg-brand-500/5 shadow-sm" : "border-zinc-200 bg-white hover:border-zinc-350"
                                     }`}
                                   >
                                     {/* Upper Content: Checkbox & Texts */}
@@ -893,7 +893,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                       {/* Left Checkbox */}
                                       <div
                                         className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 mt-0.5 transition-colors ${
-                                          isSelected ? "bg-amber-500 border-amber-500 text-black" : "bg-white border-zinc-300 text-transparent"
+                                          isSelected ? "bg-brand-500 border-brand-500 text-black" : "bg-white border-zinc-300 text-transparent"
                                         }`}
                                       >
                                         <Check className="w-2.5 h-2.5 stroke-3" />
@@ -929,7 +929,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
                                     {/* Absolute Bottom Right Price */}
                                     <div className="absolute bottom-3.5 right-3 text-right">
-                                      <span className="text-[11px] font-mono font-bold text-amber-600">+Rp {(a.price * (quantity || 1)).toLocaleString("id-ID")}</span>
+                                      <span className="text-[11px] font-mono font-bold text-brand-600">+Rp {(a.price * (quantity || 1)).toLocaleString("id-ID")}</span>
                                     </div>
                                   </div>
                                 );
@@ -945,7 +945,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     <button
                       type="button"
                       onClick={addBookingDay}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-500 hover:bg-brand-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
                     >
                       + Tambah Hari
                     </button>
@@ -958,7 +958,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                 <div className="lg:col-span-5 lg:sticky lg:top-6 bg-zinc-900/40 text-zinc-100 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl border border-zinc-850 bg-linear-to-br from-zinc-900 to-black">
                   <div>
                     <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                      <Receipt className="w-5 h-5 text-amber-500" />
+                      <Receipt className="w-5 h-5 text-brand-500" />
                       RINCIAN BIAYA
                     </h3>
                     <p className="text-[11px] text-zinc-400 mt-0.5">Penghitungan transparan secara otomatis.</p>
@@ -987,7 +987,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                             <span>
                               Hari #{index + 1}: {bd.date ? formatEventDate(bd.date, { day: "numeric", month: "short", year: "numeric" }) : <span className="text-rose-500 font-normal">Isi Tanggal..</span>}
                             </span>
-                            <span className="font-mono text-amber-500 text-xs">Rp {daySubtotal.toLocaleString("id-ID")}</span>
+                            <span className="font-mono text-brand-500 text-xs">Rp {daySubtotal.toLocaleString("id-ID")}</span>
                           </div>
                           <div className="text-[11px] text-zinc-500 flex justify-between gap-4">
                             <span className="truncate text-zinc-400">Paket: {pkg ? pkg.name : "Belum dipilih"}</span>
@@ -1011,7 +1011,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   {/* Coupon Code Input Component */}
                   <div className="space-y-3 pt-2 border-b border-zinc-800 pb-4">
                     <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <Ticket className="w-5 h-5 text-amber-500" />
+                      <Ticket className="w-5 h-5 text-brand-500" />
                       Kode Kupon / Diskon
                     </label>
 
@@ -1022,24 +1022,24 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           placeholder="Masukkan kode kupon (contoh: KREALOVE10)"
                           value={couponInput}
                           onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-                          className="flex-1 px-3 py-2 bg-zinc-950/80 border border-zinc-800 focus:border-amber-500 focus:outline-none text-white rounded-xl text-xs font-mono uppercase placeholder-zinc-650"
+                          className="flex-1 px-3 py-2 bg-zinc-950/80 border border-zinc-800 focus:border-brand-500 focus:outline-none text-white rounded-xl text-xs font-mono uppercase placeholder-zinc-650"
                         />
                         <button
                           type="button"
                           onClick={handleValidateCoupon}
-                          className="px-4 py-2 bg-zinc-850 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-amber-400 font-bold rounded-xl text-xs transition cursor-pointer"
+                          className="px-4 py-2 bg-zinc-850 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-brand-400 font-bold rounded-xl text-xs transition cursor-pointer"
                         >
                           Pasang
                         </button>
                       </div>
                     ) : (
-                      <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center justify-between">
+                      <div className="p-3 bg-brand-500/5 border border-brand-500/20 rounded-2xl flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400">
+                          <div className="p-1.5 bg-brand-500/10 rounded-lg text-brand-400">
                             <Ticket className="w-4 h-4" />
                           </div>
                           <div>
-                            <p className="text-xs font-extrabold text-amber-400 font-mono tracking-wide">{appliedCoupon.code}</p>
+                            <p className="text-xs font-extrabold text-brand-400 font-mono tracking-wide">{appliedCoupon.code}</p>
                             <p className="text-[10px] text-zinc-400 font-medium">Potongan Diskon {appliedCoupon.discountPercent}% Berhasil</p>
                           </div>
                         </div>
@@ -1056,7 +1056,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     )}
 
                     {couponSuccess && !couponError && (
-                      <p className="text-[10px] text-amber-400 font-medium flex items-center gap-1 font-mono">
+                      <p className="text-[10px] text-brand-400 font-medium flex items-center gap-1 font-mono">
                         <span>✅ {couponSuccess}</span>
                       </p>
                     )}
@@ -1066,7 +1066,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   <div className="space-y-3 pt-2">
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                        <DollarSign className="w-5 h-5 text-amber-500" />
+                        <DollarSign className="w-5 h-5 text-brand-500" />
                         Sistem Pembayaran
                       </label>
                     </div>
@@ -1098,7 +1098,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                       <div className="space-y-3 bg-zinc-950/60 p-4 rounded-2xl border border-zinc-850 text-zinc-300">
                         <div className="flex justify-between items-center text-[11px]">
                           <span className="font-semibold text-zinc-400">Atur Persentase DP:</span>
-                          <span className="font-mono text-amber-400 font-bold bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">{isCustomDpActive ? "Kustom" : `${dpPercentage}%`}</span>
+                          <span className="font-mono text-brand-400 font-bold bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">{isCustomDpActive ? "Kustom" : `${dpPercentage}%`}</span>
                         </div>
 
                         {/* Presets Grid */}
@@ -1114,7 +1114,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                   setIsCustomDpActive(false);
                                 }}
                                 className={`py-1.5 rounded-lg text-[10px] font-mono font-bold text-center border cursor-pointer transition ${
-                                  isActive ? "bg-amber-500/10 border-amber-500 text-amber-400 font-semibold" : "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:text-white"
+                                  isActive ? "bg-brand-500/10 border-brand-500 text-brand-400 font-semibold" : "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:text-white"
                                 }`}
                               >
                                 {pct}%
@@ -1135,7 +1135,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                               setDpPercentage(Number(e.target.value));
                               setIsCustomDpActive(false);
                             }}
-                            className="w-full accent-amber-500 cursor-pointer h-1 bg-zinc-800 rounded-lg appearance-none"
+                            className="w-full accent-brand-500 cursor-pointer h-1 bg-zinc-800 rounded-lg appearance-none"
                           />
                           <div className="flex justify-between text-[9px] text-zinc-500 font-mono">
                             <span>Min 50%</span>
@@ -1154,7 +1154,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                   setIsCustomDpActive(false);
                                   setDpPercentage(50);
                                 }}
-                                className="text-[9px] text-amber-500 font-bold hover:underline cursor-pointer"
+                                className="text-[9px] text-brand-500 font-bold hover:underline cursor-pointer"
                               >
                                 Reset
                               </button>
@@ -1169,7 +1169,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                               setCustomDpAmount(digits);
                               setIsCustomDpActive(true);
                             }}
-                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 focus:border-amber-500 focus:outline-none text-white rounded-lg font-mono text-xs text-right"
+                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 focus:border-brand-500 focus:outline-none text-white rounded-lg font-mono text-xs text-right"
                           />
 
                           {/* Real-time Warning message under typing */}
@@ -1191,7 +1191,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                 );
                               }
                               return (
-                                <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1 font-sans leading-normal">
+                                <p className="text-[10px] text-brand-400 mt-1 flex items-center gap-1 font-sans leading-normal">
                                   <span>✅ Porsi DP valid: {Math.round((parsedVal / finalPrice) * 100)}% dari total biaya setelah diskon</span>
                                 </p>
                               );
@@ -1212,10 +1212,10 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                       <>
                         <div className="flex justify-between text-zinc-450">
                           <span className="flex items-center gap-1">
-                            <Ticket className="w-3.5 h-3.5 text-amber-500" />
+                            <Ticket className="w-3.5 h-3.5 text-brand-500" />
                             Diskon ({appliedCoupon.code} - {appliedCoupon.discountPercent}%):
                           </span>
-                          <span className="font-mono text-amber-400 font-semibold">-Rp {discountAmount.toLocaleString("id-ID")}</span>
+                          <span className="font-mono text-brand-400 font-semibold">-Rp {discountAmount.toLocaleString("id-ID")}</span>
                         </div>
                         <div className="flex justify-between text-zinc-300 border-t border-zinc-900 pt-2 pb-1">
                           <span>Total Setelah Diskon:</span>
@@ -1225,8 +1225,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     )}
 
                     <div className="flex justify-between text-zinc-200 border-t border-zinc-800/80 pt-3">
-                      <span className="font-semibold text-amber-400 text-xs">Wajib Dibayar Sekarang:</span>
-                      <span className="font-mono text-xl font-black text-amber-400">Rp {amountPaid.toLocaleString("id-ID")}</span>
+                      <span className="font-semibold text-brand-400 text-xs">Wajib Dibayar Sekarang:</span>
+                      <span className="font-mono text-xl font-black text-brand-400">Rp {amountPaid.toLocaleString("id-ID")}</span>
                     </div>
 
                     {paymentMethod !== "full" && (
@@ -1249,7 +1249,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-650"
+                      className="w-full py-4 bg-brand-500 hover:bg-brand-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-650"
                     >
                       {isSubmitting ? "Memproses Data..." : "KONFIRMASI PEMESANAN"}
                       <ArrowRight className="w-4 h-4" />
@@ -1258,8 +1258,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                 </div>
               ) : (
                 <div className="lg:col-span-5 lg:sticky lg:top-6 bg-zinc-900/40 text-zinc-300 rounded-3xl p-6 md:p-8 border border-zinc-850 bg-linear-to-br from-zinc-900 to-black flex flex-col items-center justify-center text-center space-y-6 min-h-[380px] shadow-2xl">
-                  <div className="p-4.5 bg-zinc-950/60 rounded-full border border-zinc-800 text-amber-500 animate-pulse">
-                    <Receipt className="w-8 h-8 text-amber-500" />
+                  <div className="p-4.5 bg-zinc-950/60 rounded-full border border-zinc-800 text-brand-500 animate-pulse">
+                    <Receipt className="w-8 h-8 text-brand-500" />
                   </div>
                   <div className="space-y-2.5 max-w-[290px]">
                     <h3 className="text-zinc-200 font-extrabold text-xs uppercase tracking-widest font-sans">RINCIAN BIAYA</h3>
@@ -1267,17 +1267,17 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   </div>
                   <div className="flex flex-wrap justify-center gap-1.5 pt-2 text-[9px] font-mono">
                     <span
-                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${namaLengkap.trim() && noWhatsapp.trim() && domisili.trim() ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${namaLengkap.trim() && noWhatsapp.trim() && domisili.trim() ? "bg-brand-500/10 border-brand-500/30 text-brand-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
                     >
                       Identitas
                     </span>
                     <span
-                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${lokasiVenue.trim() ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${lokasiVenue.trim() ? "bg-brand-500/10 border-brand-500/30 text-brand-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
                     >
                       Venue
                     </span>
                     <span
-                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${bookingDays.length > 0 && bookingDays.every((bd) => bd.date && bd.packageId) ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${bookingDays.length > 0 && bookingDays.every((bd) => bd.date && bd.packageId) ? "bg-brand-500/10 border-brand-500/30 text-brand-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
                     >
                       Paket & Tanggal
                     </span>
