@@ -529,6 +529,8 @@ async function startServer() {
     });
   });
 
+  app.get("/favicon.ico", (req, res) => res.status(204).end());
+
   // ------------------------------------
   // Front-end Asset serving / Vite Setup
   // ------------------------------------

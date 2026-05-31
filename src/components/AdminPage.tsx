@@ -97,7 +97,10 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
   const loadData = () => {
     setDbLoading(true);
     fetch("/api/db")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
       .then((data) => {
         setBookings(data.bookings || []);
         setPackages(data.packages || []);
@@ -106,7 +109,9 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         setDbLoading(false);
       })
       .catch((err) => {
-        console.error("Error loading admin db:", err);
+        if (err.message !== "Unauthorized") {
+          console.error("Error loading admin db:", err);
+        }
         setDbLoading(false);
       });
   };
