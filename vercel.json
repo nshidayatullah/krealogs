@@ -20,10 +20,6 @@
   ],
   "routes": [
     {
-      "src": "/api/migrate",
-      "dest": "api/migrate.ts"
-    },
-    {
       "src": "/api/(.*)",
       "dest": "api/index.ts"
     },
