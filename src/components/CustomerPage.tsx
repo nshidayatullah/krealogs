@@ -211,7 +211,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     // Ensure all days have defined dates
     const hasEmptyDates = bookingDays.some((bd) => !bd.date);
     if (hasEmptyDates) {
-      setSubmitError("Mohon pilih tanggal untuk semua hari produksi.");
+      setSubmitError("Mohon pilih tanggal untuk semua hari acara.");
       return;
     }
 
@@ -219,7 +219,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     const uniqueDates = bookingDays.map((bd) => bd.date).filter(Boolean);
     const hasDuplicateDates = uniqueDates.some((date, index) => uniqueDates.indexOf(date) !== index);
     if (hasDuplicateDates) {
-      setSubmitError("Setiap tanggal produksi harus unik. Anda tidak boleh memilih lebih dari satu paket pada tanggal yang sama.");
+      setSubmitError("Setiap tanggal acara harus unik. Anda tidak boleh memilih lebih dari satu paket pada tanggal yang sama.");
       return;
     }
 
@@ -684,12 +684,12 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   </AnimatePresence>
                 </div>
 
-                {/* 3. Rancang Jadwal Produksi (Bisa Multi-Hari) */}
+                {/* 3. Rancang Jadwal Acara (Bisa Multi-Hari) */}
                 <div className="space-y-6 pt-4 border-t border-zinc-900">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xs font-bold text-amber-500 uppercase tracking-widest flex items-center gap-2">
                       <span className="w-5 h-5 rounded bg-amber-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">C</span>
-                      Jadwal Produksi (Bisa Multi-Hari)
+                      Jadwal Acara (Bisa Multi-Hari)
                     </h3>
                   </div>
 
@@ -713,7 +713,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           {/* Day Header with Delete Button */}
                           <div className="flex justify-between items-center">
                             <span className="text-[9px] bg-zinc-900 border border-zinc-800 font-mono font-bold px-2.5 py-1 rounded text-amber-400 tracking-wider">
-                              PRODUKSI HARI #{idx + 1}
+                              ACARA HARI #{idx + 1}
                             </span>
                             {bookingDays.length > 1 && (
                               <button
@@ -937,7 +937,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
                 {/* Multi-day Price Breakdown */}
                 <div className="space-y-4 border-b border-zinc-800 pb-4">
-                  <span className="text-zinc-500 block text-[11px] font-mono uppercase tracking-wider">Metrik Hari Produksi ({bookingDays.length}):</span>
+                  <span className="text-zinc-500 block text-[11px] font-mono uppercase tracking-wider">Metrik Hari Acara ({bookingDays.length}):</span>
                   {bookingDays.map((bd, index) => {
                     const pkg = packages.find(p => p.id === bd.packageId);
                     const dayAddonsPaid = addons.filter(a => bd.addons.includes(a.id));
@@ -1004,7 +1004,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   
                   <p className="text-[10px] text-zinc-500 leading-normal">
                     {paymentMethod === "dp_custom" 
-                      ? "Silakan tentukan nominal DP di bawah (minimum 50%). Pelunasan dari sisa tagihan wajib disetorkan paling lambat 3 hari sebelum produksi."
+                      ? "Silakan tentukan nominal DP di bawah (minimum 50%). Pelunasan dari sisa tagihan wajib disetorkan paling lambat 3 hari sebelum acara."
                       : "Selesaikan transaksi lunas seutuhnya tanpa memikirkan rincian tagihan sisa di kemudian hari."
                     }
                   </p>
