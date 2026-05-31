@@ -859,7 +859,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
                                     {/* Absolute Bottom Left Qty Counter */}
                                     {isSelected && (
-                                      <div className="absolute bottom-3 left-3.5 flex items-center space-x-1.5 bg-white p-0.5 rounded-lg border border-zinc-200 shadow-sm z-10" onClick={(e) => e.stopPropagation()}>
+                                      <div className="absolute bottom-3 left-[42px] flex items-center space-x-1.5 bg-white p-0.5 rounded-lg border border-zinc-200 shadow-sm z-10" onClick={(e) => e.stopPropagation()}>
                                         <button
                                           type="button"
                                           onClick={() => updateAddonQtyForDay(bd.id, a.id, -1)}
