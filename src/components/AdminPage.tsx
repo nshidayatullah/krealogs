@@ -412,7 +412,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       {dbLoading ? (
         <div className="py-20 text-center text-zinc-500 text-xs font-mono">Mengakses data administratif...</div>
       ) : (
-        <div className="bg-[#0c0c0e] rounded-3xl border border-zinc-850 shadow-2xl p-6 md:p-8">
+        <div className="bg-[#0c0c0e] rounded-3xl border border-zinc-850 shadow-2xl p-4 md:p-8">
           
           {/* TAB 1: BOOKING CONTROLS */}
           {activeTab === "bookings" && (
@@ -424,12 +424,12 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   <p className="text-xs text-zinc-400 mt-1">Lakukan konfirmasi atau penolakan serta periksa nota kustomer.</p>
                 </div>
 
-                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl">
+                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
                   {["all", "pending", "approved", "dp_paid", "paid", "rejected"].map((filter) => (
                     <button
                       key={filter}
                       onClick={() => setBookingFilter(filter as any)}
-                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition ${
+                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition flex-shrink-0 ${
                         bookingFilter === filter 
                           ? "bg-zinc-800 text-white shadow-md" 
                           : "text-zinc-400 hover:text-white"
