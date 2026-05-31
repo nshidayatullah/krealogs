@@ -96,8 +96,8 @@ async function startServer() {
     }
     try {
       await pool.query(
-        "INSERT INTO packages (id, name, description, price, features, type) VALUES ($1, $2, $3, $4, $5, $6)",
-        [newPkg.id, newPkg.name, newPkg.description, newPkg.price, newPkg.features, newPkg.type]
+        "INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [newPkg.id, newPkg.name, newPkg.description, newPkg.price, newPkg.features, newPkg.type, newPkg.category || 'regular']
       );
       res.json({ success: true, package: newPkg });
     } catch (error) {
@@ -108,7 +108,7 @@ async function startServer() {
 
   app.put("/api/packages/:id", async (req, res) => {
     const { id } = req.params;
-    const { name, description, price, features, type } = req.body;
+    const { name, description, price, features, type, category } = req.body;
     try {
       const { rows } = await pool.query("SELECT * FROM packages WHERE id = $1", [id]);
       if (rows.length === 0) {
@@ -116,8 +116,8 @@ async function startServer() {
       }
       const updatedPkg = { ...rows[0], ...req.body };
       await pool.query(
-        "UPDATE packages SET name = $1, description = $2, price = $3, features = $4, type = $5 WHERE id = $6",
-        [updatedPkg.name, updatedPkg.description, updatedPkg.price, updatedPkg.features, updatedPkg.type, id]
+        "UPDATE packages SET name = $1, description = $2, price = $3, features = $4, type = $5, category = $6 WHERE id = $7",
+        [updatedPkg.name, updatedPkg.description, updatedPkg.price, updatedPkg.features, updatedPkg.type, updatedPkg.category || 'regular', id]
       );
       res.json({ success: true, package: updatedPkg });
     } catch (error) {

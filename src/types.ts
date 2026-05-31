@@ -5,6 +5,7 @@ export interface Package {
   price: number;
   features: string[];
   type: 'event' | 'wedding' | 'both';
+  category?: 'signature' | 'regular';
 }
 
 export interface Addon {

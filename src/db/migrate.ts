@@ -19,7 +19,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "2 Content Creator (iPhone 15/Above & Handycam)"
     ],
-    type: "both"
+    type: "both",
+    category: "signature"
   },
   {
     id: "pkg-visual-legacy",
@@ -37,7 +38,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "2 Content Creator (iPhone 15/Above & Handycam)"
     ],
-    type: "both"
+    type: "both",
+    category: "signature"
   },
   {
     id: "pkg-golden-memoir",
@@ -55,7 +57,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "2 Content Creator (iPhone 15/Above & Handycam)"
     ],
-    type: "both"
+    type: "both",
+    category: "signature"
   },
   {
     id: "pkg-intimate-moments",
@@ -70,7 +73,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "2 Content Creator (iPhone 15/Above & Handycam)"
     ],
-    type: "both"
+    type: "both",
+    category: "signature"
   },
   // REGULAR SECTION — Modern Look
   {
@@ -86,7 +90,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "1 Content Creator (iPhone 15/Above)"
     ],
-    type: "both"
+    type: "both",
+    category: "regular"
   },
   {
     id: "pkg-insta-vibe",
@@ -101,7 +106,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "1 Content Creator (iPhone 15/Above)"
     ],
-    type: "both"
+    type: "both",
+    category: "regular"
   },
   {
     id: "pkg-prologue",
@@ -115,7 +121,8 @@ const initialPackages: Package[] = [
       "Raw Footage via Google Drive",
       "1 Content Creator (iPhone 15/Above)"
     ],
-    type: "both"
+    type: "both",
+    category: "regular"
   }
 ];
 
@@ -176,7 +183,8 @@ async function runMigration() {
         description TEXT,
         price INT NOT NULL,
         features TEXT[] NOT NULL,
-        type VARCHAR(50) NOT NULL
+        type VARCHAR(50) NOT NULL,
+        category VARCHAR(50) NOT NULL DEFAULT 'regular'
       );
     `);
     console.log("Table 'packages' ready.");
@@ -239,8 +247,8 @@ async function runMigration() {
       console.log("Seeding initial packages...");
       for (const pkg of initialPackages) {
         await pool.query(
-          "INSERT INTO packages (id, name, description, price, features, type) VALUES ($1, $2, $3, $4, $5, $6)",
-          [pkg.id, pkg.name, pkg.description, pkg.price, pkg.features, pkg.type]
+          "INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+          [pkg.id, pkg.name, pkg.description, pkg.price, pkg.features, pkg.type, pkg.category || 'regular']
         );
       }
       console.log("Seeding packages complete.");

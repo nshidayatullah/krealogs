@@ -52,6 +52,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
   const [pkgDesc, setPkgDesc] = useState("");
   const [pkgPrice, setPkgPrice] = useState(0);
   const [pkgType, setPkgType] = useState<"event" | "wedding" | "both">("wedding");
+  const [pkgCategory, setPkgCategory] = useState<"signature" | "regular">("regular");
   const [pkgFetStr, setPkgFetStr] = useState(""); // newline separated
 
   // Addon Form Modal State
@@ -172,6 +173,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       setPkgDesc(p.description);
       setPkgPrice(p.price);
       setPkgType(p.type);
+      setPkgCategory(p.category || "regular");
       setPkgFetStr(p.features ? p.features.join("\n") : "");
     } else {
       setPkgEditId(null);
@@ -179,6 +181,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       setPkgDesc("");
       setPkgPrice(1500000);
       setPkgType("wedding");
+      setPkgCategory("regular");
       setPkgFetStr("- 1 Videographer\n- Video highlight 2 menit\n- Link Google Drive");
     }
     setIsPkgModalOpen(true);
@@ -195,6 +198,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       description: pkgDesc,
       price: Number(pkgPrice),
       type: pkgType,
+      category: pkgCategory,
       features: feats
     };
 
@@ -638,9 +642,14 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                         <span className="text-[10px] font-mono font-bold bg-zinc-900 px-2 py-0.5 rounded text-zinc-400 border border-zinc-850">
                           {p.id}
                         </span>
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
-                          {p.type === "wedding" ? "Wedding" : p.type === "event" ? "Event" : "Semua Kategori"}
-                        </span>
+                        <div className="flex space-x-1.5">
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                            {p.category === "signature" ? "🏆 Signature" : "⚡ Regular"}
+                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                            {p.type === "wedding" ? "Wedding" : p.type === "event" ? "Event" : "Semua Kategori"}
+                          </span>
+                        </div>
                       </div>
                       <h4 className="text-base font-bold text-white">{p.name}</h4>
                       <p className="text-xs text-zinc-400 leading-normal">{p.description}</p>
@@ -950,13 +959,13 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 font-sans focus:outline-none">
+              <div className="grid grid-cols-3 gap-3 font-sans focus:outline-none">
                 <div className="space-y-1.5">
                   <label className="font-semibold text-zinc-400">Tipe / Kategori Acara</label>
                   <select
                     value={pkgType}
                     onChange={(e) => setPkgType(e.target.value as any)}
-                    className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white font-medium focus:outline-none"
+                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-[11px] font-medium focus:outline-none"
                   >
                     <option value="wedding">Wedding (Pernikahan)</option>
                     <option value="event">Event (Gathering/Komersial)</option>
@@ -965,13 +974,25 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-400">Harga Layanan Paket (IDR)</label>
+                  <label className="font-semibold text-zinc-400">Tampilan Paket</label>
+                  <select
+                    value={pkgCategory}
+                    onChange={(e) => setPkgCategory(e.target.value as any)}
+                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-[11px] font-medium focus:outline-none"
+                  >
+                    <option value="regular">⚡ Regular</option>
+                    <option value="signature">🏆 Signature</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="font-semibold text-zinc-400">Harga (IDR)</label>
                   <input
                     type="number"
                     required
                     value={pkgPrice}
                     onChange={(e) => setPkgPrice(Number(e.target.value))}
-                    className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                    className="w-full px-3 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold text-[11px]"
                   />
                 </div>
               </div>
