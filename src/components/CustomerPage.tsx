@@ -61,19 +61,21 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
   // Refresh data on mount
   useEffect(() => {
-    fetch("/api/db")
-      .then((res) => res.json())
-      .then((data) => {
-        setPackages(data.packages || []);
-        setAddons(data.addons || []);
-        const matchPkgs = (data.packages || []).filter((p: Package) => p.type === keperluan || p.type === "both");
+    Promise.all([
+      fetch("/api/packages").then(r => r.json()),
+      fetch("/api/addons").then(r => r.json()),
+    ])
+      .then(([packagesData, addonsData]) => {
+        setPackages(packagesData || []);
+        setAddons(addonsData || []);
+        const matchPkgs = (packagesData || []).filter((p: Package) => p.type === keperluan || p.type === "both");
         if (matchPkgs.length > 0) {
           setBookingDays([{ id: "day-1", date: "", packageId: matchPkgs[0].id, addons: [] }]);
         }
         setDbLoading(false);
       })
       .catch((err) => {
-        console.error("Error fetching db in customer:", err);
+        console.error("Error fetching data in customer:", err);
         setDbLoading(false);
       });
   }, []);
