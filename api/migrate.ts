@@ -1,137 +1,17 @@
-import { pool } from '../src/db';
-import { Package, Addon } from '../src/types';
+import { Request, Response } from 'express';
+import pg from 'pg';
 
-const initialPackages: Package[] = [
-  {
-    id: "pkg-grand-legacy",
-    name: "Grand Legacy (Full Day Coverage)",
-    description: "Paket premium vintage liputan seharian penuh menggunakan kamera digital vintage dan handycam camcorder klasik untuk hasil retro estetik terbaik.",
-    price: 1850000,
-    features: [
-      "15 Instagram Story",
-      "Highlight (Reels) shot on iPhone",
-      "Camcorder Clips shot on Handycam",
-      "Digicam Photoshoot",
-      "20 Sheets Polaroid",
-      "5 Trend TikTok",
-      "Social Media Takeover",
-      "Raw Footage via Google Drive",
-      "2 Content Creator (iPhone 15/Above & Handycam)"
-    ],
-    type: "both",
-    category: "signature"
-  },
-  {
-    id: "pkg-visual-legacy",
-    name: "Visual Legacy (8 Hours Standby)",
-    description: "Paket vintage dengan durasi 8 jam standby, memadukan rekaman klip sinematik iPhone modern dengan retro handycam aesthetic.",
-    price: 1450000,
-    features: [
-      "10 Instagram Story",
-      "Highlight (Reels) shot on iPhone",
-      "Camcorder Clips shot on Handycam",
-      "Digicam Photoshoot",
-      "10 Sheets Polaroid",
-      "3 Trend TikTok",
-      "Raw Footage via Google Drive",
-      "2 Content Creator"
-    ],
-    type: "both",
-    category: "signature"
-  },
-  {
-    id: "pkg-golden-memoir",
-    name: "Golden Memoir (6 Hours Cover)",
-    description: "Paket vintage 6 jam yang fokus pada momen inti akad dan resepsi dengan balutan klasik handycam yang hangat dan penuh kenangan.",
-    price: 1150000,
-    features: [
-      "8 Instagram Story",
-      "Highlight (Reels) shot on iPhone",
-      "Camcorder Clips shot on Handycam",
-      "Digicam Photoshoot",
-      "8 Sheets Polaroid",
-      "2 Trend TikTok",
-      "Raw Footage via Google Drive",
-      "1 Content Creator"
-    ],
-    type: "both",
-    category: "signature"
-  },
-  {
-    id: "pkg-intimate-moments",
-    name: "Intimate Moments (4 Hours Coverage)",
-    description: "Paket vintage 4 jam untuk acara privat intim nan eksklusif seperti lamaran dan akad kecil dengan nuansa klasik penuh cinta.",
-    price: 850000,
-    features: [
-      "5 Instagram Story",
-      "Highlight (Reels) shot on iPhone",
-      "Camcorder Clips shot on Handycam",
-      "Digicam Photoshoot",
-      "5 Sheets Polaroid",
-      "1 Trend TikTok",
-      "Raw Footage via Google Drive"
-    ],
-    type: "both",
-    category: "signature"
-  },
-  {
-    id: "pkg-ultimate-vibe",
-    name: "Ultimate Vibe (Full Day)",
-    description: "Paket reguler full day coverage dengan standar produksi sinematik modern dan hasil jernih resolusi tinggi.",
-    price: 1350000,
-    features: [
-      "15 Instagram Story",
-      "Cinematic Highlight Video",
-      "Drone Aerial Shot (External)",
-      "Full Day Dokumentasi Video",
-      "Photo Gallery (200+ Foto)",
-      "Flashdisk Eksklusif"
-    ],
-    type: "both",
-    category: "regular"
-  },
-  {
-    id: "pkg-insta-vibe",
-    name: "Insta Vibe (8 Hours)",
-    description: "Paket reguler 8 jam dengan gaya liputan modern, cocok untuk content creator dan brand event yang butuh visual kekinian.",
-    price: 1000000,
-    features: [
-      "10 Instagram Story",
-      "Cinematic Highlight Video",
-      "Sameday Edit",
-      "Photo Gallery (100+ Foto)",
-      "Google Drive Link"
-    ],
-    type: "both",
-    category: "regular"
-  },
-  {
-    id: "pkg-prologue",
-    name: "Prologue (4 Hours Basic)",
-    description: "Paket basic 4 jam untuk dokumentasi event sederhana dengan output profesional dan harga terjangkau.",
-    price: 650000,
-    features: [
-      "5 Instagram Story",
-      "Highlight Video 2-3 Menit",
-      "Photo Gallery (50+ Foto)",
-      "Google Drive Link"
-    ],
-    type: "both",
-    category: "regular"
-  }
-];
+const { Pool } = pg;
 
-const initialAddons: Addon[] = [
-  { id: "addon-extra-ig-story", name: "Extra IG Story", description: "Penambahan instagram story tambahan.", price: 50000 },
-  { id: "addon-polaroid", name: "Extra Sheets Polaroid", description: "Lembar polaroid vintage tambahan.", price: 25000 },
-  { id: "addon-extra-tiktok", name: "Extra Trend TikTok", description: "Penambahan konten tiktok.", price: 75000 },
-  { id: "addon-digicam", name: "Digicam Photoshoot", description: "Sesi photoshoot vintage kamera digital.", price: 100000 },
-  { id: "addon-camcorder", name: "Camcorder Clips", description: "Rekaman video handycam retro.", price: 100000 },
-  { id: "addon-extra-creator", name: "Extra Content Creator", description: "Tambahan kru content creator.", price: 250000 },
-  { id: "addon-extra-hour", name: "Extra Hour", description: "Tambahan durasi 1 jam.", price: 100000 }
-];
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  max: 5,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
 
-export default async (req: any, res: any) => {
+export default async (req: Request, res: Response) => {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
   }
@@ -146,7 +26,6 @@ export default async (req: any, res: any) => {
       type VARCHAR(50) NOT NULL DEFAULT 'both',
       category VARCHAR(50) NOT NULL DEFAULT 'regular'
     )`);
-    console.log("Table 'packages' ready.");
 
     await pool.query(`CREATE TABLE IF NOT EXISTS addons (
       id VARCHAR(100) PRIMARY KEY,
@@ -154,7 +33,6 @@ export default async (req: any, res: any) => {
       description TEXT,
       price INT NOT NULL
     )`);
-    console.log("Table 'addons' ready.");
 
     await pool.query(`CREATE TABLE IF NOT EXISTS bookings (
       id VARCHAR(100) PRIMARY KEY,
@@ -180,9 +58,9 @@ export default async (req: any, res: any) => {
       approved_at TIMESTAMP WITH TIME ZONE,
       rejected_at TIMESTAMP WITH TIME ZONE,
       coupon_code VARCHAR(50),
-      discount_amount INT DEFAULT 0
+      discount_amount INT DEFAULT 0,
+      coupon_discount INT DEFAULT 0
     )`);
-    console.log("Table 'bookings' ready.");
 
     await pool.query(`CREATE TABLE IF NOT EXISTS spreadsheet_config (
       id INT PRIMARY KEY DEFAULT 1,
@@ -191,7 +69,6 @@ export default async (req: any, res: any) => {
       last_synced_at TIMESTAMP WITH TIME ZONE,
       CONSTRAINT single_row CHECK (id = 1)
     )`);
-    console.log("Table 'spreadsheet_config' ready.");
 
     await pool.query(`CREATE TABLE IF NOT EXISTS coupons (
       code VARCHAR(100) PRIMARY KEY,
@@ -199,40 +76,47 @@ export default async (req: any, res: any) => {
       valid_until DATE NOT NULL,
       is_active BOOLEAN DEFAULT TRUE
     )`);
-    console.log("Table 'coupons' ready.");
 
     const { rows: pkgs } = await pool.query("SELECT COUNT(*) FROM packages");
     if (parseInt(pkgs[0].count, 10) === 0) {
-      for (const pkg of initialPackages) {
-        await pool.query(
-          "INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-          [pkg.id, pkg.name, pkg.description, pkg.price, pkg.features, pkg.type, pkg.category || 'regular']
-        );
+      const packages = [
+        ["pkg-grand-legacy", "Grand Legacy (Full Day Coverage)", "Paket premium vintage liputan seharian penuh menggunakan kamera digital vintage dan handycam camcorder klasik untuk hasil retro estetik terbaik.", 1850000, ["15 Instagram Story", "Highlight (Reels) shot on iPhone", "Camcorder Clips shot on Handycam", "Digicam Photoshoot", "20 Sheets Polaroid", "5 Trend TikTok", "Social Media Takeover", "Raw Footage via Google Drive", "2 Content Creator (iPhone 15/Above & Handycam)"], "both", "signature"],
+        ["pkg-visual-legacy", "Visual Legacy (8 Hours Standby)", "Paket vintage dengan durasi 8 jam standby, memadukan rekaman klip sinematik iPhone modern dengan retro handycam aesthetic.", 1450000, ["10 Instagram Story", "Highlight (Reels) shot on iPhone", "Camcorder Clips shot on Handycam", "Digicam Photoshoot", "10 Sheets Polaroid", "3 Trend TikTok", "Raw Footage via Google Drive", "2 Content Creator"], "both", "signature"],
+        ["pkg-golden-memoir", "Golden Memoir (6 Hours Cover)", "Paket vintage 6 jam yang fokus pada momen inti akad dan resepsi dengan balutan klasik handycam yang hangat dan penuh kenangan.", 1150000, ["8 Instagram Story", "Highlight (Reels) shot on iPhone", "Camcorder Clips shot on Handycam", "Digicam Photoshoot", "8 Sheets Polaroid", "2 Trend TikTok", "Raw Footage via Google Drive", "1 Content Creator"], "both", "signature"],
+        ["pkg-intimate-moments", "Intimate Moments (4 Hours Coverage)", "Paket vintage 4 jam untuk acara privat intim nan eksklusif seperti lamaran dan akad kecil dengan nuansa klasik penuh cinta.", 850000, ["5 Instagram Story", "Highlight (Reels) shot on iPhone", "Camcorder Clips shot on Handycam", "Digicam Photoshoot", "5 Sheets Polaroid", "1 Trend TikTok", "Raw Footage via Google Drive"], "both", "signature"],
+        ["pkg-ultimate-vibe", "Ultimate Vibe (Full Day)", "Paket reguler full day coverage dengan standar produksi sinematik modern dan hasil jernih resolusi tinggi.", 1350000, ["15 Instagram Story", "Cinematic Highlight Video", "Drone Aerial Shot (External)", "Full Day Dokumentasi Video", "Photo Gallery (200+ Foto)", "Flashdisk Eksklusif"], "both", "regular"],
+        ["pkg-insta-vibe", "Insta Vibe (8 Hours)", "Paket reguler 8 jam dengan gaya liputan modern, cocok untuk content creator dan brand event yang butuh visual kekinian.", 1000000, ["10 Instagram Story", "Cinematic Highlight Video", "Sameday Edit", "Photo Gallery (100+ Foto)", "Google Drive Link"], "both", "regular"],
+        ["pkg-prologue", "Prologue (4 Hours Basic)", "Paket basic 4 jam untuk dokumentasi event sederhana dengan output profesional dan harga terjangkau.", 650000, ["5 Instagram Story", "Highlight Video 2-3 Menit", "Photo Gallery (50+ Foto)", "Google Drive Link"], "both", "regular"]
+      ];
+      for (const p of packages) {
+        await pool.query("INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)", p);
       }
     }
 
     const { rows: ads } = await pool.query("SELECT COUNT(*) FROM addons");
     if (parseInt(ads[0].count, 10) === 0) {
-      for (const addon of initialAddons) {
-        await pool.query(
-          "INSERT INTO addons (id, name, description, price) VALUES ($1, $2, $3, $4)",
-          [addon.id, addon.name, addon.description, addon.price]
-        );
+      const addons = [
+        ["addon-extra-ig-story", "Extra IG Story", "Penambahan instagram story tambahan.", 50000],
+        ["addon-polaroid", "Extra Sheets Polaroid", "Lembar polaroid vintage tambahan.", 25000],
+        ["addon-extra-tiktok", "Extra Trend TikTok", "Penambahan konten tiktok.", 75000],
+        ["addon-digicam", "Digicam Photoshoot", "Sesi photoshoot vintage kamera digital.", 100000],
+        ["addon-camcorder", "Camcorder Clips", "Rekaman video handycam retro.", 100000],
+        ["addon-extra-creator", "Extra Content Creator", "Tambahan kru content creator.", 250000],
+        ["addon-extra-hour", "Extra Hour", "Tambahan durasi 1 jam.", 100000]
+      ];
+      for (const a of addons) {
+        await pool.query("INSERT INTO addons (id, name, description, price) VALUES ($1, $2, $3, $4)", a);
       }
     }
 
     const { rows: config } = await pool.query("SELECT COUNT(*) FROM spreadsheet_config");
     if (parseInt(config[0].count, 10) === 0) {
-      await pool.query(
-        "INSERT INTO spreadsheet_config (id, spreadsheet_id, spreadsheet_url, last_synced_at) VALUES (1, NULL, NULL, NULL)"
-      );
+      await pool.query("INSERT INTO spreadsheet_config (id, spreadsheet_id, spreadsheet_url, last_synced_at) VALUES (1, NULL, NULL, NULL)");
     }
 
     const { rows: cpns } = await pool.query("SELECT COUNT(*) FROM coupons");
     if (parseInt(cpns[0].count, 10) === 0) {
-      await pool.query(
-        "INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ('KREALOVE10', 10, '2027-12-31', TRUE)"
-      );
+      await pool.query("INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ('KREALOVE10', 10, '2027-12-31', TRUE)");
     }
 
     res.json({ success: true, message: "Migration completed successfully" });
