@@ -21,6 +21,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   // Convert event dates & items to solid rows matching the template
   const tableItems: {
     description: React.ReactNode;
+    qty: number;
     price: number | string;
     discount: number | string;
   }[] = [];
@@ -41,6 +42,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
             <div>Tempat: {booking.venueLocation || "Lokasi Ditentukan"}</div>
           </div>
         ),
+        qty: 1,
         price: day.packagePrice,
         discount: 0
       });
@@ -48,12 +50,17 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       // Day addons
       if (day.addonDetails && day.addonDetails.length > 0) {
         day.addonDetails.forEach((a) => {
+          const qtyMatch = a.name.match(/\(x(\d+)\)/);
+          const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+          const cleanName = a.name.replace(/\s*\(x\d+\)/, "");
+
           tableItems.push({
             description: (
               <div className="text-[11px] font-sans text-zinc-800 font-medium">
-                Add ons: {a.name} (Hari #{dIdx + 1})
+                Add ons: {cleanName} (Hari #{dIdx + 1})
               </div>
             ),
+            qty,
             price: a.price,
             discount: 0
           });
@@ -71,18 +78,24 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
           <div>Tempat: {booking.venueLocation || "Lokasi Ditetermined"}</div>
         </div>
       ),
+      qty: 1,
       price: booking.packagePrice,
       discount: 0
     });
 
     if (booking.addonDetails && booking.addonDetails.length > 0) {
       booking.addonDetails.forEach((a) => {
+        const qtyMatch = a.name.match(/\(x(\d+)\)/);
+        const qty = qtyMatch ? parseInt(qtyMatch[1], 10) : 1;
+        const cleanName = a.name.replace(/\s*\(x\d+\)/, "");
+
         tableItems.push({
           description: (
             <div className="text-[11px] font-sans text-zinc-800 font-medium">
-              Add ons: {a.name}
+              Add ons: {cleanName}
             </div>
           ),
+          qty,
           price: a.price,
           discount: 0
         });
@@ -250,11 +263,14 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 <table className="w-full border border-zinc-950 border-collapse text-xs font-sans">
                   <thead>
                     <tr className="bg-[#C00000] text-white font-bold text-[11px] uppercase border-b border-zinc-950">
-                      <th className="border-r border-zinc-950 p-2.5 text-left font-black tracking-widest w-[60%]">
+                      <th className="border-r border-zinc-950 p-2.5 text-left font-black tracking-widest w-[50%]">
                         DESKRIPSI
                       </th>
+                      <th className="border-r border-zinc-950 p-2.5 text-center font-black tracking-widest w-[10%]">
+                        QTY
+                      </th>
                       <th className="border-r border-zinc-950 p-2.5 text-right font-black tracking-widest w-[25%]">
-                        HARGA
+                        TOTAL
                       </th>
                       <th className="p-2.5 text-center font-black tracking-widest w-[15%]">
                         DISKON
@@ -275,7 +291,12 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                             {item.description}
                           </td>
 
-                          {/* PRICE CELL */}
+                          {/* QTY CELL */}
+                          <td className="border-r border-zinc-950 p-2.5 text-center align-top font-mono font-medium text-neutral-900">
+                            {item.qty}
+                          </td>
+
+                          {/* TOTAL CELL */}
                           <td className="border-r border-zinc-950 p-2.5 text-right align-top font-mono font-medium text-neutral-900">
                             {typeof item.price === "number" 
                               ? `Rp ${item.price.toLocaleString("id-ID")}` 
@@ -293,7 +314,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                     {/* Yellow Shaded Subtotal Row */}
                     <tr>
                       <td 
-                        colSpan={2} 
+                        colSpan={3} 
                         className="border-r border-b border-zinc-950 p-2.5 text-right font-black uppercase text-[10px] tracking-widest bg-[#FFC000] text-neutral-950"
                       >
                         SUBTOTAL
@@ -308,7 +329,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                     {/* Pink Shaded Lain-Lain Row */}
                     <tr>
                       <td 
-                        colSpan={2} 
+                        colSpan={3} 
                         className="border-r border-b border-zinc-950 p-2.5 text-right font-black uppercase text-[10px] tracking-widest bg-[#FCE4D6] text-neutral-950"
                       >
                         LAIN-LAIN
@@ -323,7 +344,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                     {/* Orange Shaded TOTAL Row */}
                     <tr>
                       <td 
-                        colSpan={2} 
+                        colSpan={3} 
                         className="border-r border-zinc-950 p-2.5 text-right font-black uppercase text-[11px] tracking-wider bg-[#F47B20] text-white"
                       >
                         TOTAL
