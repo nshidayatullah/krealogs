@@ -5,13 +5,27 @@ dotenv.config();
 
 const { Pool } = pg;
 
-export const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+let poolInstance: pg.Pool | null = null;
 
-export const query = (text: string, params?: any[]) => {
-  return pool.query(text, params);
-};
+export function getPool() {
+  if (!poolInstance) {
+    poolInstance = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+  return poolInstance;
+}
+
+export const pool = {
+  query: (text: string, params?: any[]) => getPool().query(text, params),
+  end: () => {
+    if (poolInstance) {
+      return poolInstance.end();
+    }
+    return Promise.resolve();
+  }
+} as any;
+
