@@ -1,13 +1,18 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import cookieParser from "cookie-parser";
 import { Package, Addon, Booking } from "./src/types";
 import { pool } from "./src/db";
 
-// Load environment variables
 dotenv.config();
 
-// Helper to map DB booking row to frontend camelCase camelCase interface
+const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
+
 function mapBookingRow(b: any): Booking {
   return {
     id: b.id,
@@ -46,52 +51,79 @@ function mapCouponRow(c: any) {
   };
 }
 
+function requireAdmin(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const token = req.cookies?.token;
+  if (!token) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    (req as any).admin = decoded;
+    next();
+  } catch {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Middleware
   app.use(express.json());
+  app.use(cookieParser());
 
   // ------------------------------------
-  // API Endpoints
+  // Auth Endpoints
   // ------------------------------------
 
-  // Health check
+  app.post("/api/auth/login", async (req, res) => {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username dan password wajib diisi" });
+    }
+    if (username.toLowerCase() !== ADMIN_USERNAME.toLowerCase()) {
+      return res.status(401).json({ error: "Kombinasi Username dan Password tidak cocok" });
+    }
+    const valid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
+    if (!valid) {
+      return res.status(401).json({ error: "Kombinasi Username dan Password tidak cocok" });
+    }
+    const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: "24h" });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.json({ success: true });
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    res.clearCookie("token");
+    res.json({ success: true });
+  });
+
+  app.get("/api/auth/check", (req, res) => {
+    const token = req.cookies?.token;
+    if (!token) {
+      return res.json({ authenticated: false });
+    }
+    try {
+      jwt.verify(token, JWT_SECRET);
+      res.json({ authenticated: true });
+    } catch {
+      res.json({ authenticated: false });
+    }
+  });
+
+  // ------------------------------------
+  // Public API Endpoints
+  // ------------------------------------
+
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok" });
   });
 
-  // Get full DB structure
-  app.get("/api/db", async (req, res) => {
-    try {
-      console.log("Database connection ping to URL: ", process.env.DATABASE_URL ? "URL is defined (starts with " + process.env.DATABASE_URL.substring(0, 15) + ")" : "URL is UNDEFINED");
-      const { rows: packages } = await pool.query("SELECT * FROM packages");
-      const { rows: addons } = await pool.query("SELECT * FROM addons");
-      const { rows: bookingsRows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
-      const { rows: couponsRows } = await pool.query("SELECT * FROM coupons ORDER BY code ASC");
-      const { rows: configRows } = await pool.query("SELECT * FROM spreadsheet_config WHERE id = 1");
-
-      const bookings = bookingsRows.map(mapBookingRow);
-      const coupons = couponsRows.map(mapCouponRow);
-      const spreadsheetConfig = configRows[0] ? {
-        spreadsheetId: configRows[0].spreadsheet_id,
-        spreadsheetUrl: configRows[0].spreadsheet_url,
-        lastSyncedAt: configRows[0].last_synced_at
-      } : {
-        spreadsheetId: null,
-        spreadsheetUrl: null,
-        lastSyncedAt: null
-      };
-
-      res.json({ packages, addons, bookings, coupons, spreadsheetConfig });
-    } catch (error: any) {
-      console.error("CRITICAL error fetching database status:", error);
-      res.status(500).json({ error: "Terjadi kesalahan internal server", details: error.message, stack: error.stack });
-    }
-  });
-
-  // Packages CRUD
   app.get("/api/packages", async (req, res) => {
     try {
       const { rows } = await pool.query("SELECT * FROM packages");
@@ -102,58 +134,6 @@ async function startServer() {
     }
   });
 
-  app.post("/api/packages", async (req, res) => {
-    const newPkg: Package = req.body;
-    if (!newPkg.id || !newPkg.name || newPkg.price === undefined) {
-      return res.status(400).json({ error: "Missing required properties" });
-    }
-    try {
-      await pool.query(
-        "INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-        [newPkg.id, newPkg.name, newPkg.description, newPkg.price, newPkg.features, newPkg.type, newPkg.category || 'regular']
-      );
-      res.json({ success: true, package: newPkg });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to create package" });
-    }
-  });
-
-  app.put("/api/packages/:id", async (req, res) => {
-    const { id } = req.params;
-    const { name, description, price, features, type, category } = req.body;
-    try {
-      const { rows } = await pool.query("SELECT * FROM packages WHERE id = $1", [id]);
-      if (rows.length === 0) {
-        return res.status(404).json({ error: "Package not found" });
-      }
-      const updatedPkg = { ...rows[0], ...req.body };
-      await pool.query(
-        "UPDATE packages SET name = $1, description = $2, price = $3, features = $4, type = $5, category = $6 WHERE id = $7",
-        [updatedPkg.name, updatedPkg.description, updatedPkg.price, updatedPkg.features, updatedPkg.type, updatedPkg.category || 'regular', id]
-      );
-      res.json({ success: true, package: updatedPkg });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to update package" });
-    }
-  });
-
-  app.delete("/api/packages/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-      const result = await pool.query("DELETE FROM packages WHERE id = $1", [id]);
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Package not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to delete package" });
-    }
-  });
-
-  // Add-ons CRUD
   app.get("/api/addons", async (req, res) => {
     try {
       const { rows } = await pool.query("SELECT * FROM addons");
@@ -164,57 +144,6 @@ async function startServer() {
     }
   });
 
-  app.post("/api/addons", async (req, res) => {
-    const newAddon: Addon = req.body;
-    if (!newAddon.id || !newAddon.name || newAddon.price === undefined) {
-      return res.status(400).json({ error: "Missing required properties" });
-    }
-    try {
-      await pool.query(
-        "INSERT INTO addons (id, name, description, price) VALUES ($1, $2, $3, $4)",
-        [newAddon.id, newAddon.name, newAddon.description, newAddon.price]
-      );
-      res.json({ success: true, addon: newAddon });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to create addon" });
-    }
-  });
-
-  app.put("/api/addons/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-      const { rows } = await pool.query("SELECT * FROM addons WHERE id = $1", [id]);
-      if (rows.length === 0) {
-        return res.status(404).json({ error: "Add-on not found" });
-      }
-      const updatedAddon = { ...rows[0], ...req.body };
-      await pool.query(
-        "UPDATE addons SET name = $1, description = $2, price = $3 WHERE id = $4",
-        [updatedAddon.name, updatedAddon.description, updatedAddon.price, id]
-      );
-      res.json({ success: true, addon: updatedAddon });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to update addon" });
-    }
-  });
-
-  app.delete("/api/addons/:id", async (req, res) => {
-    const { id } = req.params;
-    try {
-      const result = await pool.query("DELETE FROM addons WHERE id = $1", [id]);
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Add-on not found" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to delete addon" });
-    }
-  });
-
-  // Coupons CRUD & Validation APIs
   app.get("/api/coupons/validate/:code", async (req, res) => {
     const { code } = req.params;
     try {
@@ -237,63 +166,6 @@ async function startServer() {
     }
   });
 
-  app.post("/api/coupons", async (req, res) => {
-    const { code, discountPercent, validUntil, isActive } = req.body;
-    if (!code || discountPercent === undefined || !validUntil) {
-      return res.status(400).json({ error: "Missing required properties" });
-    }
-    try {
-      await pool.query(
-        "INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ($1, $2, $3, $4)",
-        [code.toUpperCase().trim(), Number(discountPercent), validUntil, isActive !== undefined ? isActive : true]
-      );
-      res.json({ success: true, coupon: { code: code.toUpperCase().trim(), discountPercent, validUntil, isActive: isActive !== undefined ? isActive : true } });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Gagal membuat kupon baru" });
-    }
-  });
-
-  app.put("/api/coupons/:code", async (req, res) => {
-    const { code } = req.params;
-    const { discountPercent, validUntil, isActive } = req.body;
-    try {
-      await pool.query(
-        "UPDATE coupons SET discount_percent = $1, valid_until = $2, is_active = $3 WHERE UPPER(code) = UPPER($4)",
-        [Number(discountPercent), validUntil, isActive, code.toUpperCase().trim()]
-      );
-      res.json({ success: true });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Gagal memperbarui kupon" });
-    }
-  });
-
-  app.delete("/api/coupons/:code", async (req, res) => {
-    const { code } = req.params;
-    try {
-      const result = await pool.query("DELETE FROM coupons WHERE UPPER(code) = UPPER($1)", [code.toUpperCase().trim()]);
-      if (result.rowCount === 0) {
-        return res.status(404).json({ error: "Kupon tidak ditemukan" });
-      }
-      res.json({ success: true });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Gagal menghapus kupon" });
-    }
-  });
-
-  // Bookings APIS
-  app.get("/api/bookings", async (req, res) => {
-    try {
-      const { rows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
-      res.json(rows.map(mapBookingRow));
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to fetch bookings" });
-    }
-  });
-
   app.post("/api/bookings", async (req, res) => {
     const bookingData: Omit<Booking, "id" | "createdAt" | "status"> = req.body;
     
@@ -309,7 +181,6 @@ async function startServer() {
       return res.status(400).json({ error: "Mohon lengkapi semua data pesanan" });
     }
 
-    // Format WA number to clean digits (no whitespaces/symbols)
     const cleanPhone = bookingData.customerPhone.trim().replace(/[^0-9+]/g, "");
 
     const newBooking: Booking = {
@@ -345,7 +216,6 @@ async function startServer() {
     }
   });
 
-  // Searching status by WhatsApp number
   app.get("/api/bookings/search", async (req, res) => {
     const { whatsapp } = req.query;
     if (!whatsapp) {
@@ -360,24 +230,218 @@ async function startServer() {
     const searchNum = cleanInput.replace(/[^0-9]/g, "");
 
     try {
-      // Find all bookings with matched phone using standard regex replace in PG
       const { rows } = await pool.query(
         `SELECT * FROM bookings 
          WHERE regexp_replace(customer_phone, '[^0-9]', '', 'g') LIKE $1 
          OR $2 LIKE '%' || regexp_replace(customer_phone, '[^0-9]', '', 'g') || '%'`,
         [`%${searchNum}%`, searchNum]
       );
-      res.json(rows.map(mapBookingRow));
+      res.json(rows.map(mapBookingRow).slice(0, 10));
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: "Error searching bookings" });
     }
   });
 
-  // Accept/Reject Booking (Admin)
-  app.post("/api/bookings/:id/status", async (req, res) => {
+  // ------------------------------------
+  // Admin-Protected API Endpoints
+  // ------------------------------------
+
+  app.get("/api/db", requireAdmin, async (req, res) => {
+    try {
+      const { rows: packages } = await pool.query("SELECT * FROM packages");
+      const { rows: addons } = await pool.query("SELECT * FROM addons");
+      const { rows: bookingsRows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
+      const { rows: couponsRows } = await pool.query("SELECT * FROM coupons ORDER BY code ASC");
+      const { rows: configRows } = await pool.query("SELECT * FROM spreadsheet_config WHERE id = 1");
+
+      const bookings = bookingsRows.map(mapBookingRow);
+      const coupons = couponsRows.map(mapCouponRow);
+      const spreadsheetConfig = configRows[0] ? {
+        spreadsheetId: configRows[0].spreadsheet_id,
+        spreadsheetUrl: configRows[0].spreadsheet_url,
+        lastSyncedAt: configRows[0].last_synced_at
+      } : {
+        spreadsheetId: null,
+        spreadsheetUrl: null,
+        lastSyncedAt: null
+      };
+
+      res.json({ packages, addons, bookings, coupons, spreadsheetConfig });
+    } catch (error: any) {
+      console.error("CRITICAL error fetching database status:", error);
+      res.status(500).json({ error: "Terjadi kesalahan internal server" });
+    }
+  });
+
+  app.post("/api/packages", requireAdmin, async (req, res) => {
+    const newPkg: Package = req.body;
+    if (!newPkg.id || !newPkg.name || newPkg.price === undefined) {
+      return res.status(400).json({ error: "Missing required properties" });
+    }
+    try {
+      await pool.query(
+        "INSERT INTO packages (id, name, description, price, features, type, category) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+        [newPkg.id, newPkg.name, newPkg.description, newPkg.price, newPkg.features, newPkg.type, newPkg.category || 'regular']
+      );
+      res.json({ success: true, package: newPkg });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to create package" });
+    }
+  });
+
+  app.put("/api/packages/:id", requireAdmin, async (req, res) => {
     const { id } = req.params;
-    const { status } = req.body; // 'approved' | 'rejected'
+    const { name, description, price, features, type, category } = req.body;
+    try {
+      const { rows } = await pool.query("SELECT * FROM packages WHERE id = $1", [id]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Package not found" });
+      }
+      const updatedPkg = { ...rows[0], ...req.body };
+      await pool.query(
+        "UPDATE packages SET name = $1, description = $2, price = $3, features = $4, type = $5, category = $6 WHERE id = $7",
+        [updatedPkg.name, updatedPkg.description, updatedPkg.price, updatedPkg.features, updatedPkg.type, updatedPkg.category || 'regular', id]
+      );
+      res.json({ success: true, package: updatedPkg });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to update package" });
+    }
+  });
+
+  app.delete("/api/packages/:id", requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await pool.query("DELETE FROM packages WHERE id = $1", [id]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Package not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to delete package" });
+    }
+  });
+
+  app.post("/api/addons", requireAdmin, async (req, res) => {
+    const newAddon: Addon = req.body;
+    if (!newAddon.id || !newAddon.name || newAddon.price === undefined) {
+      return res.status(400).json({ error: "Missing required properties" });
+    }
+    try {
+      await pool.query(
+        "INSERT INTO addons (id, name, description, price) VALUES ($1, $2, $3, $4)",
+        [newAddon.id, newAddon.name, newAddon.description, newAddon.price]
+      );
+      res.json({ success: true, addon: newAddon });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to create addon" });
+    }
+  });
+
+  app.put("/api/addons/:id", requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const { rows } = await pool.query("SELECT * FROM addons WHERE id = $1", [id]);
+      if (rows.length === 0) {
+        return res.status(404).json({ error: "Add-on not found" });
+      }
+      const updatedAddon = { ...rows[0], ...req.body };
+      await pool.query(
+        "UPDATE addons SET name = $1, description = $2, price = $3 WHERE id = $4",
+        [updatedAddon.name, updatedAddon.description, updatedAddon.price, id]
+      );
+      res.json({ success: true, addon: updatedAddon });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to update addon" });
+    }
+  });
+
+  app.delete("/api/addons/:id", requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const result = await pool.query("DELETE FROM addons WHERE id = $1", [id]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Add-on not found" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to delete addon" });
+    }
+  });
+
+  app.post("/api/coupons", requireAdmin, async (req, res) => {
+    const { code, discountPercent, validUntil, isActive } = req.body;
+    if (!code || discountPercent === undefined || !validUntil) {
+      return res.status(400).json({ error: "Missing required properties" });
+    }
+    const dp = Number(discountPercent);
+    if (dp < 0 || dp > 100) {
+      return res.status(400).json({ error: "discountPercent must be between 0 and 100" });
+    }
+    try {
+      await pool.query(
+        "INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ($1, $2, $3, $4)",
+        [code.toUpperCase().trim(), dp, validUntil, isActive !== undefined ? isActive : true]
+      );
+      res.json({ success: true, coupon: { code: code.toUpperCase().trim(), discountPercent: dp, validUntil, isActive: isActive !== undefined ? isActive : true } });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal membuat kupon baru" });
+    }
+  });
+
+  app.put("/api/coupons/:code", requireAdmin, async (req, res) => {
+    const { code } = req.params;
+    const { discountPercent, validUntil, isActive } = req.body;
+    const dp = Number(discountPercent);
+    if (dp < 0 || dp > 100) {
+      return res.status(400).json({ error: "discountPercent must be between 0 and 100" });
+    }
+    try {
+      await pool.query(
+        "UPDATE coupons SET discount_percent = $1, valid_until = $2, is_active = $3 WHERE UPPER(code) = UPPER($4)",
+        [dp, validUntil, isActive, code.toUpperCase().trim()]
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal memperbarui kupon" });
+    }
+  });
+
+  app.delete("/api/coupons/:code", requireAdmin, async (req, res) => {
+    const { code } = req.params;
+    try {
+      const result = await pool.query("DELETE FROM coupons WHERE UPPER(code) = UPPER($1)", [code.toUpperCase().trim()]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Kupon tidak ditemukan" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal menghapus kupon" });
+    }
+  });
+
+  app.get("/api/bookings", requireAdmin, async (req, res) => {
+    try {
+      const { rows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
+      res.json(rows.map(mapBookingRow));
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to fetch bookings" });
+    }
+  });
+
+  app.post("/api/bookings/:id/status", requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
 
     if (!status || !["approved", "rejected", "pending", "paid", "dp_paid"].includes(status)) {
       return res.status(400).json({ error: "Invalid status value" });
@@ -412,8 +476,7 @@ async function startServer() {
     }
   });
 
-  // Save spreadsheet connection credentials / config
-  app.post("/api/spreadsheet/config", async (req, res) => {
+  app.post("/api/spreadsheet/config", requireAdmin, async (req, res) => {
     const { spreadsheetId, spreadsheetUrl, lastSyncedAt } = req.body;
     try {
       const { rows } = await pool.query("SELECT * FROM spreadsheet_config WHERE id = 1");
@@ -452,6 +515,18 @@ async function startServer() {
     }
   });
 
+  app.get("/api/invoice-config", (req, res) => {
+    res.json({
+      bankName: process.env.BANK_NAME || "BCA",
+      bankAccount: process.env.BANK_ACCOUNT || "0512688096",
+      bankAccountName: process.env.BANK_ACCOUNT_NAME || "Brilliant Rizky Fortuna",
+      contactPhone: process.env.CONTACT_PHONE || "(+62) 812 4198 7783",
+      contactEmail: process.env.CONTACT_EMAIL || "kreatiflogs@gmail.com",
+      signatureName: process.env.SIGNATURE_NAME || "Dymas Herrnawan, S.I.Kom",
+      signatureTitle: process.env.SIGNATURE_TITLE || "Tim Krealogs",
+    });
+  });
+
   // ------------------------------------
   // Front-end Asset serving / Vite Setup
   // ------------------------------------
@@ -464,7 +539,6 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Serve static files in production
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -472,7 +546,6 @@ async function startServer() {
     });
   }
 
-  // Only listen if we are NOT in a serverless environment
   if (process.env.VERCEL !== "1" && !process.env.VERCEL) {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);

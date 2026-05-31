@@ -1,50 +1,52 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CustomerPage from "./components/CustomerPage";
 import AdminPage from "./components/AdminPage";
 import AdminLogin from "./components/AdminLogin";
 import InvoiceModal from "./components/InvoiceModal";
 import { Booking } from "./types";
-import { Camera, Sliders, Users, ExternalLink, LogOut } from "lucide-react";
+import { Users, Sliders, LogOut } from "lucide-react";
 import brandLogo from "./assets/images/krealogs_logo_1780149664590.png";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"customer" | "admin">("customer");
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem("kreasi_admin_logged_in") === "true";
-  });
-  
-  // Invoice state to share across both customer and admin panels
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState<Booking | null>(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
+
+  const checkAuth = useCallback(async () => {
+    try {
+      const res = await fetch("/api/auth/check");
+      const data = await res.json();
+      setIsAdminAuthenticated(data.authenticated === true);
+    } catch {
+      setIsAdminAuthenticated(false);
+    } finally {
+      setAuthLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const handleOpenInvoice = (booking: Booking) => {
     setSelectedInvoiceBooking(booking);
     setIsInvoiceOpen(true);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("kreasi_admin_logged_in");
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
     setIsAdminAuthenticated(false);
   };
 
   return (
     <div className="min-h-screen flex flex-col justify-between font-sans bg-[#fcfcfd] text-[#09090b]">
       
-      {/* Top Navigation Header - Hidden when printing */}
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-zinc-200 no-print">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           
-          {/* Brand Logo */}
           <div className="flex items-center select-none">
             <img
               src={brandLogo}
@@ -54,9 +56,7 @@ export default function App() {
             />
           </div>
 
-          {/* Header Action Controls */}
           <div className="flex items-center space-x-3.5">
-            {/* Customer / Admin tab switcher */}
             <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200">
               <button
                 onClick={() => setCurrentView("customer")}
@@ -83,7 +83,6 @@ export default function App() {
               </button>
             </div>
 
-            {/* Logout button for authenticated admins */}
             {currentView === "admin" && isAdminAuthenticated && (
               <button
                 onClick={handleLogout}
@@ -99,25 +98,24 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Body view */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {currentView === "customer" ? (
           <CustomerPage onOpenInvoice={handleOpenInvoice} />
+        ) : authLoading ? (
+          <div className="flex items-center justify-center py-20 text-zinc-500 text-xs font-mono">
+            Memeriksa sesi...
+          </div>
+        ) : isAdminAuthenticated ? (
+          <AdminPage onOpenInvoice={handleOpenInvoice} />
         ) : (
-          isAdminAuthenticated ? (
-            <AdminPage onOpenInvoice={handleOpenInvoice} />
-          ) : (
-            <AdminLogin onLoginSuccess={() => setIsAdminAuthenticated(true)} />
-          )
+          <AdminLogin onLoginSuccess={() => { setIsAdminAuthenticated(true); checkAuth(); }} />
         )}
       </main>
 
-      {/* Footer copyright */}
       <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-450 no-print bg-zinc-50/50">
         <p>© 2026 Krealogs.com Videography. Semua Hak Cipta Dilindungi Undang-Undang.</p>
       </footer>
 
-      {/* Shared Printable Invoice Modal */}
       <InvoiceModal
         booking={selectedInvoiceBooking}
         isOpen={isInvoiceOpen}
@@ -130,4 +128,3 @@ export default function App() {
     </div>
   );
 }
-

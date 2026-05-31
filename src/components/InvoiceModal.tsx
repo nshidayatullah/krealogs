@@ -1,8 +1,28 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Booking } from "../types";
 import { X, Printer, CheckCircle } from "lucide-react";
 import { formatEventDate } from "../utils/dateFormatter";
 import brandLogo from "../assets/images/krealogs_logo_1780149664590.png";
+
+interface InvoiceConfig {
+  bankName: string;
+  bankAccount: string;
+  bankAccountName: string;
+  contactPhone: string;
+  contactEmail: string;
+  signatureName: string;
+  signatureTitle: string;
+}
+
+const defaultConfig: InvoiceConfig = {
+  bankName: "BCA",
+  bankAccount: "0512688096",
+  bankAccountName: "Brilliant Rizky Fortuna",
+  contactPhone: "(+62) 812 4198 7783",
+  contactEmail: "kreatiflogs@gmail.com",
+  signatureName: "Dymas Herrnawan, S.I.Kom",
+  signatureTitle: "Tim Krealogs",
+};
 
 interface InvoiceModalProps {
   booking: Booking | null;
@@ -11,6 +31,17 @@ interface InvoiceModalProps {
 }
 
 export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
+  const [config, setConfig] = useState<InvoiceConfig>(defaultConfig);
+
+  useEffect(() => {
+    fetch("/api/invoice-config")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.bankName) setConfig(data);
+      })
+      .catch(() => {});
+  }, []);
+
   if (!isOpen || !booking) return null;
 
   const handlePrint = () => {
@@ -250,10 +281,10 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                     Banjarmasin, Indonesia
                   </p>
                   <p className="text-zinc-650 font-mono text-[11px]">
-                    (+62) 812 4198 7783
+                    {config.contactPhone}
                   </p>
                   <p className="text-zinc-500 font-mono text-[11px]">
-                    kreatiflogs@gmail.com
+                    {config.contactEmail}
                   </p>
                 </div>
               </div>
@@ -383,11 +414,11 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 <p className="font-bold text-neutral-950">Metode Pembayaran:</p>
                 <div className="space-y-0.5 leading-relaxed text-[11px] text-zinc-800">
                   <p>Transfer ke:</p>
-                  <p className="font-extrabold text-neutral-950 text-xs">Bank BCA</p>
+                  <p className="font-extrabold text-neutral-950 text-xs">Bank {config.bankName}</p>
                   <p className="font-mono bg-zinc-100 border border-zinc-200 rounded px-1.5 py-0.5 inline-block text-[11px] text-neutral-900 font-bold my-0.5">
-                    No. Rek: 0512688096
+                    No. Rek: {config.bankAccount}
                   </p>
-                  <p>a.n <span className="font-semibold text-neutral-950">Brilliant Rizky Fortuna</span></p>
+                  <p>a.n <span className="font-semibold text-neutral-950">{config.bankAccountName}</span></p>
                 </div>
 
                 {/* Sisa pembayaran notice for booking deposits */}
@@ -440,10 +471,10 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
 
                 {/* Seal signature title */}
                 <p className="text-xs font-black text-neutral-900 border-b border-zinc-950 w-48 text-center pb-0.5 relative z-10 font-sans">
-                  Dymas Herrnawan, S.I.Kom
+                  {config.signatureName}
                 </p>
                 <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider text-center w-48 mt-0.5 relative z-10 font-sans">
-                  Tim Krealogs
+                  {config.signatureTitle}
                 </p>
               </div>
             </div>

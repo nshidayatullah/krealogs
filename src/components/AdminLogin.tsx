@@ -27,10 +27,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [shake, setShake] = useState(false);
 
-  // Default credentials for easier evaluation/usage
-  const DEFAULT_USER = "admin";
-  const DEFAULT_PASS = "admin123";
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -44,33 +40,36 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
 
     setIsLoading(true);
 
-    // Simulate authenticating for realistic premium response
-    setTimeout(() => {
-      if (username.toLowerCase() === DEFAULT_USER && password === DEFAULT_PASS) {
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setIsSuccess(true);
         setTimeout(() => {
           setIsLoading(false);
-          // Save session in local storage for persistence
-          localStorage.setItem("kreasi_admin_logged_in", "true");
           onLoginSuccess();
         }, 1000);
       } else {
         setIsLoading(false);
-        setError("Kombinasi Username dan Password Anda tidak cocok.");
+        setError(data.error || "Kombinasi Username dan Password tidak cocok.");
         triggerShake();
       }
-    }, 1200);
+    } catch {
+      setIsLoading(false);
+      setError("Terjadi kesalahan koneksi ke server");
+      triggerShake();
+    }
   };
 
   const triggerShake = () => {
     setShake(true);
     setTimeout(() => setShake(false), 500);
-  };
-
-  const handleAutofill = () => {
-    setUsername(DEFAULT_USER);
-    setPassword(DEFAULT_PASS);
-    setError("");
   };
 
   return (
@@ -84,11 +83,9 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full max-w-md bg-[#0c0c0e] border border-zinc-850 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden"
       >
-        {/* Subtle top amber border highlight */}
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-linear-to-r from-amber-600 via-amber-500 to-amber-400"></div>
 
         <div className="space-y-6 text-center">
-          {/* Logo container */}
           <div className="mx-auto h-10 flex items-center justify-center select-none">
             {isSuccess ? (
               <ShieldCheck className="w-7 h-7 text-emerald-600 animate-pulse" />
@@ -112,7 +109,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           </div>
         </div>
 
-        {/* Shake-able login form */}
         <motion.form 
           animate={shake ? { x: [-10, 10, -10, 10, -5, 5, 0] } : {}}
           transition={{ duration: 0.5 }}
@@ -141,7 +137,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             </motion.div>
           )}
 
-          {/* Username Input */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-zinc-405 text-zinc-400 block font-mono uppercase tracking-wider">
               Username
@@ -160,7 +155,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             </div>
           </div>
 
-          {/* Password Input */}
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <label className="text-xs font-semibold text-zinc-400 block font-mono uppercase tracking-wider">
@@ -188,19 +182,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             </div>
           </div>
 
-          {/* Remember state / action links */}
-          <div className="flex items-center justify-between text-[11px] text-zinc-500 pt-1">
-            <label className="flex items-center space-x-2 cursor-pointer select-none">
-              <input 
-                type="checkbox" 
-                defaultChecked 
-                className="rounded bg-zinc-950 border-zinc-800 text-amber-500 focus:ring-amber-500/30 h-3.5 w-3.5"
-              />
-              <span>Ingat Sesi Perangkat</span>
-            </label>
-          </div>
-
-          {/* Submit Button */}
           <button
             type="submit"
             disabled={isLoading || isSuccess}
@@ -223,29 +204,14 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           </button>
         </motion.form>
 
-        {/* Demo Credentials quick access hint block */}
         <div className="mt-8 pt-6 border-t border-zinc-900/80 space-y-3.5">
           <div className="flex items-center gap-2 text-zinc-400 text-xs">
             <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
             <span className="font-semibold text-[11px] uppercase tracking-wider text-zinc-450 font-mono">Petunjuk Akses Evaluasi</span>
           </div>
 
-          <div className="bg-zinc-950 border border-zinc-900 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
-            <div>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">CREDENTIALS DEMO</p>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-[11px] text-zinc-350">
-                <span>User: <strong className="text-amber-400 font-mono">admin</strong></span>
-                <span className="text-zinc-700">•</span>
-                <span>Pass: <strong className="text-amber-400 font-mono">admin123</strong></span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={handleAutofill}
-              className="text-[10px] px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-amber-500/40 text-amber-500 rounded-lg font-bold uppercase tracking-wider transition cursor-pointer shrink-0 self-start sm:self-center"
-            >
-              Instan Isi
-            </button>
+          <div className="bg-zinc-950 border border-zinc-900 p-4 rounded-xl">
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Gunakan kredensial yang telah ditentukan admin</p>
           </div>
         </div>
 
