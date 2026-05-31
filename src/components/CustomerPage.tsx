@@ -691,13 +691,6 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                       <span className="w-5 h-5 rounded bg-amber-500 text-black font-mono font-bold flex items-center justify-center text-[10px]">C</span>
                       Jadwal Produksi (Bisa Multi-Hari)
                     </h3>
-                    <button
-                      type="button"
-                      onClick={addBookingDay}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-black rounded-lg text-[10px] font-black transition cursor-pointer font-sans uppercase tracking-wider"
-                    >
-                      + Tambah Hari
-                    </button>
                   </div>
 
                   <div className="space-y-6">
@@ -916,6 +909,16 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                         </div>
                       );
                     })}
+                  </div>
+
+                  <div className="pt-2 flex justify-start">
+                    <button
+                      type="button"
+                      onClick={addBookingDay}
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                    >
+                      + Tambah Hari
+                    </button>
                   </div>
                 </div>
 
