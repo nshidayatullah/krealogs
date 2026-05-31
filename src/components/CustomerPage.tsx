@@ -890,7 +890,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     })}
                   </div>
 
-                  <div className="pt-2 flex justify-start">
+                  <div className="pt-2 flex justify-end">
                     <button
                       type="button"
                       onClick={addBookingDay}
