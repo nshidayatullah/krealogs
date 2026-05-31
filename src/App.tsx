@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import CustomerPage from "./components/CustomerPage";
 import AdminPage from "./components/AdminPage";
 import AdminLogin from "./components/AdminLogin";
@@ -8,10 +7,8 @@ import { Booking } from "./types";
 import { Users, Sliders, LogOut } from "lucide-react";
 import brandLogo from "./assets/images/krealogs_logo_1780149664590.png";
 
-function AppContent() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith("/admin");
+export default function App() {
+  const [currentView, setCurrentView] = useState<"customer" | "admin">("customer");
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
 
@@ -31,15 +28,8 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (isAdminRoute) checkAuth();
-    else setAuthLoading(false);
-  }, [isAdminRoute, checkAuth]);
-
-  useEffect(() => {
-    if (!authLoading && isAdminRoute && !isAdminAuthenticated) {
-      navigate("/admin/login", { replace: true });
-    }
-  }, [authLoading, isAdminRoute, isAdminAuthenticated, navigate]);
+    checkAuth();
+  }, [checkAuth]);
 
   const handleOpenInvoice = (booking: Booking) => {
     setSelectedInvoiceBooking(booking);
@@ -49,7 +39,6 @@ function AppContent() {
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     setIsAdminAuthenticated(false);
-    navigate("/admin/login", { replace: true });
   };
 
   return (
@@ -70,9 +59,9 @@ function AppContent() {
           <div className="flex items-center space-x-3.5">
             <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200">
               <button
-                onClick={() => navigate("/")}
+                onClick={() => setCurrentView("customer")}
                 className={`flex items-center space-x-1.5 px-3 py-2 sm:px-4 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  !isAdminRoute
+                  currentView === "customer"
                     ? "bg-amber-500 text-black shadow-md shadow-amber-500/10"
                     : "text-zinc-500 hover:text-zinc-900"
                 }`}
@@ -82,9 +71,9 @@ function AppContent() {
               </button>
               
               <button
-                onClick={() => navigate("/admin")}
+                onClick={() => setCurrentView("admin")}
                 className={`flex items-center space-x-1.5 px-3 py-2 sm:px-4 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                  isAdminRoute
+                  currentView === "admin"
                     ? "bg-amber-500 text-black shadow-md shadow-amber-500/10"
                     : "text-zinc-500 hover:text-zinc-900"
                 }`}
@@ -94,7 +83,7 @@ function AppContent() {
               </button>
             </div>
 
-            {isAdminRoute && isAdminAuthenticated && (
+            {currentView === "admin" && isAdminAuthenticated && (
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-1.5 px-3 py-2 sm:px-4 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-550/25 text-rose-600 hover:text-rose-700 text-xs font-bold rounded-xl transition-all cursor-pointer"
@@ -110,27 +99,17 @@ function AppContent() {
       </header>
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <Routes>
-          <Route path="/" element={<CustomerPage onOpenInvoice={handleOpenInvoice} />} />
-          <Route path="/admin/login" element={
-            authLoading ? (
-              <div className="flex items-center justify-center py-20 text-zinc-500 text-xs font-mono">Memeriksa sesi...</div>
-            ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} />
-            ) : (
-              <AdminLogin onLoginSuccess={() => { setIsAdminAuthenticated(true); navigate("/admin", { replace: true }); }} />
-            )
-          } />
-          <Route path="/admin" element={
-            authLoading ? (
-              <div className="flex items-center justify-center py-20 text-zinc-500 text-xs font-mono">Memeriksa sesi...</div>
-            ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} />
-            ) : (
-              <AdminLogin onLoginSuccess={() => { setIsAdminAuthenticated(true); navigate("/admin", { replace: true }); }} />
-            )
-          } />
-        </Routes>
+        {currentView === "customer" ? (
+          <CustomerPage onOpenInvoice={handleOpenInvoice} />
+        ) : authLoading ? (
+          <div className="flex items-center justify-center py-20 text-zinc-500 text-xs font-mono">
+            Memeriksa sesi...
+          </div>
+        ) : isAdminAuthenticated ? (
+          <AdminPage onOpenInvoice={handleOpenInvoice} />
+        ) : (
+          <AdminLogin onLoginSuccess={() => { setIsAdminAuthenticated(true); checkAuth(); }} />
+        )}
       </main>
 
       <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-450 no-print bg-zinc-50/50">
@@ -147,13 +126,5 @@ function AppContent() {
       />
 
     </div>
-  );
-}
-
-export default function App() {
-  return (
-    <BrowserRouter>
-      <AppContent />
-    </BrowserRouter>
   );
 }

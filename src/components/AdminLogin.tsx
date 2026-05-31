@@ -204,6 +204,17 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           </button>
         </motion.form>
 
+        <div className="mt-8 pt-6 border-t border-zinc-900/80 space-y-3.5">
+          <div className="flex items-center gap-2 text-zinc-400 text-xs">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+            <span className="font-semibold text-[11px] uppercase tracking-wider text-zinc-450 font-mono">Petunjuk Akses Evaluasi</span>
+          </div>
+
+          <div className="bg-zinc-950 border border-zinc-900 p-4 rounded-xl">
+            <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-mono">Gunakan kredensial yang telah ditentukan admin</p>
+          </div>
+        </div>
+
       </motion.div>
     </div>
   );
