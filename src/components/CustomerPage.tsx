@@ -845,7 +845,6 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                           </span>
                                           <div className="flex items-center space-x-3">
                                             <div className="text-right whitespace-nowrap">
-                                              <span className="text-[8px] text-zinc-500 uppercase tracking-wider block font-bold font-mono leading-none mb-0.5">TARIF</span>
                                               <span className="text-[11px] sm:text-[13px] font-extrabold text-amber-500 font-mono tracking-tight">
                                                 Rp {pkg.price.toLocaleString("id-ID")}
                                               </span>
