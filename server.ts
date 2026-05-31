@@ -1,7 +1,6 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-import { createServer as createViteServer } from "vite";
 import { Package, Addon, Booking } from "./src/types";
 import { pool } from "./src/db";
 
@@ -457,6 +456,7 @@ async function startServer() {
   // Front-end Asset serving / Vite Setup
   // ------------------------------------
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
