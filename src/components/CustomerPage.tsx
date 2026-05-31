@@ -700,7 +700,11 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           <div className="flex justify-between items-center">
                             <span className="text-[9px] bg-zinc-900 border border-zinc-800 font-mono font-bold px-2.5 py-1 rounded text-amber-400 tracking-wider">ACARA HARI #{idx + 1}</span>
                             {bookingDays.length > 1 && (
-                              <button type="button" onClick={() => removeBookingDay(bd.id)} className="text-[10px] font-bold text-rose-450 hover:text-rose-405 hover:underline cursor-pointer">
+                              <button
+                                type="button"
+                                onClick={() => removeBookingDay(bd.id)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[10px] font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                              >
                                 Hapus Hari Ini
                               </button>
                             )}
