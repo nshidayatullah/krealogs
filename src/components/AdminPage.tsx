@@ -429,7 +429,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     <button
                       key={filter}
                       onClick={() => setBookingFilter(filter as any)}
-                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition flex-shrink-0 ${
+                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition shrink-0 ${
                         bookingFilter === filter 
                           ? "bg-zinc-800 text-white shadow-md" 
                           : "text-zinc-400 hover:text-white"
