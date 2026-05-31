@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Package, Addon, Booking, SpreadsheetConfig } from "../types";
+import { Package, Addon, Booking, SpreadsheetConfig, Coupon } from "../types";
 import { 
   FileText, 
   Trash2, 
@@ -22,7 +22,8 @@ import {
   FileSpreadsheet,
   Download,
   TrendingUp,
-  Coins
+  Coins,
+  Ticket
 } from "lucide-react";
 import { exportBookingsToCSV, exportPackagesToCSV, exportAddonsToCSV } from "../utils/excelExport";
 import { formatEventDate } from "../utils/dateFormatter";
@@ -37,10 +38,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [addons, setAddons] = useState<Addon[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"bookings" | "packages" | "addons" | "recap">("bookings");
+  const [activeTab, setActiveTab] = useState<"bookings" | "packages" | "addons" | "recap" | "coupons">("bookings");
 
   // Filter Bookings
   const [bookingFilter, setBookingFilter] = useState<"all" | "pending" | "approved" | "dp_paid" | "paid" | "rejected">("all");
@@ -61,6 +63,14 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
   const [addonName, setAddonName] = useState("");
   const [addonDesc, setAddonDesc] = useState("");
   const [addonPrice, setAddonPrice] = useState(0);
+
+  // Coupon Form Modal State
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [couponEditCode, setCouponEditCode] = useState<string | null>(null);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponPercent, setCouponPercent] = useState(10);
+  const [couponExpiry, setCouponExpiry] = useState("");
+  const [couponActive, setCouponActive] = useState(true);
 
   // Premium Toast and Confirmation states
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -92,6 +102,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         setBookings(data.bookings || []);
         setPackages(data.packages || []);
         setAddons(data.addons || []);
+        setCoupons(data.coupons || []);
         setDbLoading(false);
       })
       .catch((err) => {
@@ -325,6 +336,102 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
     });
   };
 
+  // CRUD COUPONS
+  const handleOpenCouponModal = (c: Coupon | null) => {
+    if (c) {
+      setCouponEditCode(c.code);
+      setCouponCode(c.code);
+      setCouponPercent(c.discountPercent);
+      const dateVal = c.validUntil ? new Date(c.validUntil).toISOString().split("T")[0] : "";
+      setCouponExpiry(dateVal);
+      setCouponActive(c.isActive);
+    } else {
+      setCouponEditCode(null);
+      setCouponCode("");
+      setCouponPercent(10);
+      const defaultDate = new Date();
+      defaultDate.setDate(defaultDate.getDate() + 7);
+      setCouponExpiry(defaultDate.toISOString().split("T")[0]);
+      setCouponActive(true);
+    }
+    setIsCouponModalOpen(true);
+  };
+
+  const handleSaveCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!couponCode.trim() || couponPercent <= 0 || couponPercent > 100 || !couponExpiry) {
+      showToast("Mohon isi seluruh data kupon dengan valid", "error");
+      return;
+    }
+
+    const parsedDate = new Date(couponExpiry);
+    if (isNaN(parsedDate.getTime())) {
+      showToast("Format tanggal kedaluwarsa tidak valid", "error");
+      return;
+    }
+
+    const couponPayload = {
+      code: couponCode.trim().toUpperCase(),
+      discountPercent: Number(couponPercent),
+      validUntil: parsedDate.toISOString(),
+      isActive: couponActive
+    };
+
+    try {
+      let url = "/api/coupons";
+      let method = "POST";
+      if (couponEditCode) {
+        url = `/api/coupons/${couponEditCode}`;
+        method = "PUT";
+      }
+
+      const response = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(couponPayload)
+      });
+
+      if (response.ok) {
+        setIsCouponModalOpen(false);
+        loadData();
+        showToast(couponEditCode ? "Kupon berhasil diperbarui!" : "Kupon berhasil dibuat!", "success");
+      } else {
+        let errorMsg = "Gagal menyimpan Kupon";
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch (_) {}
+        showToast(errorMsg, "error");
+      }
+    } catch (err) {
+      console.error("Save coupon error:", err);
+      showToast("Terjadi kesalahan koneksi saat menghubungi server", "error");
+    }
+  };
+
+  const handleDeleteCoupon = (code: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Hapus Kupon Diskon",
+      message: `Apakah Anda yakin ingin menghapus kupon ${code}? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.`,
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        try {
+          const response = await fetch(`/api/coupons/${code}`, { method: "DELETE" });
+          if (response.ok) {
+            loadData();
+            showToast("Kupon berhasil dihapus!", "success");
+          } else {
+            showToast("Gagal menghapus kupon", "error");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("Terjadi kesalahan koneksi", "error");
+        }
+      }
+    });
+  };
+
   // Excel & CSV recap exporting hooks are loaded directly from utils/excelExport.ts
 
   const filteredBookings = bookings.filter((b) => {
@@ -398,6 +505,14 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
           }`}
         >
           Kelola Add-Ons ({addons.length})
+        </button>
+        <button
+          onClick={() => setActiveTab("coupons")}
+          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
+            activeTab === "coupons" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
+          }`}
+        >
+          Kupon Diskon ({coupons.length})
         </button>
         <button
           onClick={() => setActiveTab("recap")}
@@ -921,6 +1036,112 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             </div>
           )}
 
+          {/* TAB 5: COUPONS PANEL */}
+          {activeTab === "coupons" && (
+            <div className="space-y-6 animate-fade-in text-zinc-150">
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
+                <div>
+                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Ticket className="w-5 h-5 text-amber-500" />
+                    Kelola Kupon Diskon
+                  </h2>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    Buat kode kupon promosi, tetapkan persentase potongan harga, dan batas waktu kedaluwarsa kupon.
+                  </p>
+                </div>
+                
+                <button
+                  onClick={() => handleOpenCouponModal(null)}
+                  className="flex items-center gap-1.5 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs transition cursor-pointer"
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  <span>Buat Kupon Baru</span>
+                </button>
+              </div>
+
+              {/* Coupons List */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {coupons.map((c) => {
+                  const isExpired = new Date(c.validUntil) < new Date();
+                  return (
+                    <div
+                      key={c.code}
+                      className={`p-5 bg-zinc-950 rounded-2xl border transition hover:border-zinc-800 ${
+                        !c.isActive 
+                          ? "border-zinc-900 opacity-60" 
+                          : isExpired 
+                          ? "border-rose-950" 
+                          : "border-zinc-850"
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-zinc-500 font-mono tracking-widest block uppercase">DISCOUNT CODE</span>
+                          <span className="text-base font-extrabold text-white font-mono tracking-wide bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                            {c.code}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {isExpired ? (
+                            <span className="text-[9px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">
+                              EXPIRED
+                            </span>
+                          ) : c.isActive ? (
+                            <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                              ACTIVE
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-bold text-zinc-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded">
+                              INACTIVE
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-4 pt-3 border-t border-zinc-900 space-y-2 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">Persentase Diskon:</span>
+                          <span className="font-bold text-amber-400 font-mono">{c.discountPercent}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-zinc-500">Berlaku Hingga:</span>
+                          <span className="font-medium text-zinc-300 font-mono">
+                            {formatEventDate(c.validUntil, { day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 flex justify-end gap-1.5">
+                        <button
+                          onClick={() => handleOpenCouponModal(c)}
+                          className="p-1.5 text-zinc-400 hover:text-white bg-zinc-900 hover:bg-zinc-850 border border-zinc-800 rounded-md transition cursor-pointer"
+                          title="Edit Kupon"
+                        >
+                          <Edit className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCoupon(c.code)}
+                          className="p-1.5 text-rose-450 hover:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-md transition cursor-pointer"
+                          title="Hapus Kupon"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {coupons.length === 0 && (
+                  <div className="col-span-full py-12 text-center text-zinc-500 text-xs font-mono">
+                    Belum ada kupon diskon yang dibuat. Klik tombol di kanan atas untuk membuat kupon pertama Anda!
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
+
         </div>
       )}
 
@@ -1087,6 +1308,89 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold cursor-pointer transition"
                 >
                   Simpan Add-On
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* COUPON REGISTER MODAL */}
+      {isCouponModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="w-full max-w-sm bg-[#0c0c0e] rounded-2xl shadow-2xl border border-zinc-800 overflow-hidden animate-scale-up">
+            <div className="px-6 py-4 bg-zinc-950 border-b border-zinc-900 flex justify-between items-center">
+              <h3 className="text-sm font-bold text-white">{couponEditCode ? "Ubah Detail Kupon" : "Buat Kupon Diskon Baru"}</h3>
+              <button onClick={() => setIsCouponModalOpen(false)} className="p-1 text-zinc-500 hover:text-white rounded-lg cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSaveCoupon} className="p-6 space-y-4 text-xs text-zinc-300">
+              <div className="space-y-1.5">
+                <label className="font-semibold text-zinc-400">Kode Kupon</label>
+                <input
+                  type="text"
+                  required
+                  disabled={!!couponEditCode}
+                  placeholder="cth: KREALOVE10"
+                  value={couponCode}
+                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition uppercase font-mono font-bold disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-zinc-400">Persentase Diskon (%)</label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  max="100"
+                  placeholder="10"
+                  value={couponPercent}
+                  onChange={(e) => setCouponPercent(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-semibold text-zinc-400">Berlaku Hingga Tanggal</label>
+                <input
+                  type="date"
+                  required
+                  value={couponExpiry}
+                  onChange={(e) => setCouponExpiry(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 py-2">
+                <input
+                  type="checkbox"
+                  id="coupon-active-checkbox"
+                  checked={couponActive}
+                  onChange={(e) => setCouponActive(e.target.checked)}
+                  className="w-4 h-4 accent-amber-500 rounded bg-zinc-950 border border-zinc-800 cursor-pointer"
+                />
+                <label htmlFor="coupon-active-checkbox" className="font-semibold text-zinc-300 cursor-pointer select-none">
+                  Kupon Aktif & Dapat Digunakan
+                </label>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-zinc-900">
+                <button
+                  type="button"
+                  onClick={() => setIsCouponModalOpen(false)}
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-350 rounded-xl font-bold cursor-pointer transition"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl font-bold cursor-pointer transition"
+                >
+                  {couponEditCode ? "Simpan Perubahan" : "Buat Kupon"}
                 </button>
               </div>
             </form>

@@ -55,6 +55,15 @@ export interface Booking {
   createdAt: string;
   approvedAt?: string;
   rejectedAt?: string;
+  couponCode?: string;
+  discountAmount?: number;
+}
+
+export interface Coupon {
+  code: string;
+  discountPercent: number;
+  validUntil: string;
+  isActive: boolean;
 }
 
 export interface SpreadsheetConfig {
@@ -67,5 +76,6 @@ export interface DBStructure {
   packages: Package[];
   addons: Addon[];
   bookings: Booking[];
+  coupons: Coupon[];
   spreadsheetConfig: SpreadsheetConfig;
 }

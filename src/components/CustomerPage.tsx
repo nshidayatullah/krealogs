@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Package, Addon, Booking } from "../types";
-import { User, Phone, MapPin, Calendar, FileText, Search, Check, AlertCircle, Camera, Sparkles, DollarSign, CheckCircle, HelpCircle, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { User, Phone, MapPin, Calendar, FileText, Search, Check, AlertCircle, Camera, Sparkles, DollarSign, CheckCircle, HelpCircle, ArrowRight, ChevronLeft, ChevronRight, Ticket, X, Receipt } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { formatEventDate } from "../utils/dateFormatter";
 const brandLogo = "/src/assets/images/krealogs_logo_1780149664590.png";
@@ -46,6 +46,12 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState<Booking | null>(null);
   const [submitError, setSubmitError] = useState("");
+
+  // Coupon States
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountPercent: number } | null>(null);
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
 
   // Search States
   const [searchWhatsapp, setSearchWhatsapp] = useState("");
@@ -104,33 +110,37 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     return acc;
   }, []);
 
-  const chosenAddonsDetail = bookingDays.reduce<{ id: string; name: string; price: number }[]>((acc, d) => {
-    d.addons.forEach((a) => {
-      const addonMeta = addons.find((add) => add.id === a.id);
-      if (addonMeta) {
-        const existing = acc.find(item => item.id === a.id);
-        if (existing) {
-          existing.price += addonMeta.price * a.quantity;
-        } else {
-          acc.push({
-            id: a.id,
-            name: a.id,
-            price: addonMeta.price * a.quantity
-          });
+  const chosenAddonsDetail = bookingDays
+    .reduce<{ id: string; name: string; price: number }[]>((acc, d) => {
+      d.addons.forEach((a) => {
+        const addonMeta = addons.find((add) => add.id === a.id);
+        if (addonMeta) {
+          const existing = acc.find((item) => item.id === a.id);
+          if (existing) {
+            existing.price += addonMeta.price * a.quantity;
+          } else {
+            acc.push({
+              id: a.id,
+              name: a.id,
+              price: addonMeta.price * a.quantity,
+            });
+          }
         }
-      }
+      });
+      return acc;
+    }, [])
+    .map((item) => {
+      const addonMeta = addons.find((add) => add.id === item.id);
+      const originalPrice = addonMeta ? addonMeta.price : 0;
+      const totalQty = originalPrice > 0 ? Math.round(item.price / originalPrice) : 1;
+      return {
+        id: item.id,
+        name: totalQty > 1 ? `${addonMeta?.name} (x${totalQty})` : addonMeta?.name || "",
+        price: item.price,
+      };
     });
-    return acc;
-  }, []).map(item => {
-    const addonMeta = addons.find(add => add.id === item.id);
-    const originalPrice = addonMeta ? addonMeta.price : 0;
-    const totalQty = originalPrice > 0 ? Math.round(item.price / originalPrice) : 1;
-    return {
-      id: item.id,
-      name: totalQty > 1 ? `${addonMeta?.name} (x${totalQty})` : (addonMeta?.name || ""),
-      price: item.price
-    };
-  });
+
+  const isFormComplete = !!(namaLengkap.trim() && noWhatsapp.trim() && domisili.trim() && lokasiVenue.trim() && bookingDays.length > 0 && bookingDays.every((bd) => bd.date && bd.packageId));
 
   // Total price: sum of package prices and addon prices on each day
   const totalPrice = bookingDays.reduce((sum, bd) => {
@@ -143,25 +153,28 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     return sum + pPrice + aPriceSum;
   }, 0);
 
-  const minDpAmount = Math.round(totalPrice * 0.5);
+  const discountAmount = appliedCoupon ? Math.round(totalPrice * (appliedCoupon.discountPercent / 100)) : 0;
+  const finalPrice = totalPrice - discountAmount;
 
-  let amountPaid = totalPrice;
+  const minDpAmount = Math.round(finalPrice * 0.5);
+
+  let amountPaid = finalPrice;
   if (paymentMethod !== "full") {
     if (isCustomDpActive) {
       const parsedAmount = parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0;
       amountPaid = parsedAmount;
     } else {
-      amountPaid = Math.round(totalPrice * (dpPercentage / 100));
+      amountPaid = Math.round(finalPrice * (dpPercentage / 100));
     }
   }
 
-  const remainingPayment = Math.max(0, totalPrice - amountPaid);
+  const remainingPayment = Math.max(0, finalPrice - amountPaid);
 
   // Keep custom DP string in sync when total price / selection mode changes
   useEffect(() => {
     if (paymentMethod !== "full") {
       if (!isCustomDpActive) {
-        const calculated = Math.round(totalPrice * (dpPercentage / 100));
+        const calculated = Math.round(finalPrice * (dpPercentage / 100));
         setCustomDpAmount(calculated.toString());
       }
     } else {
@@ -169,7 +182,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       setIsCustomDpActive(false);
       setDpPercentage(50);
     }
-  }, [totalPrice, dpPercentage, paymentMethod, isCustomDpActive]);
+  }, [finalPrice, dpPercentage, paymentMethod, isCustomDpActive]);
 
   // Derived comma-separated representation of multiple days dates
   const tanggalAcara = bookingDays
@@ -206,9 +219,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       prev.map((bd) => {
         if (bd.id === dayId) {
           const existing = bd.addons.find((a) => a.id === addonId);
-          const newAddons = existing
-            ? bd.addons.filter((a) => a.id !== addonId)
-            : [...bd.addons, { id: addonId, quantity: 1 }];
+          const newAddons = existing ? bd.addons.filter((a) => a.id !== addonId) : [...bd.addons, { id: addonId, quantity: 1 }];
           return { ...bd, addons: newAddons };
         }
         return bd;
@@ -234,6 +245,36 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
         return bd;
       }),
     );
+  };
+
+  const handleValidateCoupon = async () => {
+    setCouponError("");
+    setCouponSuccess("");
+    if (!couponInput.trim()) {
+      setCouponError("Silakan masukkan kode kupon");
+      return;
+    }
+    try {
+      const response = await fetch(`/api/coupons/validate/${couponInput.trim()}`);
+      const data = await response.json();
+      if (!response.ok) {
+        setCouponError(data.error || "Kode kupon tidak valid");
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon(data.coupon);
+        setCouponSuccess(`Kupon berhasil dipasang! Diskon ${data.coupon.discountPercent}% dari total.`);
+      }
+    } catch (err) {
+      console.error(err);
+      setCouponError("Terjadi kesalahan jaringan");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponSuccess("");
+    setCouponError("");
   };
 
   // Submit Booking
@@ -263,14 +304,14 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     }
 
     if (paymentMethod !== "full") {
-      const parsedAmount = isCustomDpActive ? parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0 : Math.round(totalPrice * (dpPercentage / 100));
+      const parsedAmount = isCustomDpActive ? parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0 : Math.round(finalPrice * (dpPercentage / 100));
 
       if (parsedAmount < minDpAmount) {
-        setSubmitError(`Nominal pembayaran DP minimal adalah 50% dari total biaya (Rp ${minDpAmount.toLocaleString("id-ID")}).`);
+        setSubmitError(`Nominal pembayaran DP minimal adalah 50% dari total biaya setelah diskon (Rp ${minDpAmount.toLocaleString("id-ID")}).`);
         return;
       }
-      if (parsedAmount > totalPrice) {
-        setSubmitError(`Nominal pembayaran DP tidak boleh melebihi total biaya (Rp ${totalPrice.toLocaleString("id-ID")}).`);
+      if (parsedAmount > finalPrice) {
+        setSubmitError(`Nominal pembayaran DP tidak boleh melebihi total biaya setelah diskon (Rp ${finalPrice.toLocaleString("id-ID")}).`);
         return;
       }
     }
@@ -296,7 +337,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
           const addonMeta = addons.find((add) => add.id === a.id);
           return {
             id: a.id,
-            name: a.quantity > 1 ? `${addonMeta?.name} (x${a.quantity})` : (addonMeta?.name || ""),
+            name: a.quantity > 1 ? `${addonMeta?.name} (x${a.quantity})` : addonMeta?.name || "",
             price: (addonMeta?.price || 0) * a.quantity,
           };
         });
@@ -310,9 +351,11 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
         };
       }),
       paymentMethod,
-      totalPrice,
+      totalPrice: finalPrice,
       amountPaid,
       remainingPayment,
+      couponCode: appliedCoupon ? appliedCoupon.code : undefined,
+      discountAmount: discountAmount,
     };
 
     try {
@@ -340,6 +383,10 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       setDpPercentage(50);
       setCustomDpAmount("");
       setIsCustomDpActive(false);
+      setCouponInput("");
+      setAppliedCoupon(null);
+      setCouponError("");
+      setCouponSuccess("");
 
       const matchPkgs = packages.filter((p) => p.type === keperluan || p.type === "both");
       const firstPkgId = matchPkgs.length > 0 ? matchPkgs[0].id : "";
@@ -785,7 +832,9 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                               </h4>
                                               <p className="text-[10px] text-zinc-400 leading-normal line-clamp-2">{pkg.description}</p>
                                             </div>
-                                            <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isPkgSelected ? "bg-amber-500 border-amber-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}>
+                                            <span
+                                              className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isPkgSelected ? "bg-amber-500 border-amber-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}
+                                            >
                                               {isPkgSelected && <Check className="w-2.5 h-2.5 stroke-3" />}
                                             </span>
                                           </div>
@@ -865,9 +914,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         >
                                           -
                                         </button>
-                                        <span className="text-[10px] font-mono font-bold text-zinc-900 px-1 min-w-[14px] text-center select-none">
-                                          {quantity}
-                                        </span>
+                                        <span className="text-[10px] font-mono font-bold text-zinc-900 px-1 min-w-[14px] text-center select-none">{quantity}</span>
                                         <button
                                           type="button"
                                           onClick={() => updateAddonQtyForDay(bd.id, a.id, 1)}
@@ -880,9 +927,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
                                     {/* Absolute Bottom Right Price */}
                                     <div className="absolute bottom-3.5 right-3 text-right">
-                                      <span className="text-[11px] font-mono font-bold text-amber-600">
-                                        +Rp {(a.price * (quantity || 1)).toLocaleString("id-ID")}
-                                      </span>
+                                      <span className="text-[11px] font-mono font-bold text-amber-600">+Rp {(a.price * (quantity || 1)).toLocaleString("id-ID")}</span>
                                     </div>
                                   </div>
                                 );
@@ -907,235 +952,336 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
               </div>
 
               {/* Calculator Summary Card (Right for desktop) */}
-              <div className="lg:col-span-5 lg:sticky lg:top-6 bg-zinc-900/40 text-zinc-100 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl border border-zinc-850 bg-linear-to-br from-zinc-900 to-black">
-                <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-amber-500" />
-                    Rincian Pembiayaan
-                  </h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Penghitungan transparan secara otomatis.</p>
-                </div>
+              {isFormComplete ? (
+                <div className="lg:col-span-5 lg:sticky lg:top-6 bg-zinc-900/40 text-zinc-100 rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl border border-zinc-850 bg-linear-to-br from-zinc-900 to-black">
+                  <div>
+                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Receipt className="w-5 h-5 text-amber-500" />
+                      RINCIAN BIAYA
+                    </h3>
+                    <p className="text-[11px] text-zinc-400 mt-0.5">Penghitungan transparan secara otomatis.</p>
+                  </div>
 
-                {/* Multi-day Price Breakdown */}
-                <div className="space-y-4 border-b border-zinc-800 pb-4">
-                  <span className="text-zinc-500 block text-[11px] font-mono uppercase tracking-wider">Metrik Hari Acara ({bookingDays.length}):</span>
-                  {bookingDays.map((bd, index) => {
-                    const pkg = packages.find((p) => p.id === bd.packageId);
-                    const dayAddonsPaid = bd.addons.map((a) => {
-                      const addonMeta = addons.find((add) => add.id === a.id);
-                      return {
-                        id: a.id,
-                        name: a.quantity > 1 ? `${addonMeta?.name} (x${a.quantity})` : (addonMeta?.name || ""),
-                        price: (addonMeta?.price || 0) * a.quantity,
-                      };
-                    }).filter((item) => item.price > 0);
-                    const daySubtotal = (pkg ? pkg.price : 0) + dayAddonsPaid.reduce((s, a) => s + a.price, 0);
+                  {/* Multi-day Price Breakdown */}
+                  <div className="space-y-4 border-b border-zinc-800 pb-4">
+                    <span className="text-zinc-500 block text-[11px] font-mono uppercase tracking-wider">Metrik Hari Acara ({bookingDays.length}):</span>
+                    {bookingDays.map((bd, index) => {
+                      const pkg = packages.find((p) => p.id === bd.packageId);
+                      const dayAddonsPaid = bd.addons
+                        .map((a) => {
+                          const addonMeta = addons.find((add) => add.id === a.id);
+                          return {
+                            id: a.id,
+                            name: a.quantity > 1 ? `${addonMeta?.name} (x${a.quantity})` : addonMeta?.name || "",
+                            price: (addonMeta?.price || 0) * a.quantity,
+                          };
+                        })
+                        .filter((item) => item.price > 0);
+                      const daySubtotal = (pkg ? pkg.price : 0) + dayAddonsPaid.reduce((s, a) => s + a.price, 0);
 
-                    return (
-                      <div key={bd.id} className="p-3.5 rounded-xl bg-black/40 border border-zinc-900 text-xs text-zinc-300 space-y-1.5 hover:border-zinc-805 transition-colors">
-                        <div className="flex justify-between items-center font-bold text-zinc-200">
-                          <span>
-                            Hari #{index + 1}: {bd.date ? formatEventDate(bd.date, { day: "numeric", month: "short", year: "numeric" }) : <span className="text-rose-500 font-normal">Isi Tanggal..</span>}
-                          </span>
-                          <span className="font-mono text-amber-500 text-xs">Rp {daySubtotal.toLocaleString("id-ID")}</span>
-                        </div>
-                        <div className="text-[11px] text-zinc-500 flex justify-between gap-4">
-                          <span className="truncate text-zinc-400">Paket: {pkg ? pkg.name : "Belum dipilih"}</span>
-                          <span className="font-mono shrink-0">Rp {pkg ? pkg.price.toLocaleString("id-ID") : 0}</span>
-                        </div>
-                        {dayAddonsPaid.length > 0 && (
-                          <div className="text-[10px] text-zinc-500 pl-2 space-y-0.5 border-l border-zinc-850">
-                            {dayAddonsPaid.map((a, aIdx) => (
-                              <div key={`${a.id}-${aIdx}`} className="flex justify-between text-zinc-500 font-normal">
-                                <span className="truncate max-w-[150px]">• {a.name}</span>
-                                <span className="font-mono shrink-0">+Rp {a.price.toLocaleString("id-ID")}</span>
-                              </div>
-                            ))}
+                      return (
+                        <div key={bd.id} className="p-3.5 rounded-xl bg-black/40 border border-zinc-900 text-xs text-zinc-300 space-y-1.5 hover:border-zinc-805 transition-colors">
+                          <div className="flex justify-between items-center font-bold text-zinc-200">
+                            <span>
+                              Hari #{index + 1}: {bd.date ? formatEventDate(bd.date, { day: "numeric", month: "short", year: "numeric" }) : <span className="text-rose-500 font-normal">Isi Tanggal..</span>}
+                            </span>
+                            <span className="font-mono text-amber-500 text-xs">Rp {daySubtotal.toLocaleString("id-ID")}</span>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* 5. Payment System selection */}
-                <div className="space-y-3 pt-2">
-                  <div className="flex justify-between items-center">
-                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                      <DollarSign className="w-3.5 h-3.5 text-amber-500" />
-                      Sistem Pembayaran
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 bg-black/50 p-1 rounded-xl border border-zinc-800">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("full")}
-                      className={`py-2 px-3 rounded-lg text-[11px] font-bold text-center cursor-pointer transition ${paymentMethod === "full" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
-                    >
-                      Bayar Lunas
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentMethod("dp_custom")}
-                      className={`py-2 px-3 rounded-lg text-[11px] font-bold text-center cursor-pointer transition ${paymentMethod === "dp_custom" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
-                    >
-                      Bayar DP (Min. 50%)
-                    </button>
-                  </div>
-
-                  <p className="text-[10px] text-zinc-500 leading-normal">
-                    {paymentMethod === "dp_custom"
-                      ? "Silakan tentukan nominal DP di bawah (minimum 50%). Pelunasan dari sisa tagihan wajib disetorkan paling lambat 3 hari sebelum acara."
-                      : "Selesaikan transaksi lunas seutuhnya tanpa memikirkan rincian tagihan sisa di kemudian hari."}
-                  </p>
-
-                  {paymentMethod === "dp_custom" && (
-                    <div className="space-y-3 bg-zinc-950/60 p-4 rounded-2xl border border-zinc-850 text-zinc-300">
-                      <div className="flex justify-between items-center text-[11px]">
-                        <span className="font-semibold text-zinc-400">Atur Persentase DP:</span>
-                        <span className="font-mono text-amber-400 font-bold bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">{isCustomDpActive ? "Kustom" : `${dpPercentage}%`}</span>
-                      </div>
-
-                      {/* Presets Grid */}
-                      <div className="grid grid-cols-5 gap-1.5">
-                        {[50, 60, 70, 80, 90].map((pct) => {
-                          const isActive = !isCustomDpActive && dpPercentage === pct;
-                          return (
-                            <button
-                              key={pct}
-                              type="button"
-                              onClick={() => {
-                                setDpPercentage(pct);
-                                setIsCustomDpActive(false);
-                              }}
-                              className={`py-1.5 rounded-lg text-[10px] font-mono font-bold text-center border cursor-pointer transition ${
-                                isActive ? "bg-amber-500/10 border-amber-500 text-amber-400 font-semibold" : "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:text-white"
-                              }`}
-                            >
-                              {pct}%
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      {/* Slider Input */}
-                      <div className="space-y-1">
-                        <input
-                          type="range"
-                          min="50"
-                          max="95"
-                          step="5"
-                          value={isCustomDpActive ? 50 : dpPercentage}
-                          onChange={(e) => {
-                            setDpPercentage(Number(e.target.value));
-                            setIsCustomDpActive(false);
-                          }}
-                          className="w-full accent-amber-500 cursor-pointer h-1 bg-zinc-800 rounded-lg appearance-none"
-                        />
-                        <div className="flex justify-between text-[9px] text-zinc-500 font-mono">
-                          <span>Min 50%</span>
-                          <span>Max 95%</span>
-                        </div>
-                      </div>
-
-                      {/* Custom Rupiah Input Field */}
-                      <div className="space-y-1.5 pt-2 border-t border-zinc-900">
-                        <div className="flex justify-between items-center text-[11px]">
-                          <label className="text-zinc-400 font-medium font-sans">Atau Masukkan Nominal (Rp):</label>
-                          {isCustomDpActive && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsCustomDpActive(false);
-                                setDpPercentage(50);
-                              }}
-                              className="text-[9px] text-amber-500 font-bold hover:underline cursor-pointer"
-                            >
-                              Reset
-                            </button>
+                          <div className="text-[11px] text-zinc-500 flex justify-between gap-4">
+                            <span className="truncate text-zinc-400">Paket: {pkg ? pkg.name : "Belum dipilih"}</span>
+                            <span className="font-mono shrink-0">Rp {pkg ? pkg.price.toLocaleString("id-ID") : 0}</span>
+                          </div>
+                          {dayAddonsPaid.length > 0 && (
+                            <div className="text-[10px] text-zinc-500 pl-2 space-y-0.5 border-l border-zinc-850">
+                              {dayAddonsPaid.map((a, aIdx) => (
+                                <div key={`${a.id}-${aIdx}`} className="flex justify-between text-zinc-500 font-normal">
+                                  <span className="truncate max-w-[150px]">• {a.name}</span>
+                                  <span className="font-mono shrink-0">+Rp {a.price.toLocaleString("id-ID")}</span>
+                                </div>
+                              ))}
+                            </div>
                           )}
                         </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Coupon Code Input Component */}
+                  <div className="space-y-3 pt-2 border-b border-zinc-800 pb-4">
+                    <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                      <Ticket className="w-5 h-5 text-amber-500" />
+                      Kode Kupon / Diskon
+                    </label>
+
+                    {!appliedCoupon ? (
+                      <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder={`Minimal Rp ${minDpAmount.toLocaleString("id-ID")}`}
-                          value={customDpAmount ? "Rp " + (parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0).toLocaleString("id-ID") : ""}
-                          onChange={(e) => {
-                            const digits = e.target.value.replace(/[^0-9]/g, "");
-                            setCustomDpAmount(digits);
-                            setIsCustomDpActive(true);
-                          }}
-                          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 focus:border-amber-500 focus:outline-none text-white rounded-lg font-mono text-xs text-right"
+                          placeholder="Masukkan kode kupon (contoh: KREALOVE10)"
+                          value={couponInput}
+                          onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                          className="flex-1 px-3 py-2 bg-zinc-950/80 border border-zinc-800 focus:border-amber-500 focus:outline-none text-white rounded-xl text-xs font-mono uppercase placeholder-zinc-650"
                         />
-
-                        {/* Real-time Warning message under typing */}
-                        {isCustomDpActive &&
-                          (() => {
-                            const parsedVal = parseInt(customDpAmount, 10) || 0;
-                            if (parsedVal < minDpAmount) {
-                              return (
-                                <p className="text-[10px] text-rose-400 mt-1 flex items-center gap-1 font-sans leading-normal">
-                                  <span>⚠️ Nominal di bawah batas 50% (Min: Rp {minDpAmount.toLocaleString("id-ID")})</span>
-                                </p>
-                              );
-                            }
-                            if (parsedVal > totalPrice) {
-                              return (
-                                <p className="text-[10px] text-rose-400 mt-1 flex items-center gap-1 font-sans leading-normal">
-                                  <span>⚠️ Melebihi total harga (Maks: Rp {totalPrice.toLocaleString("id-ID")})</span>
-                                </p>
-                              );
-                            }
-                            return (
-                              <p className="text-[10px] text-emerald-400 mt-1 flex items-center gap-1 font-sans leading-normal">
-                                <span>✅ Porsi DP valid: {Math.round((parsedVal / totalPrice) * 100)}% dari total biaya</span>
-                              </p>
-                            );
-                          })()}
+                        <button
+                          type="button"
+                          onClick={handleValidateCoupon}
+                          className="px-4 py-2 bg-zinc-850 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-amber-400 font-bold rounded-xl text-xs transition cursor-pointer"
+                        >
+                          Pasang
+                        </button>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    ) : (
+                      <div className="p-3 bg-amber-500/5 border border-amber-500/20 rounded-2xl flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-400">
+                            <Ticket className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-extrabold text-amber-400 font-mono tracking-wide">{appliedCoupon.code}</p>
+                            <p className="text-[10px] text-zinc-400 font-medium">Potongan Diskon {appliedCoupon.discountPercent}% Berhasil</p>
+                          </div>
+                        </div>
+                        <button type="button" onClick={handleRemoveCoupon} className="p-1 hover:bg-zinc-850 rounded-lg text-zinc-400 hover:text-rose-400 transition cursor-pointer" title="Hapus Kupon">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
 
-                {/* Math Calculations Display */}
-                <div className="pt-4 border-t border-zinc-800 space-y-3 text-xs">
-                  <div className="flex justify-between text-zinc-400">
-                    <span>Total Harga Gabungan:</span>
-                    <span className="font-mono text-base font-bold text-zinc-200">Rp {totalPrice.toLocaleString("id-ID")}</span>
+                    {couponError && (
+                      <p className="text-[10px] text-rose-400 font-medium flex items-center gap-1 font-mono">
+                        <span>⚠️ {couponError}</span>
+                      </p>
+                    )}
+
+                    {couponSuccess && !couponError && (
+                      <p className="text-[10px] text-amber-400 font-medium flex items-center gap-1 font-mono">
+                        <span>✅ {couponSuccess}</span>
+                      </p>
+                    )}
                   </div>
 
-                  <div className="flex justify-between text-zinc-200 border-t border-zinc-800/80 pt-3">
-                    <span className="font-semibold text-amber-400 text-xs">Wajib Dibayar Sekarang:</span>
-                    <span className="font-mono text-xl font-black text-amber-400">Rp {amountPaid.toLocaleString("id-ID")}</span>
+                  {/* 5. Payment System selection */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <DollarSign className="w-5 h-5 text-amber-500" />
+                        Sistem Pembayaran
+                      </label>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 bg-black/50 p-1 rounded-xl border border-zinc-800">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("full")}
+                        className={`py-2 px-3 rounded-lg text-[11px] font-bold text-center cursor-pointer transition ${paymentMethod === "full" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
+                      >
+                        Bayar Lunas
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("dp_custom")}
+                        className={`py-2 px-3 rounded-lg text-[11px] font-bold text-center cursor-pointer transition ${paymentMethod === "dp_custom" ? "bg-zinc-800 text-white" : "text-zinc-500 hover:text-white"}`}
+                      >
+                        Bayar DP (Min. 50%)
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] text-zinc-500 leading-normal">
+                      {paymentMethod === "dp_custom"
+                        ? "Silakan tentukan nominal DP di bawah (minimum 50%). Pelunasan dari sisa tagihan wajib disetorkan paling lambat 3 hari sebelum acara."
+                        : "Selesaikan transaksi lunas seutuhnya tanpa memikirkan rincian tagihan sisa di kemudian hari."}
+                    </p>
+
+                    {paymentMethod === "dp_custom" && (
+                      <div className="space-y-3 bg-zinc-950/60 p-4 rounded-2xl border border-zinc-850 text-zinc-300">
+                        <div className="flex justify-between items-center text-[11px]">
+                          <span className="font-semibold text-zinc-400">Atur Persentase DP:</span>
+                          <span className="font-mono text-amber-400 font-bold bg-zinc-950 px-2 py-0.5 rounded border border-zinc-800">{isCustomDpActive ? "Kustom" : `${dpPercentage}%`}</span>
+                        </div>
+
+                        {/* Presets Grid */}
+                        <div className="grid grid-cols-5 gap-1.5">
+                          {[50, 60, 70, 80, 90].map((pct) => {
+                            const isActive = !isCustomDpActive && dpPercentage === pct;
+                            return (
+                              <button
+                                key={pct}
+                                type="button"
+                                onClick={() => {
+                                  setDpPercentage(pct);
+                                  setIsCustomDpActive(false);
+                                }}
+                                className={`py-1.5 rounded-lg text-[10px] font-mono font-bold text-center border cursor-pointer transition ${
+                                  isActive ? "bg-amber-500/10 border-amber-500 text-amber-400 font-semibold" : "bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:text-white"
+                                }`}
+                              >
+                                {pct}%
+                              </button>
+                            );
+                          })}
+                        </div>
+
+                        {/* Slider Input */}
+                        <div className="space-y-1">
+                          <input
+                            type="range"
+                            min="50"
+                            max="95"
+                            step="5"
+                            value={isCustomDpActive ? 50 : dpPercentage}
+                            onChange={(e) => {
+                              setDpPercentage(Number(e.target.value));
+                              setIsCustomDpActive(false);
+                            }}
+                            className="w-full accent-amber-500 cursor-pointer h-1 bg-zinc-800 rounded-lg appearance-none"
+                          />
+                          <div className="flex justify-between text-[9px] text-zinc-500 font-mono">
+                            <span>Min 50%</span>
+                            <span>Max 95%</span>
+                          </div>
+                        </div>
+
+                        {/* Custom Rupiah Input Field */}
+                        <div className="space-y-1.5 pt-2 border-t border-zinc-900">
+                          <div className="flex justify-between items-center text-[11px]">
+                            <label className="text-zinc-400 font-medium font-sans">Atau Masukkan Nominal (Rp):</label>
+                            {isCustomDpActive && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setIsCustomDpActive(false);
+                                  setDpPercentage(50);
+                                }}
+                                className="text-[9px] text-amber-500 font-bold hover:underline cursor-pointer"
+                              >
+                                Reset
+                              </button>
+                            )}
+                          </div>
+                          <input
+                            type="text"
+                            placeholder={`Minimal Rp ${minDpAmount.toLocaleString("id-ID")}`}
+                            value={customDpAmount ? "Rp " + (parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0).toLocaleString("id-ID") : ""}
+                            onChange={(e) => {
+                              const digits = e.target.value.replace(/[^0-9]/g, "");
+                              setCustomDpAmount(digits);
+                              setIsCustomDpActive(true);
+                            }}
+                            className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 focus:border-amber-500 focus:outline-none text-white rounded-lg font-mono text-xs text-right"
+                          />
+
+                          {/* Real-time Warning message under typing */}
+                          {isCustomDpActive &&
+                            (() => {
+                              const parsedVal = parseInt(customDpAmount, 10) || 0;
+                              if (parsedVal < minDpAmount) {
+                                return (
+                                  <p className="text-[10px] text-rose-400 mt-1 flex items-center gap-1 font-sans leading-normal">
+                                    <span>⚠️ Nominal di bawah batas 50% (Min: Rp {minDpAmount.toLocaleString("id-ID")})</span>
+                                  </p>
+                                );
+                              }
+                              if (parsedVal > finalPrice) {
+                                return (
+                                  <p className="text-[10px] text-rose-400 mt-1 flex items-center gap-1 font-sans leading-normal">
+                                    <span>⚠️ Melebihi total harga setelah diskon (Maks: Rp {finalPrice.toLocaleString("id-ID")})</span>
+                                  </p>
+                                );
+                              }
+                              return (
+                                <p className="text-[10px] text-amber-400 mt-1 flex items-center gap-1 font-sans leading-normal">
+                                  <span>✅ Porsi DP valid: {Math.round((parsedVal / finalPrice) * 100)}% dari total biaya setelah diskon</span>
+                                </p>
+                              );
+                            })()}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  {paymentMethod !== "full" && (
-                    <div className="flex justify-between text-zinc-500 pt-1">
-                      <span>Sisa Tagihan Pelunasan:</span>
-                      <span className="font-mono text-zinc-300 font-medium">Rp {remainingPayment.toLocaleString("id-ID")}</span>
+                  {/* Math Calculations Display */}
+                  <div className="pt-4 border-t border-zinc-800 space-y-3 text-xs">
+                    <div className="flex justify-between text-zinc-400">
+                      <span>Total Harga Gabungan:</span>
+                      <span className="font-mono text-base font-bold text-zinc-200">Rp {totalPrice.toLocaleString("id-ID")}</span>
                     </div>
-                  )}
-                </div>
 
-                {/* Submit button */}
-                <div className="pt-2">
-                  {submitError && (
-                    <div className="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[11px] rounded-xl mb-3 flex items-center gap-2 font-mono">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      <span>{submitError}</span>
+                    {appliedCoupon && (
+                      <>
+                        <div className="flex justify-between text-zinc-450">
+                          <span className="flex items-center gap-1">
+                            <Ticket className="w-3.5 h-3.5 text-amber-500" />
+                            Diskon ({appliedCoupon.code} - {appliedCoupon.discountPercent}%):
+                          </span>
+                          <span className="font-mono text-amber-400 font-semibold">-Rp {discountAmount.toLocaleString("id-ID")}</span>
+                        </div>
+                        <div className="flex justify-between text-zinc-300 border-t border-zinc-900 pt-2 pb-1">
+                          <span>Total Setelah Diskon:</span>
+                          <span className="font-mono text-zinc-105 font-bold">Rp {finalPrice.toLocaleString("id-ID")}</span>
+                        </div>
+                      </>
+                    )}
+
+                    <div className="flex justify-between text-zinc-200 border-t border-zinc-800/80 pt-3">
+                      <span className="font-semibold text-amber-400 text-xs">Wajib Dibayar Sekarang:</span>
+                      <span className="font-mono text-xl font-black text-amber-400">Rp {amountPaid.toLocaleString("id-ID")}</span>
                     </div>
-                  )}
 
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-650"
-                  >
-                    {isSubmitting ? "Memproses Data..." : "KONFIRMASI PEMESANAN"}
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
+                    {paymentMethod !== "full" && (
+                      <div className="flex justify-between text-zinc-500 pt-1">
+                        <span>Sisa Tagihan Pelunasan:</span>
+                        <span className="font-mono text-zinc-300 font-medium">Rp {remainingPayment.toLocaleString("id-ID")}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Submit button */}
+                  <div className="pt-2">
+                    {submitError && (
+                      <div className="p-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-[11px] rounded-xl mb-3 flex items-center gap-2 font-mono">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>{submitError}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-650"
+                    >
+                      {isSubmitting ? "Memproses Data..." : "KONFIRMASI PEMESANAN"}
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="lg:col-span-5 lg:sticky lg:top-6 bg-zinc-900/40 text-zinc-300 rounded-3xl p-6 md:p-8 border border-zinc-850 bg-linear-to-br from-zinc-900 to-black flex flex-col items-center justify-center text-center space-y-6 min-h-[380px] shadow-2xl">
+                  <div className="p-4.5 bg-zinc-950/60 rounded-full border border-zinc-800 text-amber-500 animate-pulse">
+                    <Receipt className="w-8 h-8 text-amber-500" />
+                  </div>
+                  <div className="space-y-2.5 max-w-[290px]">
+                    <h3 className="text-zinc-200 font-extrabold text-xs uppercase tracking-widest font-sans">RINCIAN BIAYA</h3>
+                    <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">Silakan isi seluruh formulir identitas, lokasi venue, tanggal acara, serta pilihan paket untuk membuka kalkulasi biaya.</p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-1.5 pt-2 text-[9px] font-mono">
+                    <span
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${namaLengkap.trim() && noWhatsapp.trim() && domisili.trim() ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                    >
+                      Identitas
+                    </span>
+                    <span
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${lokasiVenue.trim() ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                    >
+                      Venue
+                    </span>
+                    <span
+                      className={`px-2.5 py-1 rounded-lg border transition duration-300 ${bookingDays.length > 0 && bookingDays.every((bd) => bd.date && bd.packageId) ? "bg-amber-500/10 border-amber-500/30 text-amber-400 font-bold" : "bg-black/40 border-zinc-800/80 text-zinc-500 font-medium"}`}
+                    >
+                      Paket & Tanggal
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </form>
         )}

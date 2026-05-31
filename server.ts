@@ -32,7 +32,18 @@ function mapBookingRow(b: any): Booking {
     status: b.status,
     createdAt: b.created_at,
     approvedAt: b.approved_at || undefined,
-    rejectedAt: b.rejected_at || undefined
+    rejectedAt: b.rejected_at || undefined,
+    couponCode: b.coupon_code || undefined,
+    discountAmount: b.discount_amount ? Number(b.discount_amount) : undefined
+  };
+}
+
+function mapCouponRow(c: any) {
+  return {
+    code: c.code,
+    discountPercent: Number(c.discount_percent),
+    validUntil: c.valid_until,
+    isActive: c.is_active
   };
 }
 
@@ -58,9 +69,11 @@ async function startServer() {
       const { rows: packages } = await pool.query("SELECT * FROM packages");
       const { rows: addons } = await pool.query("SELECT * FROM addons");
       const { rows: bookingsRows } = await pool.query("SELECT * FROM bookings ORDER BY created_at DESC");
+      const { rows: couponsRows } = await pool.query("SELECT * FROM coupons ORDER BY code ASC");
       const { rows: configRows } = await pool.query("SELECT * FROM spreadsheet_config WHERE id = 1");
 
       const bookings = bookingsRows.map(mapBookingRow);
+      const coupons = couponsRows.map(mapCouponRow);
       const spreadsheetConfig = configRows[0] ? {
         spreadsheetId: configRows[0].spreadsheet_id,
         spreadsheetUrl: configRows[0].spreadsheet_url,
@@ -71,7 +84,7 @@ async function startServer() {
         lastSyncedAt: null
       };
 
-      res.json({ packages, addons, bookings, spreadsheetConfig });
+      res.json({ packages, addons, bookings, coupons, spreadsheetConfig });
     } catch (error) {
       console.error("Error fetching database status:", error);
       res.status(500).json({ error: "Terjadi kesalahan internal server" });
@@ -201,6 +214,75 @@ async function startServer() {
     }
   });
 
+  // Coupons CRUD & Validation APIs
+  app.get("/api/coupons/validate/:code", async (req, res) => {
+    const { code } = req.params;
+    try {
+      const { rows } = await pool.query(
+        "SELECT * FROM coupons WHERE UPPER(code) = UPPER($1) AND is_active = TRUE",
+        [code]
+      );
+      if (rows.length === 0) {
+        return res.status(404).json({ valid: false, error: "Kode kupon tidak ditemukan atau tidak aktif" });
+      }
+      const coupon = mapCouponRow(rows[0]);
+      const today = new Date().toISOString().split("T")[0];
+      if (coupon.validUntil < today) {
+        return res.status(400).json({ valid: false, error: "Kode kupon telah kadaluarsa" });
+      }
+      res.json({ valid: true, coupon });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal memvalidasi kupon" });
+    }
+  });
+
+  app.post("/api/coupons", async (req, res) => {
+    const { code, discountPercent, validUntil, isActive } = req.body;
+    if (!code || discountPercent === undefined || !validUntil) {
+      return res.status(400).json({ error: "Missing required properties" });
+    }
+    try {
+      await pool.query(
+        "INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ($1, $2, $3, $4)",
+        [code.toUpperCase().trim(), Number(discountPercent), validUntil, isActive !== undefined ? isActive : true]
+      );
+      res.json({ success: true, coupon: { code: code.toUpperCase().trim(), discountPercent, validUntil, isActive: isActive !== undefined ? isActive : true } });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal membuat kupon baru" });
+    }
+  });
+
+  app.put("/api/coupons/:code", async (req, res) => {
+    const { code } = req.params;
+    const { discountPercent, validUntil, isActive } = req.body;
+    try {
+      await pool.query(
+        "UPDATE coupons SET discount_percent = $1, valid_until = $2, is_active = $3 WHERE UPPER(code) = UPPER($4)",
+        [Number(discountPercent), validUntil, isActive, code.toUpperCase().trim()]
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal memperbarui kupon" });
+    }
+  });
+
+  app.delete("/api/coupons/:code", async (req, res) => {
+    const { code } = req.params;
+    try {
+      const result = await pool.query("DELETE FROM coupons WHERE UPPER(code) = UPPER($1)", [code.toUpperCase().trim()]);
+      if (result.rowCount === 0) {
+        return res.status(404).json({ error: "Kupon tidak ditemukan" });
+      }
+      res.json({ success: true });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Gagal menghapus kupon" });
+    }
+  });
+
   // Bookings APIS
   app.get("/api/bookings", async (req, res) => {
     try {
@@ -244,15 +326,16 @@ async function startServer() {
           id, customer_name, customer_phone, customer_city, event_type, wedding_type, 
           event_date, venue_location, package_id, package_name, package_price, 
           addons, addon_details, days, payment_method, total_price, amount_paid, 
-          remaining_payment, status, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`,
+          remaining_payment, status, created_at, coupon_code, discount_amount
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
         [
           newBooking.id, newBooking.customerName, newBooking.customerPhone, newBooking.customerCity,
           newBooking.eventType, newBooking.weddingType || null, newBooking.eventDate, newBooking.venueLocation,
           newBooking.packageId, newBooking.packageName, newBooking.packagePrice,
           newBooking.addons, JSON.stringify(newBooking.addonDetails), newBooking.days ? JSON.stringify(newBooking.days) : null,
           newBooking.paymentMethod, newBooking.totalPrice, newBooking.amountPaid,
-          newBooking.remainingPayment, newBooking.status, newBooking.createdAt
+          newBooking.remainingPayment, newBooking.status, newBooking.createdAt,
+          newBooking.couponCode || null, newBooking.discountAmount || 0
         ]
       );
       res.json({ success: true, booking: newBooking });

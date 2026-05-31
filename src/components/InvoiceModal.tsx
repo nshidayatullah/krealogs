@@ -104,7 +104,8 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   }
 
   // Calculate Subtotal and Total
-  const subtotal = booking.totalPrice;
+  const discountAmount = booking.discountAmount || 0;
+  const subtotal = booking.totalPrice + discountAmount;
   const total = booking.totalPrice;
 
   return (
@@ -325,6 +326,23 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                         Rp {subtotal.toLocaleString("id-ID")}
                       </td>
                     </tr>
+
+                    {/* Shaded Diskon Row if discount exists */}
+                    {discountAmount > 0 && (
+                      <tr>
+                        <td 
+                          colSpan={3} 
+                          className="border-r border-b border-zinc-950 p-2.5 text-right font-black uppercase text-[10px] tracking-widest bg-[#E2EFDA] text-emerald-800"
+                        >
+                          DISKON ({booking.couponCode || "KUPON"})
+                        </td>
+                        <td 
+                          className="p-2.5 text-right font-bold font-mono text-[11px] bg-[#E2EFDA] text-emerald-800"
+                        >
+                          -Rp {discountAmount.toLocaleString("id-ID")}
+                        </td>
+                      </tr>
+                    )}
 
                     {/* Pink Shaded Lain-Lain Row */}
                     <tr>
