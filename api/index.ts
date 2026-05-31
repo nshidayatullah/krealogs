@@ -8,12 +8,22 @@ import { Request, Response, NextFunction } from "express";
 
 const { Pool } = pg;
 
+function getDatabaseUrl() {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  const host = process.env.PGHOST || "localhost";
+  const port = process.env.PGPORT || "5432";
+  const user = process.env.PGUSER || "postgres";
+  const password = process.env.PGPASSWORD || "postgres";
+  const database = process.env.PGDATABASE || "krealogs";
+  return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+}
+
 const sslConfig = process.env.NODE_ENV === "production"
   ? { ca: fs.existsSync("/etc/ssl/certs/ca-certificates.crt") ? fs.readFileSync("/etc/ssl/certs/ca-certificates.crt").toString() : undefined, rejectUnauthorized: true }
-  : { rejectUnauthorized: false };
+  : false;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: getDatabaseUrl(),
   ssl: sslConfig,
   max: 5,
   idleTimeoutMillis: 30000,
