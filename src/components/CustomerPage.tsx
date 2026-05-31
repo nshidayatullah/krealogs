@@ -777,14 +777,17 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                       >
                                         <div className="space-y-4">
                                           {/* Card Header */}
-                                          <div className="flex justify-between items-start gap-2">
-                                            <div className="space-y-1">
+                                          <div className="flex justify-between items-start gap-2 w-full">
+                                            <div className="space-y-1 flex-1">
                                               <h4 className="text-[13px] font-bold text-white tracking-tight flex items-center gap-1.5 flex-wrap">
                                                 {pkg.name}
                                                 {isPkgSelected && <span className="text-[8px] font-black bg-amber-500 text-black px-1.5 py-0.5 rounded-full uppercase tracking-widest">★ TERPILIH</span>}
                                               </h4>
                                               <p className="text-[10px] text-zinc-400 leading-normal line-clamp-2">{pkg.description}</p>
                                             </div>
+                                            <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${isPkgSelected ? "bg-amber-500 border-amber-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}>
+                                              {isPkgSelected && <Check className="w-2.5 h-2.5 stroke-3" />}
+                                            </span>
                                           </div>
 
                                           {/* Features Bullet List */}
@@ -804,13 +807,8 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                                         {/* Select Indicator Bar */}
                                         <div className="mt-4 pt-3.5 border-t border-zinc-900/60 flex items-center justify-between">
                                           <span className="text-[8px] text-zinc-500 uppercase tracking-wider block font-mono">{isPkgSelected ? "✓ Aktif Dipilih" : " Klik untuk memilih"}</span>
-                                          <div className="flex items-center space-x-3">
-                                            <div className="text-right whitespace-nowrap">
-                                              <span className="text-[11px] sm:text-[13px] font-extrabold text-amber-500 font-mono tracking-tight">Rp {pkg.price.toLocaleString("id-ID")}</span>
-                                            </div>
-                                            <span className={`w-4 h-4 rounded-full border flex items-center justify-center ${isPkgSelected ? "bg-amber-500 border-amber-500 text-black" : "border-zinc-800 group-hover:border-zinc-650"}`}>
-                                              {isPkgSelected && <Check className="w-2.5 h-2.5 stroke-3" />}
-                                            </span>
+                                          <div className="text-right whitespace-nowrap">
+                                            <span className="text-[11px] sm:text-[13px] font-extrabold text-amber-500 font-mono tracking-tight">Rp {pkg.price.toLocaleString("id-ID")}</span>
                                           </div>
                                         </div>
                                       </div>
