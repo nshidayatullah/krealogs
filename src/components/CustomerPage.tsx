@@ -535,10 +535,6 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
             <h2 className="text-xl font-bold text-white tracking-tight">Isi Formulir & Rancang Biaya</h2>
             <p className="text-xs text-zinc-400 mt-1">Isi rincian acara Anda untuk mengonfirmasi ketersediaan videografer.</p>
           </div>
-          <div className="flex items-center space-x-2 text-[11px] text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full font-mono">
-            <span>Metode Transaksi:</span>
-            <strong className="text-amber-500 font-bold uppercase font-sans">DP 50% atau Lunas</strong>
-          </div>
         </div>
 
         {dbLoading ? (
