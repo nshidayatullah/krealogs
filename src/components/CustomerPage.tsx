@@ -703,7 +703,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                               <button
                                 type="button"
                                 onClick={() => removeBookingDay(bd.id)}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 bg-rose-500 hover:bg-rose-400 text-white rounded-xl text-[10px] font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
                               >
                                 Hapus Hari Ini
                               </button>
