@@ -158,8 +158,9 @@ const S: Record<string, React.CSSProperties> = {
     width: 794,
     maxWidth: "100%",
     display: "flex",
-    justifyContent: "flex-end",
+    justifyContent: "center",
     gap: 10,
+    marginTop: 14,
     marginBottom: 14,
   },
   btn: {
