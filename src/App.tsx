@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import CustomerPage from "./components/CustomerPage";
-import AdminPage from "./components/AdminPage";
 import AdminLogin from "./components/AdminLogin";
+import AdminApproval from "./components/AdminApproval";
+import AdminPayment from "./components/AdminPayment";
 import InvoiceModal from "./components/InvoiceModal";
 import Toast from "./components/Toast";
 import { Booking } from "./types";
@@ -107,18 +108,28 @@ function AppContent() {
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
+              <Navigate to="/admin/approval" replace />
             ) : (
               <AdminLogin onLoginSuccess={handleLoginSuccess} />
             )
           } />
-          <Route path="/admin" element={
+          <Route path="/admin" element={<Navigate to="/admin/approval" replace />} />
+          <Route path="/admin/approval" element={
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
+              <AdminApproval onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
             ) : (
-              <AdminLogin onLoginSuccess={handleLoginSuccess} />
+              <Navigate to="/admin/login" replace />
+            )
+          } />
+          <Route path="/admin/payment" element={
+            authLoading ? (
+              <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
+            ) : isAdminAuthenticated ? (
+              <AdminPayment onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
+            ) : (
+              <Navigate to="/admin/login" replace />
             )
           } />
         </Routes>
