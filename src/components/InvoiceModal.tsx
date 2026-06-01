@@ -803,7 +803,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   };
 
   return (
-    <div style={S.overlay} onMouseDown={(e) => e.target === e.target.currentTarget && onClose()}>
+    <div style={S.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <style>{SCOPED_CSS}</style>
 
       {/* ===== INVOICE (Multi-page) ===== */}
