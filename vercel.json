@@ -24,7 +24,19 @@
       "dest": "api/index.ts"
     },
     {
-      "src": "/(.*)",
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/admin(/.*)?",
+      "dest": "/index.html"
+    },
+    {
+      "src": "/",
       "dest": "/index.html"
     }
   ]
