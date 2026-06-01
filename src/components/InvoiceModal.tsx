@@ -448,7 +448,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
         qty: 1,
         meta: dayMeta(d as BookingDay & Record<string, any>),
       });
-      toAddons((d as any).addonDetails).forEach((a) => rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] }));
+      Object.entries(toAddons((d as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => { const k = a.name; if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 }; acc[k].qty++; return acc; }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
     });
   } else {
     rows.push({
@@ -457,7 +457,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       qty: 1,
       meta: bookingMeta(),
     });
-    toAddons((booking as any).addonDetails).forEach((a) => rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] }));
+    Object.entries(toAddons((booking as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => { const k = a.name; if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 }; acc[k].qty++; return acc; }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
   }
 
   const lineSum = rows.reduce((s, r) => s + r.qty * r.price, 0);
