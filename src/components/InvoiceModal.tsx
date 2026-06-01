@@ -330,8 +330,8 @@ const S: Record<string, React.CSSProperties> = {
   sign: { textAlign: "center", minWidth: 240 },
   signInner: { position: "relative", display: "inline-block" },
   signContent: { position: "relative", zIndex: 2 },
-  stampImg: { position: "absolute", left: 0, top: "50%", transform: "translateY(-70%) translateX(-33%) rotate(-20deg)", height: 110, opacity: 0.25, pointerEvents: "none", zIndex: 1 },
-  signImg: { height: 80, marginBottom: -30, objectFit: "contain", opacity: 0.85, display: "block", marginLeft: "auto", marginRight: "auto" },
+  stampImg: { position: "absolute", left: 0, top: "50%", transform: "translateY(-50%) translateX(-33%) rotate(-20deg)", height: 110, opacity: 0.25, pointerEvents: "none", zIndex: 1 },
+  signImg: { height: 125, marginBottom: -48, objectFit: "contain", opacity: 0.85, display: "block", marginLeft: "auto", marginRight: "auto" },
   signName: { fontFamily: '"Hanken Grotesk", sans-serif', fontSize: 13, fontWeight: 400, marginBottom: 4, whiteSpace: "nowrap" },
   signRule: { width: "100%", height: 1, background: PALETTE.lineStrong, margin: "0 auto 6px" },
   signRole: { fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", color: PALETTE.inkSoft, fontWeight: 600 },
@@ -373,7 +373,8 @@ const SCOPED_CSS = `
 @media print {
   @page { size: A4; margin: 0; }
   html, body { margin: 0; padding: 0; background: #fff; }
-  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; }
+  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; }
+  .inv-root:last-child { page-break-after: auto; }
   .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 `;
@@ -464,12 +465,176 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   const lineSum = rows.reduce((s, r) => s + r.qty * r.price, 0);
   const discount = booking.discountAmount || 0;
   const total = typeof booking.totalPrice === "number" ? booking.totalPrice : lineSum - discount;
-  const subtotal = total + discount; // reconciles arithmetic on the page
+  const subtotal = total + discount;
   const amountPaid = booking.amountPaid || 0;
   const remaining = typeof booking.remainingPayment === "number" ? booking.remainingPayment : Math.max(total - amountPaid, 0);
   const dpPct = total > 0 ? Math.round((amountPaid / total) * 100) : 0;
   const showDP = remaining > 0 && amountPaid > 0;
   const showVoucher = !!booking.couponCode;
+
+  // Multi-page: max ~14 rows per page before overflow
+  const ROWS_PER_PAGE = 14;
+  const pageRows: Row[][] = [];
+  for (let i = 0; i < rows.length; i += ROWS_PER_PAGE) {
+    pageRows.push(rows.slice(i, i + ROWS_PER_PAGE));
+  }
+  const isMultiPage = pageRows.length > 1;
+
+  function renderPage(pageIndex: number, pageRowsSlice: Row[], isLastPage: boolean) {
+    return (
+      <div className="inv-root" style={{ ...S.root, marginTop: pageIndex > 0 ? 24 : 0 }} key={pageIndex}>
+        {paymentStatus === "paid" && isLastPage && (
+          <img src="/Stempel Lunas.png" alt="Lunas" className="inv-stamp-full" />
+        )}
+        {approvalStatus === "pending" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>PENDING</div>
+        )}
+        {approvalStatus === "rejected" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(180,40,40,0.12)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DITOLAK</div>
+        )}
+        {paymentStatus === "dp_paid" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DP TERBAYAR</div>
+        )}
+
+        {/* band */}
+        <div style={{ ...S.band, paddingBottom: isLastPage ? 24 : 18 }}>
+          <div style={S.bandTop}>
+            <div>
+              <img style={S.logo} src={LOGO_URL} alt="Krealogs" />
+              <div style={S.tag}>Wedding &amp; Event Content Creator</div>
+            </div>
+            <div style={S.word}>INVOICE</div>
+          </div>
+          <div style={S.bandMeta}>
+            <div style={S.bm}>
+              <div style={S.bmK}>Invoice No.</div>
+              <div className="inv-num" style={S.bmV}>{invoiceNumber(booking)}</div>
+            </div>
+            <div style={S.bm}>
+              <div style={S.bmK}>Tanggal</div>
+              <div style={S.bmV}>{formatDateID(booking.createdAt)}</div>
+            </div>
+            {isMultiPage && (
+              <div style={S.bm}>
+                <div style={S.bmK}>Halaman</div>
+                <div style={S.bmV}>{pageIndex + 1} / {pageRows.length}</div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* body */}
+        <div style={{ ...S.body, paddingTop: isLastPage ? 24 : 18 }}>
+          {pageIndex === 0 && (
+            <div style={S.parties}>
+              <div style={S.cardDark}>
+                <div style={S.plabel}>Ditagihkan Kepada</div>
+                <div style={S.pname}>{booking.customerName}</div>
+                {booking.customerPhone && <div style={S.pline}>{booking.customerPhone}</div>}
+                {booking.customerCity && <div style={S.pline}>{booking.customerCity}</div>}
+              </div>
+              <div style={S.card}>
+                <div style={S.plabel}>Dari</div>
+                <div style={S.pname}>Krealogs</div>
+                <div style={S.pline}>Banjarmasin, Indonesia</div>
+                {config.contactPhone && <div style={S.pline}>{config.contactPhone}</div>}
+                {config.contactEmail && <div style={S.pline}>{config.contactEmail}</div>}
+              </div>
+            </div>
+          )}
+
+          {/* table */}
+          <div>
+            <div style={S.thead}>
+              <div style={S.th}>Deskripsi</div>
+              <div style={{ ...S.th, ...S.thC }}>Qty</div>
+              <div style={{ ...S.th, ...S.thR }}>Harga</div>
+              <div style={{ ...S.th, ...S.thR }}>Jumlah</div>
+            </div>
+            {pageRowsSlice.map((r, i) => (
+              <div className="inv-row" style={S.row} key={i}>
+                <div>
+                  <div style={S.iname}>{r.name}</div>
+                  {r.meta.length > 0 && (
+                    <div style={S.imeta}>{r.meta.map((m, j) => (<div key={j}>{m}</div>))}</div>
+                  )}
+                </div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellC }}>{r.qty}</div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellR }}>{rp(r.price)}</div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellR, ...S.cellB }}>{rp(r.qty * r.price)}</div>
+              </div>
+            ))}
+          </div>
+
+          {isLastPage && (
+            <>
+              {/* totals */}
+              <div style={S.totals}>
+                {showVoucher ? (
+                  <div className="inv-voucher" style={S.voucher}>
+                    <div style={S.voucherStub}>
+                      {discount > 0 && subtotal > 0 ? (
+                        <span style={S.voucherPct}>{Math.round((discount / subtotal) * 100)}%</span>
+                      ) : (
+                        <span style={{ ...S.voucherPct, fontSize: 13 }}>PROMO</span>
+                      )}
+                      <span style={S.voucherOff}>OFF</span>
+                    </div>
+                    <div className="inv-voucher-body" style={S.voucherBody}>
+                      <span style={S.voucherTag}>Kode Voucher</span>
+                      <span style={S.voucherCode}>{booking.couponCode}</span>
+                      <span style={S.voucherNote}>Diskon diterapkan</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div />
+                )}
+                <div style={S.totalsInner}>
+                  <div style={S.trow}><span>Subtotal</span><span className="inv-num" style={S.trowV}>{rp(subtotal)}</span></div>
+                  {discount > 0 && (
+                    <div style={S.trow}><span>Diskon{booking.couponCode ? ` · ${booking.couponCode}` : ""}</span><span className="inv-num" style={S.trowDisc}>&minus;{rp(discount)}</span></div>
+                  )}
+                  <div style={S.tbox}><span style={S.tboxK}>Total</span><span className="inv-num" style={S.tboxV}>{rp(total)}</span></div>
+                  {showDP && (
+                    <div style={S.dp}>
+                      <div style={S.dpDue}><span style={S.dpLbl}>DP Terbayar ({dpPct}%)</span><span className="inv-num" style={S.dpAmt}>{rp(amountPaid)}</span></div>
+                      <div style={S.dpRest}><span>Sisa Pelunasan</span><span className="inv-num" style={S.dpRestV}>{rp(remaining)}</span></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* footer */}
+              <div style={S.foot}>
+                <div style={S.pay}>
+                  <div style={S.payLabel}>Metode Pembayaran</div>
+                  <div style={S.payGrid}>
+                    <span style={S.payK}>Bank</span>
+                    <span style={S.payVPlain}>{config.bankName}</span>
+                    <span style={S.payK}>No. Rekening</span>
+                    <span className="inv-num" style={S.payVMono}>{config.bankAccount}</span>
+                    <span style={S.payK}>Atas Nama</span>
+                    <span style={S.payVPlain}>{config.bankAccountName}</span>
+                  </div>
+                </div>
+                <div style={S.sign}>
+                  <div style={S.signInner}>
+                    <img src="/Stempel Krealogs.png" alt="Stempel" style={S.stampImg} />
+                    <div style={S.signContent}>
+                      <img src="/Tandatangan.png" alt="Tanda tangan" style={S.signImg} />
+                      <div style={S.signName}>{config.signatureName}</div>
+                      <div style={S.signRule} />
+                      <div style={S.signRole}>{config.signatureTitle}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   /* ----- print in a new tab ----- */
   const handlePrint = () => {
@@ -511,166 +676,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
         </button>
       </div>
 
-      {/* ===== INVOICE (Modern Corporate) ===== */}
-      <div className="inv-root" style={S.root} ref={invoiceRef}>
-        {paymentStatus === "paid" && (
-          <img src="/Stempel Lunas.png" alt="Lunas" className="inv-stamp-full" />
-        )}
-        {approvalStatus === "pending" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>PENDING</div>
-        )}
-        {approvalStatus === "rejected" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(180,40,40,0.12)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DITOLAK</div>
-        )}
-        {paymentStatus === "dp_paid" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DP TERBAYAR</div>
-        )}
-
-        {/* band */}
-        <div style={S.band}>
-          <div style={S.bandTop}>
-            <div>
-              <img style={S.logo} src={LOGO_URL} alt="Krealogs" />
-              <div style={S.tag}>Wedding &amp; Event Content Creator</div>
-            </div>
-            <div style={S.word}>INVOICE</div>
-          </div>
-          <div style={S.bandMeta}>
-            <div style={S.bm}>
-              <div style={S.bmK}>Invoice No.</div>
-              <div className="inv-num" style={S.bmV}>{invoiceNumber(booking)}</div>
-            </div>
-            <div style={S.bm}>
-              <div style={S.bmK}>Tanggal</div>
-              <div style={S.bmV}>{formatDateID(booking.createdAt)}</div>
-            </div>
-          </div>
-        </div>
-
-        {/* body */}
-        <div style={S.body}>
-          <div style={S.parties}>
-            <div style={S.cardDark}>
-              <div style={S.plabel}>Ditagihkan Kepada</div>
-              <div style={S.pname}>{booking.customerName}</div>
-              {booking.customerPhone && <div style={S.pline}>{booking.customerPhone}</div>}
-              {booking.customerCity && <div style={S.pline}>{booking.customerCity}</div>}
-            </div>
-            <div style={S.card}>
-              <div style={S.plabel}>Dari</div>
-              <div style={S.pname}>Krealogs</div>
-              <div style={S.pline}>Banjarmasin, Indonesia</div>
-              {config.contactPhone && <div style={S.pline}>{config.contactPhone}</div>}
-              {config.contactEmail && <div style={S.pline}>{config.contactEmail}</div>}
-            </div>
-          </div>
-
-          {/* table */}
-          <div>
-            <div style={S.thead}>
-              <div style={S.th}>Deskripsi</div>
-              <div style={{ ...S.th, ...S.thC }}>Qty</div>
-              <div style={{ ...S.th, ...S.thR }}>Harga</div>
-              <div style={{ ...S.th, ...S.thR }}>Jumlah</div>
-            </div>
-            {rows.map((r, i) => (
-              <div className="inv-row" style={S.row} key={i}>
-                <div>
-                  <div style={S.iname}>{r.name}</div>
-                  {r.meta.length > 0 && (
-                    <div style={S.imeta}>
-                      {r.meta.map((m, j) => (
-                        <div key={j}>{m}</div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellC }}>{r.qty}</div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR }}>{rp(r.price)}</div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR, ...S.cellB }}>{rp(r.qty * r.price)}</div>
-              </div>
-            ))}
-          </div>
-
-          {/* totals */}
-          <div style={S.totals}>
-            {showVoucher ? (
-              <div className="inv-voucher" style={S.voucher}>
-                <div style={S.voucherStub}>
-                  {discount > 0 && subtotal > 0 ? (
-                    <span style={S.voucherPct}>{Math.round((discount / subtotal) * 100)}%</span>
-                  ) : (
-                    <span style={{ ...S.voucherPct, fontSize: 13 }}>PROMO</span>
-                  )}
-                  <span style={S.voucherOff}>OFF</span>
-                </div>
-                <div className="inv-voucher-body" style={S.voucherBody}>
-                  <span style={S.voucherTag}>Kode Voucher</span>
-                  <span style={S.voucherCode}>{booking.couponCode}</span>
-                  <span style={S.voucherNote}>Diskon diterapkan</span>
-                </div>
-              </div>
-            ) : (
-              <div />
-            )}
-
-            <div style={S.totalsInner}>
-              <div style={S.trow}>
-                <span>Subtotal</span>
-                <span className="inv-num" style={S.trowV}>{rp(subtotal)}</span>
-              </div>
-              {discount > 0 && (
-                <div style={S.trow}>
-                  <span>Diskon{booking.couponCode ? ` · ${booking.couponCode}` : ""}</span>
-                  <span className="inv-num" style={S.trowDisc}>&minus;{rp(discount)}</span>
-                </div>
-              )}
-              <div style={S.tbox}>
-                <span style={S.tboxK}>Total</span>
-                <span className="inv-num" style={S.tboxV}>{rp(total)}</span>
-              </div>
-
-              {showDP && (
-                <div style={S.dp}>
-                  <div style={S.dpDue}>
-                    <span style={S.dpLbl}>DP Terbayar ({dpPct}%)</span>
-                    <span className="inv-num" style={S.dpAmt}>{rp(amountPaid)}</span>
-                  </div>
-                  <div style={S.dpRest}>
-                    <span>Sisa Pelunasan</span>
-                    <span className="inv-num" style={S.dpRestV}>{rp(remaining)}</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* footer */}
-          <div style={S.foot}>
-            <div style={S.pay}>
-              <div style={S.payLabel}>Metode Pembayaran</div>
-              <div style={S.payGrid}>
-                <span style={S.payK}>Bank</span>
-                <span style={S.payVPlain}>{config.bankName}</span>
-                <span style={S.payK}>No. Rekening</span>
-                <span className="inv-num" style={S.payVMono}>{config.bankAccount}</span>
-                <span style={S.payK}>Atas Nama</span>
-                <span style={S.payVPlain}>{config.bankAccountName}</span>
-              </div>
-            </div>
-            <div style={S.sign}>
-              <div style={S.signInner}>
-                <img src="/Stempel Krealogs.png" alt="Stempel" style={S.stampImg} />
-                <div style={S.signContent}>
-                  <img src="/Tandatangan.png" alt="Tanda tangan" style={S.signImg} />
-                  <div style={S.signName}>{config.signatureName}</div>
-                  <div style={S.signRule} />
-                  <div style={S.signRole}>{config.signatureTitle}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* ===== INVOICE (Multi-page) ===== */}
+      <div ref={invoiceRef}>
+        {pageRows.map((pageSlice, i) => renderPage(i, pageSlice, i === pageRows.length - 1))}
       </div>
     </div>
   );
