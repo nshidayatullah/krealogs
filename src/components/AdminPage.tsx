@@ -533,16 +533,10 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-sans">Menu Admin</span>
         </div>
         
-        <button onClick={() => { setActiveTab("approval"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "approval" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+        <button onClick={() => { setActiveTab("bookings"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "bookings" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span className="flex-1">Persetujuan</span>
-          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "approval" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
-        </button>
-
-        <button onClick={() => { setActiveTab("bookings"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "bookings" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
-          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <span className="flex-1">Pembayaran</span>
-          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "bookings" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
+          <span className="flex-1">Pemesanan</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "bookings" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
         </button>
 
         <div className="border-t border-zinc-900 my-1" />
