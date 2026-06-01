@@ -765,31 +765,39 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  /* ----- print in a new tab ----- */
+  /* ----- print without new tab ----- */
   const handlePrint = () => {
     const node = invoiceRef.current;
     if (!node) return;
-    const w = window.open("", "_blank", "width=900,height=1200");
-    if (!w) return;
-    w.document.write(
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "none";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    document.body.appendChild(iframe);
+    const doc = iframe.contentWindow?.document;
+    if (!doc) { document.body.removeChild(iframe); return; }
+    doc.open();
+    doc.write(
       `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
         `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
         `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
         `</style>` +
         `</head><body>${node.outerHTML}</body></html>`,
     );
-    w.document.close();
+    doc.close();
     const trigger = () => {
-      w.focus();
-      w.print();
-      setTimeout(() => w.close(), 300);
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 500);
     };
-    // Wait for fonts/images before printing.
-    const fonts = (w.document as any).fonts;
+    const fonts = (doc as any).fonts;
     if (fonts && fonts.ready) {
       fonts.ready.then(() => setTimeout(trigger, 250)).catch(() => setTimeout(trigger, 600));
     } else {
-      w.onload = () => setTimeout(trigger, 400);
+      iframe.onload = () => setTimeout(trigger, 400);
       setTimeout(trigger, 800);
     }
   };
