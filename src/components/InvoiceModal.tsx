@@ -793,7 +793,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
 
       <div style={S.toolbar}>
         <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handlePrint}>
-          Cetak / Simpan PDF
+          Unduh PDF
         </button>
         <button type="button" style={{ ...S.btn, ...S.btnClose }} onClick={onClose}>
           Tutup
