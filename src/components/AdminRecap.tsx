@@ -114,7 +114,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
                     <td className="py-3 font-medium">{b.customerName}</td>
                     <td className="py-3 capitalize">{b.eventType === "wedding" ? `Wedding${b.weddingType ? " ("+b.weddingType+")" : ""}` : b.eventType}</td>
                     <td className="py-3">{formatEventDate(b.eventDate, { day: "numeric", month: "short", year: "numeric" })}</td>
-                    <td className="py-3 font-medium truncate max-w-[120px]" title={b.packageName}>{b.packageName}</td>
+                    <td className="py-3 font-medium truncate max-w-30" title={b.packageName}>{b.packageName}</td>
                     <td className="py-3 text-right font-sans font-bold text-white">Rp {b.totalPrice.toLocaleString("id-ID")}</td>
                     <td className="py-3 text-center">
                       <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold font-sans ${b.approvalStatus === "rejected" ? "bg-red-50 text-red-600 border border-red-200" : b.approvalStatus === "pending" ? "bg-yellow-50 text-yellow-700 border border-yellow-200" : b.paymentStatus === "paid" ? "bg-green-50 text-green-700 border border-green-200" : b.paymentStatus === "dp_paid" ? "bg-sky-50 text-sky-700 border border-sky-200" : "bg-gray-50 text-gray-600 border border-gray-200"}`}>
