@@ -472,7 +472,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
       return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 uppercase tracking-widest">Ditolak</span>;
     }
     if (b.paymentStatus === "paid") {
-      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase tracking-widest">Lunas (Kwitansi)</span>;
+      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase tracking-widest">Lunas</span>;
     }
     if (b.paymentStatus === "dp_paid") {
       return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-700 border border-amber-550/30 uppercase tracking-widest">Invoice (DP Terbayar)</span>;
@@ -616,7 +616,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
                           className="px-3 py-2 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1"
                         >
                           <FileText className="w-3.5 h-3.5" />
-                          Kwitansi Pelunasan
+                          Simpan Kwitansi
                         </button>
                       ) : (
                         <button onClick={() => onOpenInvoice(b)} className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1">
