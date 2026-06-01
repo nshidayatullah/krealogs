@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+!PRD.md
+dns-zone.txt
