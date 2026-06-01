@@ -399,14 +399,28 @@ const SCOPED_CSS = `
   white-space: nowrap;
 }
 .inv-stamp-full { position: absolute; top: 50%; left: 55%; transform: translate(-50%, calc(-50% + 100px)) rotate(-15deg); height: 200px; opacity: 0.15; pointer-events: none; z-index: 5; }
+
 @media print {
   @page { size: A4; margin: 0mm !important; }
-  html, body { margin: 0; padding: 0; background: #fff; }
-  .inv-overlay { padding: 0 !important; align-items: flex-start !important; }
-  .inv-toolbar { display: none !important; }
-  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; transform: none !important; margin: 0 !important; }
+  html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; min-height: auto !important; }
+  body > * { display: none !important; }
+  .inv-root, .inv-root * { display: revert !important; visibility: visible !important; }
+  .inv-overlay, .inv-toolbar { display: none !important; }
+  .inv-root { box-shadow: none !important; width: 794px !important; min-height: 1123px !important; max-width: 794px !important; page-break-after: always; transform: none !important; margin: 0 auto !important; position: static !important; overflow: visible !important; }
   .inv-root:last-child { page-break-after: auto; }
   .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+@media screen and (min-width: 821px) and (max-height: 900px) {
+  .inv-root { transform-origin: top center; transform: scale(0.25); margin-bottom: -420px !important; }
+  .inv-root + .inv-root { margin-top: -420px !important; }
+}
+@media screen and (max-width: 820px) {
+  .inv-root { transform-origin: top center; transform: scale(0.55); width: 100% !important; min-height: auto !important; margin-bottom: -40px !important; }
+  .inv-root + .inv-root { margin-top: 2px !important; }
+}
+@media screen and (max-width: 500px) {
+  .inv-root { transform-origin: top center; transform: scale(0.42); margin-bottom: -40px !important; }
+  .inv-root + .inv-root { margin-top: 2px !important; }
 }
 @media screen and (max-width: 820px) {
   .inv-overlay { padding: 4px !important; justify-content: flex-start !important; }
