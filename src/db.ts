@@ -1,11 +1,10 @@
 import pg from "pg";
-import fs from "fs";
 
 const { Pool } = pg;
 
-const sslConfig = process.env.NODE_ENV === "production"
-  ? { ca: fs.existsSync("/etc/ssl/certs/ca-certificates.crt") ? fs.readFileSync("/etc/ssl/certs/ca-certificates.crt").toString() : undefined, rejectUnauthorized: true }
-  : { rejectUnauthorized: false };
+const sslConfig = process.env.NODE_ENV === "production" || process.env.DATABASE_URL?.includes("neon.tech")
+  ? { rejectUnauthorized: false }
+  : false;
 
 let poolInstance: pg.Pool | null = null;
 
@@ -31,4 +30,3 @@ export const pool = {
     return Promise.resolve();
   }
 } as any;
-

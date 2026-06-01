@@ -328,10 +328,6 @@ const S: Record<string, React.CSSProperties> = {
   payVPlain: { fontWeight: 600 },
   payVMono: { fontWeight: 600, fontFamily: '"Space Mono", monospace' },
   sign: { textAlign: "center", minWidth: 290 },
-  signInner: { position: "relative", display: "inline-block" },
-  signContent: { position: "relative", zIndex: 2 },
-  stampImg: { position: "absolute", left: 0, top: "50%", transform: "translateY(-70%) translateX(-33%) rotate(-20deg)", height: 135, opacity: 0.25, pointerEvents: "none", zIndex: 1 },
-  signImg: { height: 100, marginBottom: -40, objectFit: "contain", opacity: 0.85, display: "block", marginLeft: "auto", marginRight: "auto" },
   signName: { fontFamily: '"Hanken Grotesk", sans-serif', fontSize: 15, fontWeight: 400, marginBottom: 6, whiteSpace: "nowrap" },
   signRule: { width: "100%", height: 1, background: PALETTE.lineStrong, margin: "0 auto 8px" },
   signRole: { fontSize: 9.5, letterSpacing: ".14em", textTransform: "uppercase", color: PALETTE.inkSoft, fontWeight: 600 },
@@ -369,7 +365,6 @@ const SCOPED_CSS = `
   padding: 18px 46px; border-radius: 18px; transform: rotate(-18deg); text-transform: uppercase;
   white-space: nowrap;
 }
-.inv-stamp-full { position: absolute; top: 50%; left: 55%; transform: translate(-50%, calc(-50% + 100px)) rotate(-15deg); height: 200px; opacity: 0.15; pointer-events: none; z-index: 5; }
 @media print {
   @page { size: A4; margin: 0; }
   html, body { margin: 0; padding: 0; background: #fff; }
@@ -512,8 +507,10 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
 
       {/* ===== INVOICE (Modern Corporate) ===== */}
       <div className="inv-root" style={S.root} ref={invoiceRef}>
-        {status === "paid" && (
-          <img src="/Stempel Lunas.png" alt="Lunas" className="inv-stamp-full" />
+        {watermark && (
+          <div className="inv-watermark" aria-hidden="true">
+            <span>{watermark}</span>
+          </div>
         )}
 
         {/* band */}
@@ -649,15 +646,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
               </div>
             </div>
             <div style={S.sign}>
-              <div style={S.signInner}>
-                <img src="/Stempel Krealogs.png" alt="Stempel" style={S.stampImg} />
-                <div style={S.signContent}>
-                  <img src="/Tandatangan.png" alt="Tanda tangan" style={S.signImg} />
-                  <div style={S.signName}>{config.signatureName}</div>
-                  <div style={S.signRule} />
-                  <div style={S.signRole}>{config.signatureTitle}</div>
-                </div>
-              </div>
+              <div style={S.signName}>{config.signatureName}</div>
+              <div style={S.signRule} />
+              <div style={S.signRole}>{config.signatureTitle}</div>
             </div>
           </div>
         </div>

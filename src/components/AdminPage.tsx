@@ -451,28 +451,28 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         
         <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">TOTAL BOOKING</span>
-          <p className="text-3xl font-mono font-extrabold text-white mt-1.5">{bookings.length}</p>
+          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide block font-sans">TOTAL BOOKING</span>
+          <p className="text-3xl font-sans font-bold text-white mt-1.5">{bookings.length}</p>
         </div>
 
         <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-widest block font-mono">REVIEW PENDING</span>
-          <p className="text-3xl font-mono font-extrabold text-amber-500 mt-1.5">
+          <span className="text-xs font-bold text-amber-500/80 uppercase tracking-wide block font-sans">REVIEW PENDING</span>
+          <p className="text-3xl font-sans font-bold text-amber-500 mt-1.5">
             {bookings.filter((b) => b.status === "pending").length}
           </p>
         </div>
 
         <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest block font-mono">APPROVED ORDERS</span>
-          <p className="text-3xl font-mono font-extrabold text-emerald-400 mt-1.5">
+          <span className="text-xs font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">APPROVED ORDERS</span>
+          <p className="text-3xl font-sans font-bold text-emerald-400 mt-1.5">
             {bookings.filter((b) => ["approved", "dp_paid", "paid"].includes(b.status)).length}
           </p>
         </div>
 
         <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg flex items-center justify-between">
           <div className="space-y-1">
-            <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-widest block font-mono">ESTIMASI REVENUE</span>
-            <p className="text-2xl font-mono font-extrabold text-[#f3f4f6]" title="Total nilai kontrak pesanan disetujui">
+            <span className="text-xs font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">ESTIMASI REVENUE</span>
+            <p className="text-2xl font-sans font-bold text-[#f3f4f6]" title="Total nilai kontrak pesanan disetujui">
               Rp {bookings
                 .filter((b) => ["approved", "dp_paid", "paid"].includes(b.status))
                 .reduce((sum, b) => sum + b.totalPrice, 0)
@@ -530,7 +530,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       </section>
 
       {dbLoading ? (
-        <div className="py-20 text-center text-zinc-500 text-xs font-mono">Mengakses data administratif...</div>
+        <div className="py-20 text-center text-zinc-500 text-xs font-sans">Mengakses data administratif...</div>
       ) : (
         <div className="bg-[#0c0c0e] rounded-3xl border border-zinc-850 shadow-2xl p-4 md:p-8">
           
@@ -579,7 +579,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-zinc-850 text-[10px] font-mono uppercase text-zinc-500 bg-black/20">
+                      <tr className="border-b border-zinc-850 text-xs font-sans uppercase text-zinc-500 bg-black/20">
                         <th className="py-3 px-4 rounded-l">Klien / Kontak</th>
                         <th className="py-3 px-4">Rincian Acara</th>
                         <th className="py-3 px-4">Layanan / Paket</th>
@@ -592,32 +592,32 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       {filteredBookings.map((b) => ( b && (
                         <tr key={b.id} className="hover:bg-zinc-900/10 transition">
                           <td className="py-4 px-4 space-y-1">
-                            <span className="font-mono text-[10px] bg-zinc-900 border border-zinc-800 font-bold px-2 py-0.5 rounded text-zinc-350 block w-fit">
+                            <span className="font-sans text-xs bg-zinc-900 border border-zinc-800 font-bold px-2 py-0.5 rounded text-zinc-350 block w-fit">
                               {b.id}
                             </span>
                             <span className="font-bold text-white block mt-1.5">{b.customerName}</span>
-                            <span className="text-zinc-400 block font-mono">{b.customerPhone}</span>
-                            <span className="text-[10px] text-zinc-500 block">{b.customerCity}</span>
+                            <span className="text-zinc-400 block font-sans">{b.customerPhone}</span>
+                            <span className="text-xs text-zinc-500 block">{b.customerCity}</span>
                           </td>
                           <td className="py-4 px-4 space-y-1">
-                            <span className="text-[10px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded block w-fit font-mono">
+                            <span className="text-xs font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded block w-fit font-sans">
                               {b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event"}
                             </span>
-                            <span className="text-zinc-200 block font-light">
+                            <span className="text-zinc-200 block font-normal">
                               {formatEventDate(b.eventDate, {
                                 year: "numeric",
                                 month: "short",
                                 day: "numeric"
                               })}
                             </span>
-                            <span className="text-[11px] text-zinc-450 block leading-tight truncate max-w-[200px]">{b.venueLocation}</span>
+                            <span className="text-xs text-zinc-450 block leading-tight truncate max-w-[200px]">{b.venueLocation}</span>
                           </td>
                           <td className="py-4 px-4 space-y-1.5">
-                            <span className="font-semibold text-white block">{b.packageName}</span>
+                            <span className="font-medium text-white block">{b.packageName}</span>
                             {b.addonDetails && b.addonDetails.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {b.addonDetails.map((a) => (
-                                  <span key={a.id} className="text-[9px] bg-zinc-900 text-zinc-400 border border-zinc-850 px-1.5 py-0.5 rounded font-mono">
+                                  <span key={a.id} className="text-xs bg-zinc-900 text-zinc-400 border border-zinc-850 px-1.5 py-0.5 rounded font-sans">
                                     +{a.name}
                                   </span>
                                 ))}
@@ -625,37 +625,37 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                             )}
                           </td>
                           <td className="py-4 px-4 text-right space-y-1">
-                            <span className="font-mono font-medium text-amber-400 block">
+                            <span className="font-sans font-medium text-amber-400 block">
                               Rp {b.totalPrice.toLocaleString("id-ID")}
                             </span>
-                            <span className="text-[10px] text-emerald-400 block">
+                            <span className="text-xs text-emerald-400 block">
                               Masuk: Rp {b.amountPaid.toLocaleString("id-ID")} ({b.amountPaid < b.totalPrice ? `DP ${Math.round((b.amountPaid / b.totalPrice) * 100)}%` : "Lunas"})
                             </span>
                             {b.amountPaid < b.totalPrice && (
-                              <span className="text-[10px] text-zinc-400 block">
+                              <span className="text-xs text-zinc-400 block">
                                 Sisa tagihan: Rp {b.remainingPayment.toLocaleString("id-ID")}
                               </span>
                             )}
                           </td>
                           <td className="py-4 px-4 text-center">
                             {b.status === "paid" ? (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-emerald-500 text-white uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500 text-white uppercase tracking-wide">
                                 LUNAS (RECEIPT)
                               </span>
                             ) : b.status === "dp_paid" ? (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-blue-600 text-white uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-blue-600 text-white uppercase tracking-wide">
                                 DP PAID (INVOICE)
                               </span>
                             ) : b.status === "approved" ? (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-amber-500 text-black uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-amber-500 text-black uppercase tracking-wide">
                                 INVOICE (UNPAID)
                               </span>
                             ) : b.status === "rejected" ? (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-wide">
                                 REJECTED
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 uppercase tracking-widest">
+                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 uppercase tracking-wide">
                                 PENDING
                               </span>
                             )}
@@ -666,7 +666,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                                 <>
                                   <button
                                     onClick={() => handleBookingStatus(b.id, "approved")}
-                                    className="p-1 px-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    className="p-1 px-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
                                     title="Setujui Booking"
                                   >
                                     <Check className="w-3 h-3" />
@@ -674,7 +674,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                                   </button>
                                   <button
                                     onClick={() => handleBookingStatus(b.id, "rejected")}
-                                    className="p-1 px-2.5 bg-rose-700 hover:bg-rose-600 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    className="p-1 px-2.5 bg-rose-700 hover:bg-rose-600 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
                                     title="Tolak Booking"
                                   >
                                     <X className="w-3 h-3" />
@@ -687,7 +687,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                                 <>
                                   <button
                                     onClick={() => handleBookingStatus(b.id, "dp_paid")}
-                                    className="p-1 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    className="p-1 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
                                     title="Konfirmasi Pembayaran DP"
                                   >
                                     <Check className="w-3 h-3" />
@@ -695,7 +695,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                                   </button>
                                   <button
                                     onClick={() => handleBookingStatus(b.id, "paid")}
-                                    className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
                                     title="Konfirmasi Pembayaran Lunas"
                                   >
                                     <Check className="w-3 h-3" />
@@ -707,7 +707,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                               {b.status === "dp_paid" && (
                                 <button
                                   onClick={() => handleBookingStatus(b.id, "paid")}
-                                  className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                  className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
                                   title="Konfirmasi Pelunasan"
                                 >
                                   <Check className="w-3 h-3" />
@@ -717,7 +717,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                               <button
                                 onClick={() => onOpenInvoice(b)}
-                                className="p-1 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded font-bold text-[10px] uppercase cursor-pointer flex items-center space-x-1"
+                                className="p-1 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded font-bold text-xs uppercase cursor-pointer flex items-center space-x-1"
                                 title="Lihat Invoice Pemesanan"
                               >
                                 <FileText className="w-3.5 h-3.5 text-zinc-400" />
@@ -747,7 +747,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <button
                   onClick={() => handleOpenPkgModal(null)}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tambah Paket</span>
@@ -760,11 +760,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     <div className="space-y-2">
                       <div className="flex justify-end items-start w-full">
                         <div className="flex space-x-1.5">
-                          <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                          <span className="text-xs font-bold uppercase tracking-wide bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                             {p.category === "signature" ? "Signature" : "Regular"}
                           </span>
                           {p.type !== "both" && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
+                            <span className="text-xs font-bold uppercase tracking-wide bg-zinc-900 text-amber-500 border border-zinc-800 px-2.5 py-0.5 rounded">
                               {p.type === "wedding" ? "Wedding" : "Event"}
                             </span>
                           )}
@@ -774,7 +774,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       <p className="text-xs text-zinc-400 leading-normal">{p.description}</p>
                       
                       <div className="pt-2">
-                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block font-mono">FITUR UTAMA</span>
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide block font-sans">FITUR UTAMA</span>
                         <ul className="mt-1.5 space-y-1 text-zinc-300 text-xs">
                           {p.features && p.features.map((f, i) => (
                             <li key={i} className="flex items-center gap-1.5">
@@ -788,8 +788,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                     <div className="pt-4 border-t border-zinc-900 flex justify-between items-center">
                       <div>
-                        <span className="text-[9px] font-semibold text-zinc-500 block uppercase font-mono">DIPUBLISH DENGAN HARGA</span>
-                        <span className="text-base font-mono font-bold text-amber-400">
+                        <span className="text-xs font-medium text-zinc-500 block uppercase font-sans">DIPUBLISH DENGAN HARGA</span>
+                        <span className="text-base font-sans font-bold text-amber-400">
                           Rp {p.price.toLocaleString("id-ID")}
                         </span>
                       </div>
@@ -830,7 +830,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <button
                   onClick={() => handleOpenAddonModal(null)}
-                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-extrabold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
+                  className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tambah Add-On</span>
@@ -841,13 +841,13 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 {addons.map((a) => (
                   <div key={a.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/45 flex flex-col justify-between space-y-4 hover:border-zinc-700 transition">
                     <div className="space-y-1.5">
-                      <span className="text-[9px] font-mono font-bold text-zinc-500">{a.id}</span>
+                      <span className="text-xs font-sans font-bold text-zinc-500">{a.id}</span>
                       <h4 className="text-sm font-bold text-white block">{a.name}</h4>
                       <p className="text-xs text-zinc-400 leading-normal">{a.description}</p>
                     </div>
 
                     <div className="flex justify-between items-center pt-3 border-t border-zinc-900">
-                      <span className="text-xs font-mono font-bold text-amber-400">
+                      <span className="text-xs font-sans font-bold text-amber-400">
                         Rp {a.price.toLocaleString("id-ID")}
                       </span>
 
@@ -891,8 +891,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-900 flex justify-between items-center">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">APPROVED REVENUE</span>
-                    <p className="text-xl font-bold text-emerald-400 font-mono">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">APPROVED REVENUE</span>
+                    <p className="text-xl font-bold text-emerald-400 font-sans">
                       Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.totalPrice, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -903,8 +903,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-900 flex justify-between items-center">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">DP TERKUMPUL</span>
-                    <p className="text-xl font-bold text-white font-mono">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">DP TERKUMPUL</span>
+                    <p className="text-xl font-bold text-white font-sans">
                       Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.amountPaid, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -915,8 +915,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-900 flex justify-between items-center">
                   <div className="space-y-1">
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest font-mono">SISA PIUTANG</span>
-                    <p className="text-xl font-bold text-amber-500 font-mono">
+                    <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">SISA PIUTANG</span>
+                    <p className="text-xl font-bold text-amber-500 font-sans">
                       Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.remainingPayment, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
@@ -932,9 +932,9 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 {/* Bookings Exporter */}
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
                   <div className="space-y-2">
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded font-mono block w-fit">PRIMARY DATA</span>
+                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded font-sans block w-fit">PRIMARY DATA</span>
                     <h3 className="text-sm font-bold text-white">Ekspor Rekap Booking</h3>
-                    <p className="text-[11px] text-zinc-450 leading-normal">Unduh seluruh riwayat pendaftaran kontrak kustomer, domisili, paket pilihan, status pembayaran, serta tanggal approval.</p>
+                    <p className="text-xs text-zinc-450 leading-normal">Unduh seluruh riwayat pendaftaran kontrak kustomer, domisili, paket pilihan, status pembayaran, serta tanggal approval.</p>
                   </div>
                   <button
                     onClick={() => exportBookingsToCSV(bookings)}
@@ -948,9 +948,9 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 {/* Packages Exporter */}
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
                   <div className="space-y-2">
-                    <span className="text-[9px] font-bold text-zinc-450 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-mono block w-fit">CATALOG DATA</span>
+                    <span className="text-xs font-bold text-zinc-450 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-sans block w-fit">CATALOG DATA</span>
                     <h3 className="text-sm font-bold text-white">Ekspor Katalog Paket</h3>
-                    <p className="text-[11px] text-zinc-450 leading-normal">Unduh daftar katalog paket videografi aktif yang tersaji pada menu customer untuk kebutuhan penyesuaian penawaran offline.</p>
+                    <p className="text-xs text-zinc-450 leading-normal">Unduh daftar katalog paket videografi aktif yang tersaji pada menu customer untuk kebutuhan penyesuaian penawaran offline.</p>
                   </div>
                   <button
                     onClick={() => exportPackagesToCSV(packages)}
@@ -964,9 +964,9 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 {/* Addons Exporter */}
                 <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
                   <div className="space-y-2">
-                    <span className="text-[9px] font-bold text-zinc-450 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-mono block w-fit">UPSELL DATA</span>
+                    <span className="text-xs font-bold text-zinc-450 bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded font-sans block w-fit">UPSELL DATA</span>
                     <h3 className="text-sm font-bold text-white">Ekspor Katalog Add-On</h3>
-                    <p className="text-[11px] text-zinc-450 leading-normal">Unduh daftar item tambahan atau add-ons beserta harganya sebagai instrumen audit penjualan pelengkap pengerjaan klip.</p>
+                    <p className="text-xs text-zinc-450 leading-normal">Unduh daftar item tambahan atau add-ons beserta harganya sebagai instrumen audit penjualan pelengkap pengerjaan klip.</p>
                   </div>
                   <button
                     onClick={() => exportAddonsToCSV(addons)}
@@ -983,16 +983,16 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               <div className="bg-zinc-950 p-6 rounded-2xl border border-zinc-900 space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wider block font-mono">Daftar Preview Data Terkini</h4>
-                    <span className="text-[10px] text-zinc-500 mt-0.5 block">Menampilkan maksimal 5 bookings terbaru untuk memvalidasi isi berkas sebelum dilanjutkan penarikan ekspor.</span>
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide block font-sans">Daftar Preview Data Terkini</h4>
+                    <span className="text-xs text-zinc-500 mt-0.5 block">Menampilkan maksimal 5 bookings terbaru untuk memvalidasi isi berkas sebelum dilanjutkan penarikan ekspor.</span>
                   </div>
-                  <span className="text-[9px] font-bold font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/10">
+                  <span className="text-xs font-bold font-sans text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/10">
                     {bookings.length} Rekor Total
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full text-[11px] text-left border-collapse">
+                  <table className="w-full text-xs text-left border-collapse">
                     <thead>
                       <tr className="border-b border-zinc-900 text-zinc-500 font-bold">
                         <th className="py-2.5">ID BOOKING</th>
@@ -1007,16 +1007,16 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     <tbody className="divide-y divide-zinc-900 text-zinc-350">
                       {bookings.slice(0, 5).map((b) => (
                         <tr key={b.id} className="hover:bg-zinc-900/30 transition">
-                          <td className="py-3 font-mono font-medium text-white">{b.id}</td>
-                          <td className="py-3 font-semibold">{b.customerName}</td>
+                          <td className="py-3 font-sans font-medium text-white">{b.id}</td>
+                          <td className="py-3 font-medium">{b.customerName}</td>
                           <td className="py-3 capitalize">
                             {b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : b.eventType}
                           </td>
                           <td className="py-3">{new Date(b.eventDate).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</td>
                           <td className="py-3 font-medium truncate max-w-[120px]" title={b.packageName}>{b.packageName}</td>
-                          <td className="py-3 text-right font-mono font-bold text-white">Rp {b.totalPrice.toLocaleString("id-ID")}</td>
+                          <td className="py-3 text-right font-sans font-bold text-white">Rp {b.totalPrice.toLocaleString("id-ID")}</td>
                           <td className="py-3 text-center">
-                            <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold font-mono ${
+                            <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold font-sans ${
                               b.status === "paid" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" :
                               b.status === "dp_paid" ? "bg-blue-500/10 text-blue-400 border border-blue-500/10" :
                               b.status === "approved" ? "bg-amber-500/10 text-amber-400 border border-amber-500/10" :
@@ -1030,7 +1030,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       ))}
                       {bookings.length === 0 && (
                         <tr>
-                          <td colSpan={7} className="py-8 text-center text-zinc-550 font-mono">Belum ada pemesanan masuk untuk diekspor.</td>
+                          <td colSpan={7} className="py-8 text-center text-zinc-550 font-sans">Belum ada pemesanan masuk untuk diekspor.</td>
                         </tr>
                       )}
                     </tbody>
@@ -1082,22 +1082,22 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                     >
                       <div className="flex justify-between items-start">
                         <div className="space-y-1">
-                          <span className="text-[9px] font-bold text-zinc-500 font-mono tracking-widest block uppercase">DISCOUNT CODE</span>
-                          <span className="text-base font-extrabold text-white font-mono tracking-wide bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
+                          <span className="text-xs font-bold text-zinc-500 font-sans tracking-wide block uppercase">DISCOUNT CODE</span>
+                          <span className="text-base font-bold text-white font-sans tracking-wide bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">
                             {c.code}
                           </span>
                         </div>
                         <div className="flex items-center gap-1">
                           {isExpired ? (
-                            <span className="text-[9px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">
+                            <span className="text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2 py-0.5 rounded">
                               EXPIRED
                             </span>
                           ) : c.isActive ? (
-                            <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
+                            <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">
                               ACTIVE
                             </span>
                           ) : (
-                            <span className="text-[9px] font-bold text-zinc-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded">
+                            <span className="text-xs font-bold text-zinc-400 bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded">
                               INACTIVE
                             </span>
                           )}
@@ -1107,11 +1107,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       <div className="mt-4 pt-3 border-t border-zinc-900 space-y-2 text-xs">
                         <div className="flex justify-between">
                           <span className="text-zinc-500">Persentase Diskon:</span>
-                          <span className="font-bold text-amber-400 font-mono">{c.discountPercent}%</span>
+                          <span className="font-bold text-amber-400 font-sans">{c.discountPercent}%</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-zinc-500">Berlaku Hingga:</span>
-                          <span className="font-medium text-zinc-300 font-mono">
+                          <span className="font-medium text-zinc-300 font-sans">
                             {formatEventDate(c.validUntil, { day: "numeric", month: "short", year: "numeric" })}
                           </span>
                         </div>
@@ -1138,7 +1138,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 })}
 
                 {coupons.length === 0 && (
-                  <div className="col-span-full py-12 text-center text-zinc-500 text-xs font-mono">
+                  <div className="col-span-full py-12 text-center text-zinc-500 text-xs font-sans">
                     Belum ada kupon diskon yang dibuat. Klik tombol di kanan atas untuk membuat kupon pertama Anda!
                   </div>
                 )}
@@ -1163,7 +1163,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             
             <form onSubmit={handleSavePackage} className="p-6 space-y-4 text-xs text-zinc-200">
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Nama Paket Videography</label>
+                <label className="font-medium text-zinc-400">Nama Paket Videography</label>
                 <input
                   type="text"
                   required
@@ -1175,7 +1175,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Deskripsi Ringkas Paket</label>
+                <label className="font-medium text-zinc-400">Deskripsi Ringkas Paket</label>
                 <textarea
                   placeholder="cth: Paket premium cinematografi dilengkapi editing klip highlight..."
                   value={pkgDesc}
@@ -1186,11 +1186,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
               <div className="grid grid-cols-3 gap-3 font-sans focus:outline-none">
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-400">Tipe / Kategori Acara</label>
+                  <label className="font-medium text-zinc-400">Tipe / Kategori Acara</label>
                   <select
                     value={pkgType}
                     onChange={(e) => setPkgType(e.target.value as any)}
-                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-[11px] font-medium focus:outline-none"
+                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-xs font-medium focus:outline-none"
                   >
                     <option value="wedding">Wedding (Pernikahan)</option>
                     <option value="event">Event (Gathering/Komersial)</option>
@@ -1199,11 +1199,11 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-400">Tampilan Paket</label>
+                  <label className="font-medium text-zinc-400">Tampilan Paket</label>
                   <select
                     value={pkgCategory}
                     onChange={(e) => setPkgCategory(e.target.value as any)}
-                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-[11px] font-medium focus:outline-none"
+                    className="w-full px-2 py-2.5 bg-zinc-950 rounded-xl border border-zinc-850 text-white text-xs font-medium focus:outline-none"
                   >
                     <option value="regular">Regular</option>
                     <option value="signature">Signature</option>
@@ -1211,27 +1211,27 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="font-semibold text-zinc-400">Harga (IDR)</label>
+                  <label className="font-medium text-zinc-400">Harga (IDR)</label>
                   <input
                     type="number"
                     required
                     value={pkgPrice}
                     onChange={(e) => setPkgPrice(Number(e.target.value))}
-                    className="w-full px-3 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold text-[11px]"
+                    className="w-full px-3 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-sans font-bold text-xs"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center mb-0.5">
-                  <label className="font-semibold text-zinc-400">Daftar Fitur (Satu per baris)</label>
-                  <span className="text-[10px] text-zinc-500">Gunakan baris baru untuk memisahkan fitur</span>
+                  <label className="font-medium text-zinc-400">Daftar Fitur (Satu per baris)</label>
+                  <span className="text-xs text-zinc-500">Gunakan baris baru untuk memisahkan fitur</span>
                 </div>
                 <textarea
                   placeholder="- 2 Videographer Berpengalaman&#10;- Video Cinematic Highlight 3-5 Menit&#10;- Link Google Drive Selamanya"
                   value={pkgFetStr}
                   onChange={(e) => setPkgFetStr(e.target.value)}
-                  className="w-full p-4 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white font-mono text-[11px] h-28 focus:outline-none"
+                  className="w-full p-4 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white font-sans text-xs h-28 focus:outline-none"
                 />
               </div>
 
@@ -1268,7 +1268,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             
             <form onSubmit={handleSaveAddon} className="p-6 space-y-4 text-xs text-zinc-300">
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Nama Add-On</label>
+                <label className="font-medium text-zinc-400">Nama Add-On</label>
                 <input
                   type="text"
                   required
@@ -1280,7 +1280,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Deskripsi Pendek Add-On</label>
+                <label className="font-medium text-zinc-400">Deskripsi Pendek Add-On</label>
                 <textarea
                   placeholder="cth: Klip udara sinematik tambahan selama acara..."
                   value={addonDesc}
@@ -1290,13 +1290,13 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Harga Jasa Add-On (IDR)</label>
+                <label className="font-medium text-zinc-400">Harga Jasa Add-On (IDR)</label>
                 <input
                   type="number"
                   required
                   value={addonPrice}
                   onChange={(e) => setAddonPrice(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-sans font-bold"
                 />
               </div>
 
@@ -1333,7 +1333,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             
             <form onSubmit={handleSaveCoupon} className="p-6 space-y-4 text-xs text-zinc-300">
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Kode Kupon</label>
+                <label className="font-medium text-zinc-400">Kode Kupon</label>
                 <input
                   type="text"
                   required
@@ -1341,12 +1341,12 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="cth: KREALOVE10"
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition uppercase font-mono font-bold disabled:opacity-50"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition uppercase font-sans font-bold disabled:opacity-50"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Persentase Diskon (%)</label>
+                <label className="font-medium text-zinc-400">Persentase Diskon (%)</label>
                 <input
                   type="number"
                   required
@@ -1355,18 +1355,18 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   placeholder="10"
                   value={couponPercent}
                   onChange={(e) => setCouponPercent(Number(e.target.value))}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-sans font-bold"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-semibold text-zinc-400">Berlaku Hingga Tanggal</label>
+                <label className="font-medium text-zinc-400">Berlaku Hingga Tanggal</label>
                 <input
                   type="date"
                   required
                   value={couponExpiry}
                   onChange={(e) => setCouponExpiry(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-mono font-bold"
+                  className="w-full px-4 py-2.5 bg-zinc-950 rounded-xl border border-zinc-800 focus:border-amber-500 text-white focus:outline-none transition font-sans font-bold"
                 />
               </div>
 
@@ -1378,7 +1378,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   onChange={(e) => setCouponActive(e.target.checked)}
                   className="w-4 h-4 accent-amber-500 rounded bg-zinc-950 border border-zinc-800 cursor-pointer"
                 />
-                <label htmlFor="coupon-active-checkbox" className="font-semibold text-zinc-300 cursor-pointer select-none">
+                <label htmlFor="coupon-active-checkbox" className="font-medium text-zinc-300 cursor-pointer select-none">
                   Kupon Aktif & Dapat Digunakan
                 </label>
               </div>

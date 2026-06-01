@@ -1,0 +1,189 @@
+* { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #ece7df; font-family: "Hanken Grotesk", sans-serif; }
+
+  /* ===== Shared tokens ===== */
+  :root {
+    --terra: #d05848;
+    --terra-deep: #b3402c;
+    --terra-soft: #e8a597;
+    --ink: #241f1c;
+    --ink-soft: #6c625b;
+    --line: rgba(36,31,28,.12);
+    --line-strong: rgba(36,31,28,.28);
+    --cream: #f7f2ea;
+    --paper: #fffdfa;
+  }
+
+  .num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+  /* ====================================================== */
+  /*  VARIATION A — EDITORIAL MINIMAL                       */
+  /* ====================================================== */
+  .invA {
+    width: 794px; height: 1123px;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 70px 68px 56px;
+    display: flex; flex-direction: column;
+    position: relative;
+    font-size: 13px; line-height: 1.5;
+  }
+  .invA-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding-bottom: 30px;
+  }
+  .invA-logo { width: 150px; height: auto; display: block; }
+  .invA-tagline {
+    margin-top: 14px;
+    font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase;
+    color: var(--ink-soft); font-weight: 600;
+  }
+  .invA-meta { text-align: right; }
+  .invA-word {
+    font-family: "Instrument Serif", serif;
+    font-size: 62px; line-height: .9; letter-spacing: -.01em;
+    color: var(--ink);
+  }
+  .invA-meta-rows { margin-top: 16px; display: grid; gap: 7px; }
+  .invA-meta-row { display: grid; grid-template-columns: auto auto; gap: 22px; justify-content: end; align-items: baseline; }
+  .invA-meta-k { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+  .invA-meta-v { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; }
+
+  .invA-rule { height: 2px; background: var(--terra); margin-bottom: 30px; }
+
+  .invA-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 42px; }
+  .invA-plabel { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); font-weight: 700; margin-bottom: 10px; }
+  .invA-pname { font-family: "Instrument Serif", serif; font-size: 24px; line-height: 1.05; margin-bottom: 7px; }
+  .invA-pline { font-size: 12.5px; color: var(--ink-soft); }
+
+  .invA-thead { display: grid; grid-template-columns: 1fr 56px 130px 130px; gap: 12px; padding-bottom: 12px; border-bottom: 1.5px solid var(--ink); }
+  .invA-th { font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; }
+  .invA-th.r { text-align: right; }
+  .invA-th.c { text-align: center; }
+  .invA-row { display: grid; grid-template-columns: 1fr 56px 130px 130px; gap: 12px; padding: 18px 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .invA-iname { font-size: 14.5px; font-weight: 700; margin-bottom: 6px; }
+  .invA-imeta { font-size: 11.5px; color: var(--ink-soft); line-height: 1.55; }
+  .invA-cell { font-size: 13.5px; }
+  .invA-cell.r { text-align: right; }
+  .invA-cell.c { text-align: center; }
+  .invA-cell.b { font-weight: 700; }
+
+  .invA-foot { margin-top: auto; }
+  .invA-totals { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 26px; gap: 30px; }
+  .invA-voucher { padding-bottom: 4px; }
+  .invA-voucher-label { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); font-weight: 700; margin-bottom: 10px; white-space: nowrap; }
+  .invA-voucher-ticket { display: inline-block; border: 1.5px dashed var(--terra); border-radius: 6px; padding: 8px 16px; background: rgba(208,88,72,.05); }
+  .invA-voucher-code { font-family: "Space Mono", monospace; font-weight: 700; font-size: 15px; letter-spacing: .12em; color: var(--terra-deep); }
+  .invA-voucher-desc { margin-top: 9px; font-size: 11.5px; color: var(--ink-soft); }
+  .invA-totals-inner { width: 300px; }
+  .invA-trow { display: flex; justify-content: space-between; padding: 9px 0; font-size: 13px; color: var(--ink-soft); }
+  .invA-trow .v { color: var(--ink); font-weight: 600; }
+  .invA-dp { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .invA-dp-due { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 9px; border-bottom: 1px dashed var(--line); }
+  .invA-dp-lbl { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; font-weight: 700; color: var(--terra); }
+  .invA-dp-amt { font-family: "Instrument Serif", serif; font-size: 20px; color: var(--terra); line-height: 1; }
+  .invA-dp-rest { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-soft); white-space: nowrap; }
+  .invA-dp-rest .num { font-weight: 600; color: var(--ink); }
+  .invA-trow .v.disc { color: var(--terra); }
+  .invA-ttotal { display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px; padding-top: 16px; border-top: 2px solid var(--ink); }
+  .invA-ttotal .k { font-size: 11px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; }
+  .invA-ttotal .v { font-family: "Instrument Serif", serif; font-size: 34px; color: var(--terra); line-height: 1; }
+
+  .invA-bottom { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: end; margin-top: 54px; padding-top: 28px; border-top: 1px solid var(--line); }
+  .invA-pay-label { font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); font-weight: 700; margin-bottom: 12px; }
+  .invA-pay-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; font-size: 12.5px; }
+  .invA-pay-k { color: var(--ink-soft); white-space: nowrap; }
+  .invA-pay-v { font-weight: 600; }
+  .invA-sign { text-align: center; min-width: 290px; }
+  .invA-sign-name { font-family: "Instrument Serif", serif; font-style: italic; font-size: 26px; color: var(--ink); margin-bottom: 6px; white-space: nowrap; }
+  .invA-sign-rule { width: 100%; height: 1px; background: var(--line-strong); margin: 0 auto 8px; }
+  .invA-sign-role { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
+  .invA-thanks { position: absolute; bottom: 26px; left: 68px; font-size: 9.5px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-soft); }
+
+  /* ====================================================== */
+  /*  VARIATION B — MODERN CORPORATE                        */
+  /* ====================================================== */
+  .invB {
+    width: 794px; height: 1123px;
+    background: var(--paper);
+    color: var(--ink);
+    display: flex; flex-direction: column;
+    position: relative;
+    font-size: 13px; line-height: 1.5;
+    overflow: hidden;
+  }
+  .invB-band { background: var(--terra); color: #fff; padding: 46px 60px 38px; }
+  .invB-band-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .invB-logo { width: 158px; height: auto; display: block; }
+  .invB-tag { margin-top: 12px; font-size: 9.5px; letter-spacing: .26em; text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,.82); }
+  .invB-word { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 40px; letter-spacing: .02em; line-height: 1; text-align: right; }
+  .invB-band-meta { display: flex; gap: 46px; justify-content: flex-end; margin-top: 18px; }
+  .invB-bm { text-align: right; }
+  .invB-bm-k { font-size: 8.5px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.7); font-weight: 700; margin-bottom: 4px; }
+  .invB-bm-v { font-size: 13px; font-weight: 600; color: #fff; white-space: nowrap; }
+
+  .invB-body { padding: 38px 60px 0; display: flex; flex-direction: column; flex: 1; }
+  .invB-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 34px; }
+  .invB-card { border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; }
+  .invB-card.dark { background: var(--cream); border-color: transparent; }
+  .invB-plabel { font-size: 8.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); font-weight: 700; margin-bottom: 9px; }
+  .invB-pname { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 18px; margin-bottom: 6px; }
+  .invB-pline { font-size: 12px; color: var(--ink-soft); }
+
+  .invB-thead { display: grid; grid-template-columns: 1fr 48px 124px 124px; gap: 10px; background: var(--ink); color: #fff; padding: 12px 18px; border-radius: 4px 4px 0 0; }
+  .invB-th { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; color: rgba(255,255,255,.78); }
+  .invB-th.r { text-align: right; }
+  .invB-th.c { text-align: center; }
+  .invB-row { display: grid; grid-template-columns: 1fr 48px 124px 124px; gap: 10px; padding: 16px 18px; border-bottom: 1px solid var(--line); align-items: start; }
+  .invB-row:nth-child(odd) { background: #fbf7f1; }
+  .invB-iname { font-family: "Space Grotesk", sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+  .invB-imeta { font-size: 11px; color: var(--ink-soft); line-height: 1.5; }
+  .invB-cell { font-size: 13px; }
+  .invB-cell.r { text-align: right; }
+  .invB-cell.c { text-align: center; }
+  .invB-cell.b { font-weight: 700; }
+
+  .invB-totals { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 22px; gap: 30px; }
+  .invB-voucher { position: relative; display: inline-flex; align-items: stretch; border-radius: 10px; overflow: hidden; background: rgba(208,88,72,.09);
+    --stub: 64px; --notch: 8px;
+    -webkit-mask:
+      radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
+      radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
+    mask:
+      radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
+      radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
+  }
+  .invB-voucher-stub { width: var(--stub); flex: none; background: var(--terra); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+  .invB-voucher-pct { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; line-height: 1; }
+  .invB-voucher-off { font-size: 8px; letter-spacing: .22em; font-weight: 700; opacity: .9; }
+  .invB-voucher-body { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 5px; padding: 13px 18px 13px 19px; }
+  .invB-voucher-body::before { content: ""; position: absolute; left: 0; top: 9px; bottom: 9px; border-left: 1.5px dashed rgba(208,88,72,.55); }
+  .invB-voucher-tag { font-size: 8px; letter-spacing: .18em; text-transform: uppercase; color: var(--terra); font-weight: 700; }
+  .invB-voucher-code { font-family: "Space Mono", monospace; font-weight: 700; font-size: 15px; letter-spacing: .1em; color: var(--terra-deep); }
+  .invB-voucher-note { font-size: 10.5px; color: var(--ink-soft); white-space: nowrap; }
+  .invB-totals-inner { width: 320px; }
+  .invB-trow { display: flex; justify-content: space-between; padding: 8px 2px; font-size: 13px; color: var(--ink-soft); }
+  .invB-trow .v { color: var(--ink); font-weight: 600; }
+  .invB-dp { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .invB-dp-due { display: flex; justify-content: space-between; align-items: baseline; background: rgba(208,88,72,.09); border-radius: 4px; padding: 10px 14px; }
+  .invB-dp-lbl { font-size: 10.5px; letter-spacing: .04em; text-transform: uppercase; font-weight: 700; color: var(--terra-deep); }
+  .invB-dp-amt { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 15px; color: var(--terra-deep); }
+  .invB-dp-rest { display: flex; justify-content: space-between; padding: 0 14px; font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+  .invB-dp-rest .num { font-weight: 600; color: var(--ink); }
+  .invB-trow .v.disc { color: var(--terra); }
+  .invB-tbox { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: var(--terra); color: #fff; padding: 16px 20px; border-radius: 4px; }
+  .invB-tbox .k { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; }
+  .invB-tbox .v { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 20px; }
+
+  .invB-foot { margin-top: auto; display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: end; padding: 30px 0 40px; }
+  .invB-pay { border-left: 3px solid var(--terra); padding-left: 18px; }
+  .invB-pay-label { font-size: 8.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--terra); font-weight: 700; margin-bottom: 10px; }
+  .invB-pay-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font-size: 12px; }
+  .invB-pay-k { color: var(--ink-soft); white-space: nowrap; }
+  .invB-pay-v { font-weight: 600; font-family: "Space Mono", monospace; }
+  .invB-pay-v.plain { font-family: "Hanken Grotesk", sans-serif; }
+  .invB-sign { text-align: center; min-width: 290px; }
+  .invB-sign-name { font-family: "Instrument Serif", serif; font-style: italic; font-size: 24px; margin-bottom: 6px; white-space: nowrap; }
+  .invB-sign-rule { width: 100%; height: 1px; background: var(--line-strong); margin: 0 auto 8px; }
+  .invB-sign-role { font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-soft); font-weight: 600; }
