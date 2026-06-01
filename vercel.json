@@ -24,8 +24,7 @@
       "dest": "api/index.ts"
     },
     {
-      "src": "/(.*\\..*)",
-      "dest": "/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
