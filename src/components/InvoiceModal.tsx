@@ -770,34 +770,20 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     clone.style.margin = "0";
     clone.style.width = "794px";
     clone.style.minHeight = "1123px";
-    clone.style.maxWidth = "794px";
-    clone.style.overflow = "visible";
     const wrapper = document.createElement("div");
     wrapper.style.position = "fixed";
-    wrapper.style.left = "0";
+    wrapper.style.left = "-9999px";
     wrapper.style.top = "0";
-    wrapper.style.width = "794px";
-    wrapper.style.zIndex = "-9999";
     wrapper.appendChild(clone);
     document.body.appendChild(wrapper);
     const opt = {
       margin: 0,
       filename: `${(booking.customerName || "invoice").replace(/\s+/g, "_")}_Krealogs.pdf`,
-      image: { type: "jpeg", quality: 0.95 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        letterRendering: true,
-        width: 794,
-        height: clone.scrollHeight,
-        windowWidth: 794,
-        logging: false,
-      },
-      jsPDF: { unit: "px", format: [794, clone.scrollHeight], orientation: "portrait" },
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true, width: 794, height: 1123 },
+      jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
     } as any;
     html2pdf().set(opt).from(clone).save().then(() => {
-      document.body.removeChild(wrapper);
-    }).catch(() => {
       document.body.removeChild(wrapper);
     });
   };
