@@ -399,7 +399,7 @@ const SCOPED_CSS = `
 }
 .inv-stamp-full { position: absolute; top: 50%; left: 55%; transform: translate(-50%, calc(-50% + 100px)) rotate(-15deg); height: 200px; opacity: 0.15; pointer-events: none; z-index: 5; }
 @media print {
-  @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 0mm !important; }
   html, body { margin: 0; padding: 0; background: #fff; }
   .inv-overlay { padding: 0 !important; align-items: flex-start !important; }
   .inv-toolbar { display: none !important; }
