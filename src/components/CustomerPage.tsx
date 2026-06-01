@@ -582,7 +582,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {searchResults.map((b) => (
-                  <div key={b.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/80 hover:border-zinc-700 transition flex items-start justify-between gap-4 shadow-lg">
+                  <div key={b.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/80 hover:border-zinc-700 transition flex flex-col sm:flex-row items-start justify-between gap-3 shadow-lg">
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{b.id}</span>
@@ -602,7 +602,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
                       </p>
                     </div>
 
-                    <div className="flex flex-col items-end justify-between h-full gap-4">
+                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-end gap-2 shrink-0">
                       {b.approvalStatus === "rejected" ? (
                         <span className="text-[10px] text-rose-600 font-medium italic">Ditolak</span>
                       ) : b.approvalStatus === "pending" ? (
