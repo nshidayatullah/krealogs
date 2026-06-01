@@ -800,6 +800,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
         `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
         `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
+        `*{visibility:visible}` +
         `</style>` +
         `</head><body>${node.outerHTML}</body></html>`,
     );
