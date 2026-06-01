@@ -16,7 +16,6 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@google/genai": "^2.4.0",
     "@internationalized/date": "^3.12.2",
     "@react-stately/utils": "^3.12.1",
     "@tailwindcss/vite": "^4.1.14",
