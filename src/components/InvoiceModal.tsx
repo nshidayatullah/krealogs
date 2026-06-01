@@ -765,27 +765,14 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   const handleDownload = () => {
     const node = invoiceRef.current;
     if (!node) return;
-    const clone = node.cloneNode(true) as HTMLElement;
-    clone.style.transform = "none";
-    clone.style.margin = "0";
-    clone.style.width = "794px";
-    clone.style.minHeight = "1123px";
-    const wrapper = document.createElement("div");
-    wrapper.style.position = "fixed";
-    wrapper.style.left = "-9999px";
-    wrapper.style.top = "0";
-    wrapper.appendChild(clone);
-    document.body.appendChild(wrapper);
     const opt = {
       margin: 0,
       filename: `${(booking.customerName || "invoice").replace(/\s+/g, "_")}_Krealogs.pdf`,
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true, width: 794, height: 1123 },
-      jsPDF: { unit: "px", format: [794, 1123], orientation: "portrait" },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
     } as any;
-    html2pdf().set(opt).from(clone).save().then(() => {
-      document.body.removeChild(wrapper);
-    });
+    html2pdf().set(opt).from(node).save();
   };
 
   return (
