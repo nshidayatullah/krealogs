@@ -414,6 +414,10 @@ const SCOPED_CSS = `
   .inv-root { transform-origin: top center; transform: scale(0.55); width: 100% !important; min-height: auto !important; margin-bottom: -280px !important; }
   .inv-root + .inv-root { margin-top: -280px !important; }
 }
+@media screen and (min-width: 821px) and (max-height: 900px) {
+  .inv-root { transform-origin: top center; transform: scale(0.7); margin-bottom: -160px !important; }
+  .inv-root + .inv-root { margin-top: -160px !important; }
+}
 @media screen and (max-width: 500px) {
   .inv-root { transform: scale(0.42); margin-bottom: -380px !important; }
   .inv-root + .inv-root { margin-top: -380px !important; }
