@@ -83,26 +83,50 @@ function invoiceNumber(b: Booking): string {
   return `${seq}/INV/CC/${month}/${year}`;
 }
 
-type Addon = { name: string; price?: number };
+type Addon = { name: string; price?: number; qty?: number };
 
 /** addonDetails may arrive as array | string | object — normalise it. */
 function toAddons(raw: unknown): Addon[] {
   if (!raw) return [];
+  let parsed: Addon[] = [];
   if (Array.isArray(raw)) {
-    return raw.map((x: any) => (typeof x === "string" ? { name: x } : { name: x?.name ?? x?.detail ?? x?.title ?? "", price: x?.price ?? x?.amount })).filter((a) => a.name);
-  }
-  if (typeof raw === "string") {
-    return raw
+    parsed = raw.map((x: any) => {
+      if (typeof x === "string") {
+        return { name: x, price: 0, qty: 1 };
+      }
+      return {
+        name: x?.name ?? x?.detail ?? x?.title ?? "",
+        price: x?.price ?? x?.amount ?? 0,
+        qty: x?.qty ?? x?.quantity ?? 1
+      };
+    }).filter((a) => a.name);
+  } else if (typeof raw === "string") {
+    parsed = raw
       .split(/\r?\n|,|;/)
       .map((s) => s.trim())
       .filter(Boolean)
-      .map((name) => ({ name }));
-  }
-  if (typeof raw === "object") {
+      .map((name) => ({ name, price: 0, qty: 1 }));
+  } else if (typeof raw === "object") {
     const o = raw as any;
-    return o.name ? [{ name: o.name, price: o.price ?? o.amount }] : [];
+    parsed = o.name ? [{ name: o.name, price: o.price ?? o.amount ?? 0, qty: o.qty ?? o.quantity ?? 1 }] : [];
   }
-  return [];
+
+  return parsed.map((addon) => {
+    let name = addon.name;
+    let price = addon.price || 0;
+    let qty = addon.qty || 1;
+
+    const match = name.match(/[\s(×x]+(\d+)\)?$/);
+    if (match) {
+      const parsedQty = parseInt(match[1], 10);
+      if (!isNaN(parsedQty) && parsedQty > 0) {
+        qty = parsedQty;
+        name = name.replace(/[\s(×x]+\d+\)?$/, "").trim();
+        price = Math.round(price / qty);
+      }
+    }
+    return { name, price, qty };
+  });
 }
 
 interface Row {
@@ -448,7 +472,12 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
         qty: 1,
         meta: dayMeta(d as BookingDay & Record<string, any>),
       });
-      Object.entries(toAddons((d as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => { const k = a.name; if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 }; acc[k].qty++; return acc; }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
+      Object.entries(toAddons((d as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => {
+        const k = a.name;
+        if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 };
+        acc[k].qty += a.qty || 1;
+        return acc;
+      }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
     });
   } else {
     rows.push({
@@ -457,7 +486,12 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       qty: 1,
       meta: bookingMeta(),
     });
-    Object.entries(toAddons((booking as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => { const k = a.name; if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 }; acc[k].qty++; return acc; }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
+    Object.entries(toAddons((booking as any).addonDetails).reduce((acc: Record<string, { price: number; qty: number }>, a) => {
+      const k = a.name;
+      if (!acc[k]) acc[k] = { price: a.price || 0, qty: 0 };
+      acc[k].qty += a.qty || 1;
+      return acc;
+    }, {})).forEach(([name, { price, qty }]) => rows.push({ name: `Add on: ${name}`, price, qty, meta: [] }));
   }
 
   const lineSum = rows.reduce((s, r) => s + r.qty * r.price, 0);
