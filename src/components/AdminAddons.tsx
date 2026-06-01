@@ -58,7 +58,7 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
   return (
     <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
+        <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white">Kelola Add-Ons</h2><p className="text-xs text-zinc-400 mt-1">Layanan tambahan opsional.</p></div>
           <button onClick={() => openModal(null)} className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl flex items-center gap-1.5 transition cursor-pointer"><Plus className="w-4 h-4" /><span>Tambah</span></button>
         </div>

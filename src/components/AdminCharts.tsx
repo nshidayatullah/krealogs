@@ -78,7 +78,7 @@ export function BarChart({ data, color = "#10b981", formatValue, height = 240, h
         <RechartsBar data={sliced} layout="vertical" margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" horizontal={false} />
           <XAxis type="number" tick={{ fill: "#71717a", fontSize: 10, fontFamily: "monospace" }} axisLine={false} tickLine={false} tickFormatter={formatValue} />
-          <YAxis type="category" dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 10 }} axisLine={false} tickLine={false} width={100} tickFormatter={v => v.length > 14 ? v.slice(0, 14) + "..." : v} />
+          <YAxis type="category" dataKey="label" tick={{ fill: "#a1a1aa", fontSize: 10 }} axisLine={false} tickLine={false} width={90} tickFormatter={v => v.length > 14 ? v.slice(0, 14) + "..." : v} />
           <Tooltip {...tooltipStyle} formatter={formatValue ? (val: number) => [formatValue(val), "Jumlah"] : undefined} />
           <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} maxBarSize={16} />
         </RechartsBar>
@@ -90,7 +90,7 @@ export function BarChart({ data, color = "#10b981", formatValue, height = 240, h
     <ResponsiveContainer width="100%" height={height}>
       <RechartsBar data={sliced} margin={{ top: 8, right: 8, bottom: 8, left: -12 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-        <XAxis dataKey="label" tick={{ fill: "#71717a", fontSize: 10, fontFamily: "monospace" }} axisLine={{ stroke: "#27272a" }} tickLine={false} angle={-25} textAnchor="end" height={50} />
+        <XAxis dataKey="label" tick={{ fill: "#71717a", fontSize: 10, fontFamily: "monospace" }} axisLine={{ stroke: "#27272a" }} tickLine={false} angle={-15} textAnchor="end" height={50} />
         <YAxis tick={{ fill: "#71717a", fontSize: 10, fontFamily: "monospace" }} axisLine={false} tickLine={false} tickFormatter={formatValue} />
         <Tooltip {...tooltipStyle} formatter={formatValue ? (val: number) => [formatValue(val), "Nilai"] : undefined} />
         <Bar dataKey="value" fill={color} radius={[4, 4, 0, 0]} maxBarSize={40} />

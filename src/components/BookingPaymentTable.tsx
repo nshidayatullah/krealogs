@@ -94,7 +94,7 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
         <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">Tidak ditemukan data pembayaran.</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-xs min-w-[800px]">
             <thead>
               <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
                 <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
@@ -152,14 +152,14 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
                     <div className="flex flex-col gap-1">
                       {b.paymentStatus === "unpaid" && (
                         <>
-                          <button onClick={() => handlePayment(b.id, "dp_paid")} className="w-full py-1 px-2 bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><Check className="w-3 h-3" /><span>Terima DP</span></button>
-                          <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1 px-2 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><Check className="w-3 h-3" /><span>Terima Lunas</span></button>
+                          <button onClick={() => handlePayment(b.id, "dp_paid")} className="w-full py-1.5 px-3 bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><Check className="w-3 h-3" /><span>Terima DP</span></button>
+                          <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><Check className="w-3 h-3" /><span>Terima Lunas</span></button>
                         </>
                       )}
                       {b.paymentStatus === "dp_paid" && (
-                        <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1 px-2 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><Check className="w-3 h-3" /><span>Konfirmasi Lunas</span></button>
+                        <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><Check className="w-3 h-3" /><span>Konfirmasi Lunas</span></button>
                       )}
-                      <button onClick={() => onOpenInvoice(b)} className="w-full py-1 px-2 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><FileText className="w-3 h-3" /><span>Detail</span></button>
+                      <button onClick={() => onOpenInvoice(b)} className="w-full py-1.5 px-3 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><FileText className="w-3 h-3" /><span>Detail</span></button>
                     </div>
                   </td>
                 </tr>

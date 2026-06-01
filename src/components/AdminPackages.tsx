@@ -69,9 +69,9 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
   return (
     <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6 animate-fade-in">
-        <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
+        <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white">Kelola Paket Utama</h2><p className="text-xs text-zinc-400 mt-1">Daftar paket utama cinematografi yang disuguhkan pelanggan.</p></div>
-          <button onClick={() => openPkg(null)} className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"><Plus className="w-4 h-4" /><span>Tambah Paket</span></button>
+          <button onClick={() => openPkg(null)} className="shrink-0 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold rounded-xl flex items-center space-x-1.5 transition cursor-pointer"><Plus className="w-4 h-4" /><span>Tambah Paket</span></button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,7 +118,7 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
                 <label className="text-xs font-bold text-zinc-700">Nama Paket</label>
                 <input value={pkgName} onChange={e => setPkgName(e.target.value)} placeholder="Nama paket" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs" required />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-700">Tipe</label>
                   <select value={pkgType} onChange={e => setPkgType(e.target.value as any)} title="Tipe" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs">
@@ -144,7 +144,7 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
                 <label className="text-xs font-bold text-zinc-700">Fitur (pisahkan dengan baris baru)</label>
                 <textarea value={pkgFetStr} onChange={e => setPkgFetStr(e.target.value)} placeholder="Fitur per baris" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs resize-none h-24" />
               </div>
-              <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200">
+              <div className="flex flex-wrap justify-end gap-2 pt-4 border-t border-zinc-200">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold cursor-pointer transition">Batal</button>
                 <button type="submit" className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-bold cursor-pointer transition">{editId ? "Simpan" : "Buat Paket"}</button>
               </div>

@@ -63,7 +63,7 @@ export default function AdminCoupons({ onOpenInvoice, mobileSidebarOpen, setMobi
   return (
     <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6">
-        <div className="flex justify-between items-center border-b border-zinc-900 pb-4">
+        <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white flex items-center gap-2"><Ticket className="w-5 h-5 text-amber-500" />Kupon Diskon</h2><p className="text-xs text-zinc-400 mt-1">Kelola kode promo dan diskon.</p></div>
           <button onClick={() => openModal(null)} className="flex items-center gap-1.5 py-2.5 px-4 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-xl text-xs transition cursor-pointer"><PlusCircle className="w-4 h-4" /><span>Buat Kupon</span></button>
         </div>

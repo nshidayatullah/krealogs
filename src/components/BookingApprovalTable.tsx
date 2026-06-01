@@ -95,7 +95,7 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
         <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">Tidak ditemukan pesanan.</div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table className="w-full text-left border-collapse text-xs min-w-[750px]">
             <thead>
               <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
                 <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
@@ -149,12 +149,12 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
                     <div className="flex flex-col gap-1">
                       {b.approvalStatus === "pending" && (
                         <>
-                          <button onClick={() => handleApproval(b.id, "approved")} className="w-full py-1 px-2 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><Check className="w-3 h-3" /><span>Setujui</span></button>
-                          <button onClick={() => handleApproval(b.id, "rejected")} className="w-full py-1 px-2 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><X className="w-3 h-3" /><span>Tolak</span></button>
+                          <button onClick={() => handleApproval(b.id, "approved")} className="w-full py-1.5 px-3 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><Check className="w-3 h-3" /><span>Setujui</span></button>
+                          <button onClick={() => handleApproval(b.id, "rejected")} className="w-full py-1.5 px-3 bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><X className="w-3 h-3" /><span>Tolak</span></button>
                         </>
                       )}
                       {b.approvalStatus === "approved" && (
-                        <button onClick={() => onOpenInvoice(b)} className="w-full py-1 px-2 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1"><FileText className="w-3 h-3" /><span>Detail</span></button>
+                        <button onClick={() => onOpenInvoice(b)} className="w-full py-1.5 px-3 bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 rounded-lg text-[9px] font-bold uppercase cursor-pointer flex items-center justify-center gap-1 min-h-[32px]"><FileText className="w-3 h-3" /><span>Detail</span></button>
                       )}
                     </div>
                   </td>

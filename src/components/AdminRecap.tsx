@@ -66,7 +66,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-2">
-          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
+          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition min-h-[200px]">
             <div className="space-y-2">
               <span className="text-xs font-bold text-emerald-400 bg-emerald-500/5 border border-emerald-500/10 px-2 py-0.5 rounded font-sans block w-fit">PRIMARY DATA</span>
               <h3 className="text-sm font-bold text-white">Ekspor Rekap Booking</h3>
@@ -74,7 +74,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
             </div>
             <button onClick={() => exportBookingsToCSV(bookings)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download CSV</span></button>
           </div>
-          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
+          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition min-h-[200px]">
             <div className="space-y-2">
               <span className="text-xs font-bold text-amber-400 bg-amber-500/5 border border-amber-500/10 px-2 py-0.5 rounded font-sans block w-fit">CATALOG</span>
               <h3 className="text-sm font-bold text-white">Ekspor Daftar Paket</h3>
@@ -82,7 +82,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
             </div>
             <button onClick={() => exportPackagesToCSV(packages)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download CSV</span></button>
           </div>
-          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition h-52">
+          <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition min-h-[200px]">
             <div className="space-y-2">
               <span className="text-xs font-bold text-amber-400 bg-amber-500/5 border border-amber-500/10 px-2 py-0.5 rounded font-sans block w-fit">CATALOG</span>
               <h3 className="text-sm font-bold text-white">Ekspor Daftar Add-Ons</h3>

@@ -13,11 +13,11 @@ interface Props {
 
 function StatCard({ label, value, icon, trend, trendUp, color }: { label: string; value: string; icon: React.ReactNode; trend?: string; trendUp?: boolean; color?: string }) {
   return (
-    <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
+    <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg min-w-0">
+      <div className="flex items-start justify-between gap-2">
+        <div className="space-y-1 min-w-0">
           <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide block font-sans">{label}</span>
-          <p className={`text-2xl font-sans font-bold mt-0.5 ${color || "text-white"}`}>{value}</p>
+          <p className={`text-2xl font-sans font-bold mt-0.5 truncate ${color || "text-white"}`}>{value}</p>
           {trend && (
             <div className={`flex items-center gap-1 mt-1 ${trendUp ? "text-emerald-500" : "text-rose-500"}`}>
               {trendUp ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}

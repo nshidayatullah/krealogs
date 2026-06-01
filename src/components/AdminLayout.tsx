@@ -45,7 +45,7 @@ export default function AdminLayout({ bookings, packagesCount, addonsCount, coup
           <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[#0c0c0e] border-r border-zinc-850 shadow-2xl p-4 space-y-1 overflow-y-auto">
             <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-900 mb-2">
               <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-sans">Menu Admin</span>
-              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 text-zinc-400 hover:text-white transition cursor-pointer">
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-2 text-zinc-400 hover:text-white transition cursor-pointer">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
