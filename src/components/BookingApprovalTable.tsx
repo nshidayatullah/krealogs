@@ -82,7 +82,7 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">Tidak ditemukan pesanan.</div>
       ) : (
         <div className="overflow-x-auto">
