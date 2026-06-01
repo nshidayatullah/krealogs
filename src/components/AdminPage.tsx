@@ -572,92 +572,157 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
               </div>
 
               {filteredBookings.length === 0 ? (
-                <div className="py-16 text-center text-zinc-400 text-sm border border-dashed border-zinc-300 rounded-lg">
+                <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
                   Tidak ditemukan pesanan dengan status: <strong className="text-amber-500">{bookingFilter.toUpperCase()}</strong>
                 </div>
               ) : (
-                <div className="overflow-x-auto border border-zinc-200 rounded-lg">
-                  <table className="w-full text-left text-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-zinc-50 border-b border-zinc-200 text-zinc-500 text-xs uppercase tracking-wider">
-                        <th className="py-3 px-4 font-semibold">Klien / Kontak</th>
-                        <th className="py-3 px-4 font-semibold">Rincian Acara</th>
-                        <th className="py-3 px-4 font-semibold">Layanan / Paket</th>
-                        <th className="py-3 px-4 font-semibold text-right">Biaya</th>
-                        <th className="py-3 px-4 font-semibold text-center">Status</th>
-                        <th className="py-3 px-4 font-semibold text-center">Aksi</th>
+                      <tr className="border-b border-zinc-850 text-[10px] font-mono uppercase text-zinc-500 bg-black/20">
+                        <th className="py-3 px-4 rounded-l">Klien / Kontak</th>
+                        <th className="py-3 px-4">Rincian Acara</th>
+                        <th className="py-3 px-4">Layanan / Paket</th>
+                        <th className="py-3 px-4 text-right">Biaya Pembayaran</th>
+                        <th className="py-3 px-4 text-center">Status</th>
+                        <th className="py-3 px-4 text-center rounded-r">Kelola & Aksi</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-100">
+                    <tbody className="divide-y divide-zinc-900">
                       {filteredBookings.map((b) => ( b && (
-                        <tr key={b.id} className="hover:bg-zinc-50 transition">
-                          <td className="py-3 px-4">
-                            <div className="text-[11px] text-zinc-400 font-mono mb-1">{b.id}</div>
-                            <div className="font-medium text-zinc-900">{b.customerName}</div>
-                            <div className="text-xs text-zinc-500 font-mono">{b.customerPhone}</div>
-                            <div className="text-xs text-zinc-400">{b.customerCity}</div>
+                        <tr key={b.id} className="hover:bg-zinc-900/10 transition">
+                          <td className="py-4 px-4 space-y-1">
+                            <span className="font-mono text-[10px] bg-zinc-900 border border-zinc-800 font-bold px-2 py-0.5 rounded text-zinc-350 block w-fit">
+                              {b.id}
+                            </span>
+                            <span className="font-bold text-white block mt-1.5">{b.customerName}</span>
+                            <span className="text-zinc-400 block font-mono">{b.customerPhone}</span>
+                            <span className="text-[10px] text-zinc-500 block">{b.customerCity}</span>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="text-xs font-medium text-zinc-700 capitalize mb-1">
-                              {b.eventType === "wedding" ? `Wedding${b.weddingType ? ` (${b.weddingType})` : ""}` : "Event"}
-                            </div>
-                            <div className="text-xs text-zinc-600">
-                              {formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}
-                            </div>
-                            <div className="text-xs text-zinc-400 truncate max-w-[200px]">{b.venueLocation}</div>
+                          <td className="py-4 px-4 space-y-1">
+                            <span className="text-[10px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded block w-fit font-mono">
+                              {b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event"}
+                            </span>
+                            <span className="text-zinc-200 block font-light">
+                              {formatEventDate(b.eventDate, {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric"
+                              })}
+                            </span>
+                            <span className="text-[11px] text-zinc-450 block leading-tight truncate max-w-[200px]">{b.venueLocation}</span>
                           </td>
-                          <td className="py-3 px-4">
-                            <div className="font-medium text-zinc-900 text-sm">{b.packageName}</div>
+                          <td className="py-4 px-4 space-y-1.5">
+                            <span className="font-semibold text-white block">{b.packageName}</span>
                             {b.addonDetails && b.addonDetails.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-1">
                                 {b.addonDetails.map((a) => (
-                                  <span key={a.id} className="text-[10px] bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded">
+                                  <span key={a.id} className="text-[9px] bg-zinc-900 text-zinc-400 border border-zinc-850 px-1.5 py-0.5 rounded font-mono">
                                     +{a.name}
                                   </span>
                                 ))}
                               </div>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="font-medium text-zinc-900">Rp {b.totalPrice.toLocaleString("id-ID")}</div>
-                            <div className="text-xs text-emerald-600">
-                              Masuk: Rp {b.amountPaid.toLocaleString("id-ID")} {b.amountPaid < b.totalPrice ? `(${Math.round((b.amountPaid / b.totalPrice) * 100)}%)` : ""}
-                            </div>
+                          <td className="py-4 px-4 text-right space-y-1">
+                            <span className="font-mono font-medium text-amber-400 block">
+                              Rp {b.totalPrice.toLocaleString("id-ID")}
+                            </span>
+                            <span className="text-[10px] text-emerald-400 block">
+                              Masuk: Rp {b.amountPaid.toLocaleString("id-ID")} ({b.amountPaid < b.totalPrice ? `DP ${Math.round((b.amountPaid / b.totalPrice) * 100)}%` : "Lunas"})
+                            </span>
                             {b.amountPaid < b.totalPrice && (
-                              <div className="text-xs text-zinc-400">Sisa: Rp {b.remainingPayment.toLocaleString("id-ID")}</div>
+                              <span className="text-[10px] text-zinc-400 block">
+                                Sisa tagihan: Rp {b.remainingPayment.toLocaleString("id-ID")}
+                              </span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-center">
+                          <td className="py-4 px-4 text-center">
                             {b.status === "paid" ? (
-                              <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-emerald-100 text-emerald-700">Lunas</span>
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-emerald-500 text-white uppercase tracking-widest">
+                                LUNAS (RECEIPT)
+                              </span>
                             ) : b.status === "dp_paid" ? (
-                              <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-blue-100 text-blue-700">DP Paid</span>
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-blue-600 text-white uppercase tracking-widest">
+                                DP PAID (INVOICE)
+                              </span>
                             ) : b.status === "approved" ? (
-                              <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-amber-100 text-amber-700">Disetujui</span>
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-amber-500 text-black uppercase tracking-widest">
+                                INVOICE (UNPAID)
+                              </span>
                             ) : b.status === "rejected" ? (
-                              <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-red-100 text-red-700">Ditolak</span>
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-widest">
+                                REJECTED
+                              </span>
                             ) : (
-                              <span className="inline-block px-2 py-0.5 text-[10px] font-semibold rounded bg-zinc-100 text-zinc-500">Pending</span>
+                              <span className="px-2 py-0.5 text-[9px] font-black rounded bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 uppercase tracking-widest">
+                                PENDING
+                              </span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-center whitespace-nowrap">
-                            <div className="flex items-center justify-center gap-1.5">
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex items-center justify-center gap-2">
                               {b.status === "pending" && (
                                 <>
-                                  <button onClick={() => handleBookingStatus(b.id, "approved")} className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium transition cursor-pointer">Setujui</button>
-                                  <button onClick={() => handleBookingStatus(b.id, "rejected")} className="px-2.5 py-1.5 bg-red-600 hover:bg-red-500 text-white rounded text-[10px] font-medium transition cursor-pointer">Tolak</button>
+                                  <button
+                                    onClick={() => handleBookingStatus(b.id, "approved")}
+                                    className="p-1 px-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    title="Setujui Booking"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Setujui</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleBookingStatus(b.id, "rejected")}
+                                    className="p-1 px-2.5 bg-rose-700 hover:bg-rose-600 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    title="Tolak Booking"
+                                  >
+                                    <X className="w-3 h-3" />
+                                    <span>Tolak</span>
+                                  </button>
                                 </>
                               )}
+
                               {b.status === "approved" && (
                                 <>
-                                  <button onClick={() => handleBookingStatus(b.id, "dp_paid")} className="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded text-[10px] font-medium transition cursor-pointer">Terima DP</button>
-                                  <button onClick={() => handleBookingStatus(b.id, "paid")} className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium transition cursor-pointer">Lunas</button>
+                                  <button
+                                    onClick={() => handleBookingStatus(b.id, "dp_paid")}
+                                    className="p-1 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    title="Konfirmasi Pembayaran DP"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Terima DP</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleBookingStatus(b.id, "paid")}
+                                    className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                    title="Konfirmasi Pembayaran Lunas"
+                                  >
+                                    <Check className="w-3 h-3" />
+                                    <span>Terima Lunas</span>
+                                  </button>
                                 </>
                               )}
+
                               {b.status === "dp_paid" && (
-                                <button onClick={() => handleBookingStatus(b.id, "paid")} className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-[10px] font-medium transition cursor-pointer">Konfirmasi Lunas</button>
+                                <button
+                                  onClick={() => handleBookingStatus(b.id, "paid")}
+                                  className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-[10px] uppercase transition cursor-pointer flex items-center space-x-1"
+                                  title="Konfirmasi Pelunasan"
+                                >
+                                  <Check className="w-3 h-3" />
+                                  <span>Konfirmasi Lunas</span>
+                                </button>
                               )}
-                              <button onClick={() => onOpenInvoice(b)} className="px-2.5 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-50 text-zinc-700 rounded text-[10px] font-medium transition cursor-pointer">Detail</button>
+
+                              <button
+                                onClick={() => onOpenInvoice(b)}
+                                className="p-1 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded font-bold text-[10px] uppercase cursor-pointer flex items-center space-x-1"
+                                title="Lihat Invoice Pemesanan"
+                              >
+                                <FileText className="w-3.5 h-3.5 text-zinc-400" />
+                                <span>Detail</span>
+                              </button>
                             </div>
                           </td>
                         </tr>

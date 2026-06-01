@@ -601,7 +601,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.55">
                       <label className="text-xs font-semibold text-zinc-400 block">Nama Lengkap</label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />

@@ -5,7 +5,7 @@ const { Pool } = pg;
 
 const sslConfig = process.env.NODE_ENV === "production"
   ? { ca: fs.existsSync("/etc/ssl/certs/ca-certificates.crt") ? fs.readFileSync("/etc/ssl/certs/ca-certificates.crt").toString() : undefined, rejectUnauthorized: true }
-  : process.env.DATABASE_URL?.includes("neon.tech") ? { rejectUnauthorized: false } : false;
+  : { rejectUnauthorized: false };
 
 let poolInstance: pg.Pool | null = null;
 
