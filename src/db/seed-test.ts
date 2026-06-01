@@ -426,6 +426,108 @@ async function seedBulkPending(count: number = 50) {
   return results;
 }
 
+/** Booking with many add-ons across 4 days — enough items to overflow 1 invoice page (20+ rows) */
+async function seedMultiPageInvoice() {
+  const city = "Jakarta Selatan";
+  const venue = pick(VENUES[city]);
+  const days: BookingSeed["days"] = [
+    {
+      date: "2026-08-15",
+      packageId: "pkg-grand-legacy",
+      packageName: "Grand Legacy (Full Day Coverage)",
+      packagePrice: 1850000,
+      addons: ["add-ig-story", "add-polaroid", "add-tiktok", "add-digicam", "add-camcorder", "add-extra-creator", "add-extra-hour"],
+      addonDetails: [
+        { id: "add-ig-story", name: "Extra Instagram Story ×5", price: 75000 },
+        { id: "add-polaroid", name: "Polaroid Sheets ×10", price: 250000 },
+        { id: "add-tiktok", name: "Extra Trend TikTok ×3", price: 45000 },
+        { id: "add-digicam", name: "Digicam Photoshoot ×1", price: 150000 },
+        { id: "add-camcorder", name: "Camcorder Clips ×2", price: 900000 },
+        { id: "add-extra-creator", name: "Extra Content Creator ×2", price: 400000 },
+        { id: "add-extra-hour", name: "Extra Hour ×3", price: 225000 },
+      ],
+    },
+    {
+      date: "2026-08-16",
+      packageId: "pkg-visual-legacy",
+      packageName: "Visual Legacy (8 Hours Standby)",
+      packagePrice: 1450000,
+      addons: ["add-polaroid", "add-tiktok", "add-digicam", "add-camcorder", "add-extra-creator", "add-extra-hour"],
+      addonDetails: [
+        { id: "add-polaroid", name: "Polaroid Sheets ×15", price: 375000 },
+        { id: "add-tiktok", name: "Extra Trend TikTok ×2", price: 30000 },
+        { id: "add-digicam", name: "Digicam Photoshoot ×1", price: 150000 },
+        { id: "add-camcorder", name: "Camcorder Clips ×1", price: 450000 },
+        { id: "add-extra-creator", name: "Extra Content Creator ×3", price: 600000 },
+        { id: "add-extra-hour", name: "Extra Hour ×2", price: 150000 },
+      ],
+    },
+    {
+      date: "2026-08-17",
+      packageId: "pkg-golden-memoir",
+      packageName: "Golden Memoir (8 Hours Standby)",
+      packagePrice: 1250000,
+      addons: ["add-ig-story", "add-polaroid", "add-tiktok", "add-digicam"],
+      addonDetails: [
+        { id: "add-ig-story", name: "Extra Instagram Story ×3", price: 45000 },
+        { id: "add-polaroid", name: "Polaroid Sheets ×5", price: 125000 },
+        { id: "add-tiktok", name: "Extra Trend TikTok ×2", price: 30000 },
+        { id: "add-digicam", name: "Digicam Photoshoot ×1", price: 150000 },
+      ],
+    },
+    {
+      date: "2026-08-18",
+      packageId: "pkg-intimate-moments",
+      packageName: "Intimate Moments (6 Hours Standby)",
+      packagePrice: 850000,
+      addons: ["add-ig-story", "add-camcorder", "add-extra-hour"],
+      addonDetails: [
+        { id: "add-ig-story", name: "Extra Instagram Story ×2", price: 30000 },
+        { id: "add-camcorder", name: "Camcorder Clips ×1", price: 450000 },
+        { id: "add-extra-hour", name: "Extra Hour ×4", price: 300000 },
+      ],
+    },
+  ];
+
+  const totalPrice = days.reduce((sum, d) => {
+    const addonSum = d.addonDetails.reduce((s, a) => s + a.price, 0);
+    return sum + d.packagePrice + addonSum;
+  }, 0);
+
+  const discountAmount = Math.round(totalPrice * 0.1);
+  const finalPrice = totalPrice - discountAmount;
+
+  let s: BookingSeed = {
+    customerName: "Ahmad Rizki Pratama",
+    customerPhone: "+6281234567890",
+    customerCity: city,
+    eventType: "wedding",
+    weddingType: "Akad & Resepsi (4 Hari)",
+    eventDate: "2026-08-15",
+    venueLocation: venue,
+    packageId: days[0].packageId,
+    packageName: days[0].packageName,
+    packagePrice: days[0].packagePrice,
+    addons: days[0].addons,
+    addonDetails: days[0].addonDetails,
+    days,
+    paymentMethod: "dp_50",
+    totalPrice: finalPrice,
+    amountPaid: Math.round(finalPrice * 0.5),
+    remainingPayment: finalPrice - Math.round(finalPrice * 0.5),
+    approvalStatus: "approved",
+    paymentStatus: "dp_paid",
+    createdAt: new Date(Date.now() - 7 * 86400000).toISOString(),
+    approvedAt: new Date(Date.now() - 6 * 86400000).toISOString(),
+    couponCode: "KREALOVE10",
+    discountAmount,
+  };
+
+  s = assignPayment(assignApproval(s, "approved"), "dp_paid");
+  const id = await insertBooking(s);
+  return id ? [id] : [];
+}
+
 async function main() {
   const mode = process.argv[2] || "all";
 
@@ -436,6 +538,7 @@ async function main() {
     "payment": seedPaymentVariants,
     "edge": seedEdgeCases,
     "bulk": () => seedBulkPending(50),
+    "multi-page": seedMultiPageInvoice,
   };
 
   if (mode === "all") {
@@ -462,6 +565,7 @@ Modes:
   payment    Various payment methods (full, dp_50, dp_custom)
   edge       Edge cases (free, expensive, old, event-only)
   bulk       50 pending bookings (for pagination testing)
+  multi-page 1 booking with 4 event days & many addons (20+ invoice rows)
   help       Show this help
 `);
   } else {

@@ -13,13 +13,13 @@ interface Props {
 }
 
 export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
-  const [sortKey, setSortKey] = useState<"date" | "name">("date");
+  const [sortKey, setSortKey] = useState<"date" | "name" | "package" | "addons" | "price" | "status">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
 
-  const toggleSort = (key: "date" | "name") => {
+  const toggleSort = (key: "date" | "name" | "package" | "addons" | "price" | "status") => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
   };
@@ -33,13 +33,22 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
   const searched = approved.filter(b => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.trim().toLowerCase();
-    return b.customerName.toLowerCase().includes(q) || b.customerPhone.replace(/[^0-9+]/g, "").includes(q.replace(/[^0-9+]/g, ""));
+    const nameMatch = b.customerName.toLowerCase().includes(q);
+    const idMatch = b.id.toLowerCase().includes(q);
+    const phoneQuery = q.replace(/[^0-9+]/g, "");
+    const phoneMatch = phoneQuery ? b.customerPhone.replace(/[^0-9+]/g, "").includes(phoneQuery) : false;
+    return nameMatch || idMatch || phoneMatch;
   });
 
   const sorted = [...searched].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
-    if (sortKey === "date") return dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    return dir * a.customerName.localeCompare(b.customerName);
+    if (sortKey === "date") return dir * (new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+    if (sortKey === "name") return dir * a.customerName.localeCompare(b.customerName);
+    if (sortKey === "package") return dir * a.packageName.localeCompare(b.packageName);
+    if (sortKey === "addons") return dir * ((a.addonDetails?.length || 0) - (b.addonDetails?.length || 0));
+    if (sortKey === "price") return dir * (a.totalPrice - b.totalPrice);
+    if (sortKey === "status") return dir * a.paymentStatus.localeCompare(b.paymentStatus);
+    return 0;
   });
 
   const totalPages = Math.ceil(sorted.length / PER_PAGE);
@@ -94,10 +103,18 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
                 <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("date")}>
                   Acara {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                 </th>
-                <th className="py-2 px-2">Paket</th>
-                <th className="py-2 px-2">Add-Ons</th>
-                <th className="py-2 px-2 text-right">Biaya</th>
-                <th className="py-2 px-2 text-center">Status</th>
+                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("package")}>
+                  Paket {sortKey === "package" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("addons")}>
+                  Add-Ons {sortKey === "addons" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 text-right cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("price")}>
+                  Biaya {sortKey === "price" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 text-center cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("status")}>
+                  Status {sortKey === "status" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
                 <th className="py-2 px-2 text-center rounded-r">Aksi</th>
               </tr>
             </thead>

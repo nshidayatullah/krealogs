@@ -21,10 +21,25 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
-const CSRF_SECRET = process.env.JWT_SECRET || "csrf-fallback-secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+const CSRF_SECRET = process.env.CSRF_SECRET;
+
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET environment variable is required (min 32 chars)");
+}
+if (!CSRF_SECRET || CSRF_SECRET.length < 32) {
+  throw new Error("CSRF_SECRET environment variable is required (min 32 chars)");
+}
+if (JWT_SECRET === CSRF_SECRET) {
+  throw new Error("JWT_SECRET and CSRF_SECRET must be different");
+}
+
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
+
+function sanitize(str: string): string {
+  return str.replace(/[<>&"'`]/g, "").trim();
+}
 
 function mapBookingRow(b: any) {
   const s = (b.status || "pending").toLowerCase();
@@ -91,8 +106,19 @@ function requireCsrf(req: Request, res: Response, next: NextFunction) {
 }
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
+
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "0");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
+  next();
+});
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
@@ -164,18 +190,62 @@ app.get("/api/coupons/validate/:code", async (req, res) => {
 
 app.post("/api/bookings", async (req, res) => {
   const d = req.body;
-  if (!d.customerName || !d.customerPhone || !d.customerCity || !d.eventType || !d.eventDate || !d.venueLocation || !d.packageId)
+  if (
+    !d.customerName ||
+    !d.customerPhone ||
+    !d.customerCity ||
+    !d.eventType ||
+    !d.eventDate ||
+    !d.venueLocation ||
+    !d.packageId
+  ) {
     return res.status(400).json({ error: "Mohon lengkapi semua data pesanan" });
+  }
+
   const cleanPhone = d.customerPhone.trim().replace(/[^0-9+]/g, "");
-  const id = `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const customerName = sanitize(d.customerName);
+  const customerCity = sanitize(d.customerCity);
+  const venueLocation = sanitize(d.venueLocation);
+  const id = `BOOK-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  const createdAt = new Date().toISOString();
+
   try {
     await pool.query(
-      `INSERT INTO bookings (id, customer_name, customer_phone, customer_city, event_type, wedding_type, event_date, venue_location, package_id, package_name, package_price, addons, addon_details, days, payment_method, total_price, amount_paid, remaining_payment, status, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
-      [id, d.customerName, cleanPhone, d.customerCity, d.eventType, d.weddingType || null, d.eventDate, d.venueLocation, d.packageId, d.packageName, d.packagePrice, d.addons, JSON.stringify(d.addonDetails), d.days ? JSON.stringify(d.days) : null, d.paymentMethod, d.totalPrice, d.amountPaid, d.remainingPayment, "pending", new Date().toISOString()]
+      `INSERT INTO bookings (
+        id, customer_name, customer_phone, customer_city, event_type, wedding_type, 
+        event_date, venue_location, package_id, package_name, package_price, 
+        addons, addon_details, days, payment_method, total_price, amount_paid, 
+        remaining_payment, status, created_at, coupon_code, discount_amount
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22)`,
+      [
+        id, customerName, cleanPhone, customerCity,
+        d.eventType, d.weddingType || null, d.eventDate, venueLocation,
+        d.packageId, d.packageName, d.packagePrice,
+        d.addons, JSON.stringify(d.addonDetails), d.days ? JSON.stringify(d.days) : null,
+        d.paymentMethod, d.totalPrice, d.amountPaid,
+        d.remainingPayment, "pending", createdAt,
+        d.couponCode || null, d.discountAmount || 0
+      ]
     );
-    res.json({ success: true, booking: { ...d, id, customerPhone: cleanPhone, status: "pending", createdAt: new Date().toISOString() } });
-  } catch { res.status(500).json({ error: "Gagal menyimpan pesanan" }); }
+    res.json({
+      success: true,
+      booking: {
+        ...d,
+        id,
+        customerName,
+        customerPhone: cleanPhone,
+        customerCity,
+        venueLocation,
+        status: "pending",
+        approvalStatus: "pending",
+        paymentStatus: "unpaid",
+        createdAt
+      }
+    });
+  } catch (error) {
+    console.error("Error creating booking:", error);
+    res.status(500).json({ error: "Gagal menyimpan pesanan" });
+  }
 });
 
 app.get("/api/bookings/search", async (req, res) => {
@@ -343,7 +413,7 @@ app.post("/api/spreadsheet/config", requireAdmin, requireCsrf, async (req, res) 
   } catch { res.status(500).json({ error: "Failed to update spreadsheet config" }); }
 });
 
-app.post("/api/migrate", requireAdmin, async (req: Request, res: Response) => {
+app.post("/api/migrate", requireAdmin, requireCsrf, async (req: Request, res: Response) => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS packages (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL, features TEXT[], type VARCHAR(50) NOT NULL DEFAULT 'both', category VARCHAR(50) NOT NULL DEFAULT 'regular')`);
     await pool.query(`CREATE TABLE IF NOT EXISTS addons (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL)`);

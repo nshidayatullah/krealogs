@@ -89,13 +89,7 @@ type Addon = { name: string; price?: number };
 function toAddons(raw: unknown): Addon[] {
   if (!raw) return [];
   if (Array.isArray(raw)) {
-    return raw
-      .map((x: any) =>
-        typeof x === "string"
-          ? { name: x }
-          : { name: x?.name ?? x?.detail ?? x?.title ?? "", price: x?.price ?? x?.amount }
-      )
-      .filter((a) => a.name);
+    return raw.map((x: any) => (typeof x === "string" ? { name: x } : { name: x?.name ?? x?.detail ?? x?.title ?? "", price: x?.price ?? x?.amount })).filter((a) => a.name);
   }
   if (typeof raw === "string") {
     return raw
@@ -289,7 +283,17 @@ const S: Record<string, React.CSSProperties> = {
   },
   voucherNote: { fontSize: 10.5, color: PALETTE.inkSoft, whiteSpace: "nowrap" },
 
-  totalsInner: { width: 280 },
+  totalsInner: { width: 280, position: "relative" },
+  stampLunas: {
+    position: "absolute",
+    left: "50%",
+    top: "50%",
+    transform: "translate(-50%, -50%) rotate(-12deg)",
+    height: 140,
+    opacity: 0.85,
+    pointerEvents: "none",
+    zIndex: 10,
+  },
   trow: { display: "flex", justifyContent: "space-between", padding: "5px 2px", fontSize: 11.5, color: PALETTE.inkSoft },
   trowV: { color: PALETTE.ink, fontWeight: 600 },
   trowDisc: { color: PALETTE.terra, fontWeight: 600 },
@@ -320,7 +324,7 @@ const S: Record<string, React.CSSProperties> = {
   dpRest: { display: "flex", justifyContent: "space-between", padding: "0 12px", fontSize: 11, color: PALETTE.inkSoft, whiteSpace: "nowrap" },
   dpRestV: { fontWeight: 600, color: PALETTE.ink },
 
-  foot: { marginTop: "auto", display: "grid", gridTemplateColumns: "1fr auto", gap: 30, alignItems: "end", padding: "20px 0 28px" },
+  foot: { marginTop: 30, display: "grid", gridTemplateColumns: "1fr auto", gap: 30, alignItems: "end", padding: "20px 0 28px" },
   pay: { borderLeft: `3px solid ${PALETTE.terra}`, paddingLeft: 14 },
   payLabel: { fontSize: 7.5, letterSpacing: ".2em", textTransform: "uppercase", color: PALETTE.terra, fontWeight: 700, marginBottom: 7 },
   payGrid: { display: "grid", gridTemplateColumns: "auto 1fr", gap: "3px 14px", fontSize: 11 },
@@ -422,11 +426,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   const docTitle = `Invoice ${invoiceNumber(booking)}${watermark ? " — " + watermark : ""}`;
 
   const bookingMeta = (): string[] =>
-    [
-      [booking.eventType, booking.weddingType].filter(Boolean).join(" · "),
-      booking.eventDate ? "Tanggal — " + formatDateShort(booking.eventDate) : "",
-      booking.venueLocation ? "Tempat — " + booking.venueLocation : "",
-    ].filter(Boolean) as string[];
+    [[booking.eventType, booking.weddingType].filter(Boolean).join(" · "), booking.eventDate ? "Tanggal — " + formatDateShort(booking.eventDate) : "", booking.venueLocation ? "Tempat — " + booking.venueLocation : ""].filter(
+      Boolean,
+    ) as string[];
 
   const dayMeta = (d: BookingDay & Record<string, any>): string[] =>
     [
@@ -446,9 +448,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
         qty: 1,
         meta: dayMeta(d as BookingDay & Record<string, any>),
       });
-      toAddons((d as any).addonDetails).forEach((a) =>
-        rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] })
-      );
+      toAddons((d as any).addonDetails).forEach((a) => rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] }));
     });
   } else {
     rows.push({
@@ -457,9 +457,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       qty: 1,
       meta: bookingMeta(),
     });
-    toAddons((booking as any).addonDetails).forEach((a) =>
-      rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] })
-    );
+    toAddons((booking as any).addonDetails).forEach((a) => rows.push({ name: `Add on: ${a.name}`, price: a.price || 0, qty: 1, meta: [] }));
   }
 
   const lineSum = rows.reduce((s, r) => s + r.qty * r.price, 0);
@@ -483,17 +481,59 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   function renderPage(pageIndex: number, pageRowsSlice: Row[], isLastPage: boolean) {
     return (
       <div className="inv-root" style={{ ...S.root, marginTop: pageIndex > 0 ? 24 : 0 }} key={pageIndex}>
-        {paymentStatus === "paid" && isLastPage && (
-          <img src="/Stempel Lunas.png" alt="Lunas" className="inv-stamp-full" />
-        )}
         {approvalStatus === "pending" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>PENDING</div>
+          <div
+            style={{
+              position: "absolute",
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -50%) rotate(-30deg)",
+              fontSize: 48,
+              fontWeight: 900,
+              color: "rgba(36,31,28,0.06)",
+              letterSpacing: 8,
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            PENDING
+          </div>
         )}
         {approvalStatus === "rejected" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(180,40,40,0.12)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DITOLAK</div>
+          <div
+            style={{
+              position: "absolute",
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -50%) rotate(-30deg)",
+              fontSize: 48,
+              fontWeight: 900,
+              color: "rgba(180,40,40,0.12)",
+              letterSpacing: 8,
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            DITOLAK
+          </div>
         )}
         {paymentStatus === "dp_paid" && (
-          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DP TERBAYAR</div>
+          <div
+            style={{
+              position: "absolute",
+              top: "40%",
+              left: "50%",
+              transform: "translate(-50%, -50%) rotate(-30deg)",
+              fontSize: 48,
+              fontWeight: 900,
+              color: "rgba(36,31,28,0.06)",
+              letterSpacing: 8,
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            DP TERBAYAR
+          </div>
         )}
 
         {/* band */}
@@ -508,7 +548,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
           <div style={S.bandMeta}>
             <div style={S.bm}>
               <div style={S.bmK}>Invoice No.</div>
-              <div className="inv-num" style={S.bmV}>{invoiceNumber(booking)}</div>
+              <div className="inv-num" style={S.bmV}>
+                {invoiceNumber(booking)}
+              </div>
             </div>
             <div style={S.bm}>
               <div style={S.bmK}>Tanggal</div>
@@ -517,7 +559,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
             {isMultiPage && (
               <div style={S.bm}>
                 <div style={S.bmK}>Halaman</div>
-                <div style={S.bmV}>{pageIndex + 1} / {pageRows.length}</div>
+                <div style={S.bmV}>
+                  {pageIndex + 1} / {pageRows.length}
+                </div>
               </div>
             )}
           </div>
@@ -556,12 +600,22 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 <div>
                   <div style={S.iname}>{r.name}</div>
                   {r.meta.length > 0 && (
-                    <div style={S.imeta}>{r.meta.map((m, j) => (<div key={j}>{m}</div>))}</div>
+                    <div style={S.imeta}>
+                      {r.meta.map((m, j) => (
+                        <div key={j}>{m}</div>
+                      ))}
+                    </div>
                   )}
                 </div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellC }}>{r.qty}</div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR }}>{rp(r.price)}</div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR, ...S.cellB }}>{rp(r.qty * r.price)}</div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellC }}>
+                  {r.qty}
+                </div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellR }}>
+                  {rp(r.price)}
+                </div>
+                <div className="inv-num" style={{ ...S.cell, ...S.cellR, ...S.cellB }}>
+                  {rp(r.qty * r.price)}
+                </div>
               </div>
             ))}
           </div>
@@ -573,11 +627,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 {showVoucher ? (
                   <div className="inv-voucher" style={S.voucher}>
                     <div style={S.voucherStub}>
-                      {discount > 0 && subtotal > 0 ? (
-                        <span style={S.voucherPct}>{Math.round((discount / subtotal) * 100)}%</span>
-                      ) : (
-                        <span style={{ ...S.voucherPct, fontSize: 13 }}>PROMO</span>
-                      )}
+                      {discount > 0 && subtotal > 0 ? <span style={S.voucherPct}>{Math.round((discount / subtotal) * 100)}%</span> : <span style={{ ...S.voucherPct, fontSize: 13 }}>PROMO</span>}
                       <span style={S.voucherOff}>OFF</span>
                     </div>
                     <div className="inv-voucher-body" style={S.voucherBody}>
@@ -590,15 +640,41 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                   <div />
                 )}
                 <div style={S.totalsInner}>
-                  <div style={S.trow}><span>Subtotal</span><span className="inv-num" style={S.trowV}>{rp(subtotal)}</span></div>
+                  {paymentStatus === "paid" && <img src="/Stempel Lunas.png" alt="Lunas" style={S.stampLunas} />}
+                  <div style={S.trow}>
+                    <span>Subtotal</span>
+                    <span className="inv-num" style={S.trowV}>
+                      {rp(subtotal)}
+                    </span>
+                  </div>
                   {discount > 0 && (
-                    <div style={S.trow}><span>Diskon{booking.couponCode ? ` · ${booking.couponCode}` : ""}</span><span className="inv-num" style={S.trowDisc}>&minus;{rp(discount)}</span></div>
+                    <div style={S.trow}>
+                      <span>Diskon{booking.couponCode ? ` · ${booking.couponCode}` : ""}</span>
+                      <span className="inv-num" style={S.trowDisc}>
+                        &minus;{rp(discount)}
+                      </span>
+                    </div>
                   )}
-                  <div style={S.tbox}><span style={S.tboxK}>Total</span><span className="inv-num" style={S.tboxV}>{rp(total)}</span></div>
+                  <div style={S.tbox}>
+                    <span style={S.tboxK}>Total</span>
+                    <span className="inv-num" style={S.tboxV}>
+                      {rp(total)}
+                    </span>
+                  </div>
                   {showDP && (
                     <div style={S.dp}>
-                      <div style={S.dpDue}><span style={S.dpLbl}>DP Terbayar ({dpPct}%)</span><span className="inv-num" style={S.dpAmt}>{rp(amountPaid)}</span></div>
-                      <div style={S.dpRest}><span>Sisa Pelunasan</span><span className="inv-num" style={S.dpRestV}>{rp(remaining)}</span></div>
+                      <div style={S.dpDue}>
+                        <span style={S.dpLbl}>DP Terbayar ({dpPct}%)</span>
+                        <span className="inv-num" style={S.dpAmt}>
+                          {rp(amountPaid)}
+                        </span>
+                      </div>
+                      <div style={S.dpRest}>
+                        <span>Sisa Pelunasan</span>
+                        <span className="inv-num" style={S.dpRestV}>
+                          {rp(remaining)}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -612,7 +688,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                     <span style={S.payK}>Bank</span>
                     <span style={S.payVPlain}>{config.bankName}</span>
                     <span style={S.payK}>No. Rekening</span>
-                    <span className="inv-num" style={S.payVMono}>{config.bankAccount}</span>
+                    <span className="inv-num" style={S.payVMono}>
+                      {config.bankAccount}
+                    </span>
                     <span style={S.payK}>Atas Nama</span>
                     <span style={S.payVPlain}>{config.bankAccountName}</span>
                   </div>
@@ -645,7 +723,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     w.document.write(
       `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
         `<title>${docTitle}</title><style>${SCOPED_CSS}\nbody{margin:0;background:#fff;display:flex;justify-content:center;}</style>` +
-        `</head><body>${node.outerHTML}</body></html>`
+        `</head><body>${node.outerHTML}</body></html>`,
     );
     w.document.close();
     const trigger = () => {
@@ -677,9 +755,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       </div>
 
       {/* ===== INVOICE (Multi-page) ===== */}
-      <div ref={invoiceRef}>
-        {pageRows.map((pageSlice, i) => renderPage(i, pageSlice, i === pageRows.length - 1))}
-      </div>
+      <div ref={invoiceRef}>{pageRows.map((pageSlice, i) => renderPage(i, pageSlice, i === pageRows.length - 1))}</div>
     </div>
   );
 }
