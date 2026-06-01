@@ -164,7 +164,6 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                 id="login-password"
                 type={showPassword ? "text" : "password"}
                 disabled={isLoading || isSuccess}
-                placeholder="******"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
