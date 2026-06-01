@@ -49,12 +49,10 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
   }, []);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"approval" | "payment" | "packages" | "addons" | "recap" | "coupons">("approval");
+  const [activeTab, setActiveTab] = useState<"bookings" | "packages" | "addons" | "recap" | "coupons">("bookings");
 
-  // Filter Approval
+  // Filters
   const [approvalFilter, setApprovalFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
-
-  // Filter Payment
   const [paymentFilter, setPaymentFilter] = useState<"all" | "unpaid" | "dp_paid" | "paid">("all");
 
   // Package Form Modal State
@@ -453,24 +451,20 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
   };
 
   // Search
+  // Search
   const [searchQuery, setSearchQuery] = useState("");
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 15;
 
-  const filteredApproval = bookings.filter((b) => {
-    if (approvalFilter === "all") return b.approvalStatus !== "approved" || b.paymentStatus === "unpaid";
-    return b.approvalStatus === approvalFilter;
+  const filtered = bookings.filter((b) => {
+    if (approvalFilter !== "all" && b.approvalStatus !== approvalFilter) return false;
+    if (paymentFilter !== "all" && b.paymentStatus !== paymentFilter) return false;
+    return true;
   });
 
-  const filteredPayment = bookings.filter((b) => {
-    if (b.approvalStatus !== "approved") return false;
-    if (paymentFilter === "all") return b.paymentStatus !== "unpaid";
-    return b.paymentStatus === paymentFilter;
-  });
-
-  const searched = (activeTab === "approval" ? filteredApproval : filteredPayment).filter((b) => {
+  const searched = filtered.filter((b) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.trim().toLowerCase();
     return b.customerName.toLowerCase().includes(q) || b.customerPhone.replace(/[^0-9+]/g, "").includes(q.replace(/[^0-9+]/g, ""));
@@ -485,7 +479,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [approvalFilter, paymentFilter, activeTab, searchQuery]);
+  }, [approvalFilter, paymentFilter, searchQuery]);
 
   return (
     <div className="text-zinc-150">
@@ -501,15 +495,10 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
-            <button onClick={() => { setActiveTab("approval"); setCurrentPage(1); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "approval" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+            <button onClick={() => { setActiveTab("bookings"); setCurrentPage(1); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "bookings" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
               <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span className="flex-1">Persetujuan</span>
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "approval" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
-            </button>
-            <button onClick={() => { setActiveTab("payment"); setCurrentPage(1); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "payment" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
-              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              <span className="flex-1">Pembayaran</span>
-              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "payment" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
+              <span className="flex-1">Pemesanan</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "bookings" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.length}</span>
             </button>
             <div className="border-t border-zinc-900 my-1" />
             <button onClick={() => { setActiveTab("packages"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "packages" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
@@ -550,10 +539,10 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
           <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "approval" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
         </button>
 
-        <button onClick={() => { setActiveTab("payment"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "payment" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+        <button onClick={() => { setActiveTab("bookings"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "bookings" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
           <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           <span className="flex-1">Pembayaran</span>
-          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "payment" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "bookings" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
         </button>
 
         <div className="border-t border-zinc-900 my-1" />
@@ -612,14 +601,14 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
       ) : (
         <div className="bg-[#0c0c0e] rounded-3xl border border-zinc-850 shadow-2xl p-4 md:p-8">
           
-          {/* TAB 1: APPROVAL */}
-          {activeTab === "approval" && (
+          {/* TAB 1: BOOKINGS */}
+          {activeTab === "bookings" && (
             <div className="space-y-6 animate-fade-in">
               
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Persetujuan Pemesanan</h2>
-                  <p className="text-xs text-zinc-400 mt-1">Setujui atau tolak pemesanan dari kustomer.</p>
+                  <h2 className="text-xl font-bold text-white">Pemesanan</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Kelola persetujuan dan pembayaran pesanan.</p>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -628,24 +617,30 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
                     <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
                     {searchQuery && <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
                   </div>
-                  <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                </div>
+              </div>
+
+              {/* Filter row */}
+              <div className="flex flex-wrap items-center gap-3 pb-2">
+                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                  <span className="text-[10px] text-zinc-500 font-bold px-2 uppercase tracking-wider">Approval</span>
                   {["all", "pending", "approved", "rejected"].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setApprovalFilter(filter as any)}
-                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition shrink-0 ${
-                        approvalFilter === filter 
-                          ? "bg-zinc-800 text-white shadow-md" 
-                          : "text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      {filter === "all" ? "Perlu Disetujui" : filter === "pending" ? "Menunggu" : filter === "approved" ? "Disetujui" : "Ditolak"}
+                    <button key={filter} onClick={() => { setApprovalFilter(filter as any); setCurrentPage(1); }} className={`px-2.5 py-1 rounded-lg text-[10px] capitalize font-bold cursor-pointer transition shrink-0 ${approvalFilter === filter ? "bg-zinc-800 text-white shadow-md" : "text-zinc-400 hover:text-white"}`}>
+                      {filter === "all" ? "Semua" : filter === "pending" ? "Pending" : filter === "approved" ? "Approved" : "Ditolak"}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                  <span className="text-[10px] text-zinc-500 font-bold px-2 uppercase tracking-wider">Payment</span>
+                  {["all", "unpaid", "dp_paid", "paid"].map((filter) => (
+                    <button key={filter} onClick={() => { setPaymentFilter(filter as any); setCurrentPage(1); }} className={`px-2.5 py-1 rounded-lg text-[10px] capitalize font-bold cursor-pointer transition shrink-0 ${paymentFilter === filter ? "bg-zinc-800 text-white shadow-md" : "text-zinc-400 hover:text-white"}`}>
+                      {filter === "all" ? "Semua" : filter === "unpaid" ? "Blm Bayar" : filter === "dp_paid" ? "DP Paid" : "Lunas"}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {filteredApproval.length === 0 ? (
+              {filtered.length === 0 ? (
                 <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
                   Tidak ditemukan pesanan.
                 </div>
@@ -742,147 +737,6 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
                     <button key={page} onClick={() => setCurrentPage(page)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${currentPage === page ? "bg-amber-500 text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{page}</button>
                   ))}
                   <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Next</button>
-                  <span className="text-xs text-zinc-500 ml-2">{filteredApproval.length} total</span>
-                </div>
-              )}
-
-            </div>
-          )}
-
-          {/* TAB 2: PAYMENT */}
-          {activeTab === "payment" && (
-            <div className="space-y-6 animate-fade-in">
-              
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
-                <div>
-                  <h2 className="text-xl font-bold text-white">Konfirmasi Pembayaran</h2>
-                  <p className="text-xs text-zinc-400 mt-1">Catat pembayaran DP atau pelunasan dari kustomer yang sudah disetujui.</p>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <div className="relative">
-                    <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                    <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
-                    {searchQuery && <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
-                  </div>
-                  <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
-                  {["all", "unpaid", "dp_paid", "paid"].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setPaymentFilter(filter as any)}
-                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition shrink-0 ${
-                        paymentFilter === filter 
-                          ? "bg-zinc-800 text-white shadow-md" 
-                          : "text-zinc-400 hover:text-white"
-                      }`}
-                    >
-                      {filter === "all" ? "Semua" : filter === "unpaid" ? "Belum Bayar" : filter === "dp_paid" ? "DP Paid" : "Lunas"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {filteredPayment.length === 0 ? (
-                <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
-                  Tidak ditemukan data pembayaran.
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-zinc-850 text-xs font-sans uppercase text-zinc-500 bg-black/20">
-                        <th className="py-3 px-4 rounded-l">Klien / Kontak</th>
-                        <th className="py-3 px-4">Rincian Acara</th>
-                        <th className="py-3 px-4">Paket</th>
-                        <th className="py-3 px-4">Add-Ons</th>
-                        <th className="py-3 px-4 text-right">Biaya Pembayaran</th>
-                        <th className="py-3 px-4 text-center">Status</th>
-                        <th className="py-3 px-4 text-center rounded-r">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-900">
-                      {paginatedBookings.map((b) => ( b && (
-                        <tr key={b.id} className="hover:bg-zinc-900/10 transition">
-                          <td className="py-2 px-3 space-y-0.5">
-                            <span className="font-sans text-[10px] bg-zinc-900 border border-zinc-800 font-bold px-1.5 py-0.5 rounded text-zinc-350 block w-fit">{b.id}</span>
-                            <span className="font-bold text-white block text-xs">{b.customerName}</span>
-                            <span className="text-zinc-400 block text-[10px]">{b.customerPhone}</span>
-                            <span className="text-[10px] text-zinc-500 block">{b.customerCity}</span>
-                          </td>
-                          <td className="py-2 px-3 space-y-0.5">
-                            <span className="text-[10px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded block w-fit font-sans">{b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event"}</span>
-                            <span className="text-zinc-200 block text-[11px]">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</span>
-                            <span className="text-[10px] text-zinc-450 block leading-tight truncate max-w-[160px]">{b.venueLocation}</span>
-                          </td>
-                          <td className="py-2 px-3">
-                            <span className="font-medium text-white text-[11px]">{b.packageName}</span>
-                          </td>
-                          <td className="py-1.5 px-2 leading-[13px]">
-                            {b.addonDetails && b.addonDetails.length > 0 ? (
-                              <div>{Object.entries(
-                                b.addonDetails.reduce((acc: Record<string, number>, a) => {
-                                  acc[a.name] = (acc[a.name] || 0) + 1;
-                                  return acc;
-                                 }, {} as Record<string, number>)
-                               ).map(([name, qty]) => (
-                                 <div key={name} className="text-[9px] text-zinc-400 font-sans leading-[13px]">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>
-                               ))}</div>
-                            ) : (
-                              <span className="text-[9px] text-zinc-600 font-sans">—</span>
-                            )}
-                          </td>
-                          <td className="py-1.5 px-2 text-right leading-[13px]">
-                            <div className="text-amber-400 text-[10px] font-sans">Rp {b.totalPrice.toLocaleString("id-ID")}</div>
-                            <div className="text-[9px] text-emerald-400">Masuk: Rp {b.amountPaid.toLocaleString("id-ID")}</div>
-                            {b.amountPaid < b.totalPrice && (
-                              <div className="text-[9px] text-zinc-400">Sisa: Rp {b.remainingPayment.toLocaleString("id-ID")}</div>
-                            )}
-                          </td>
-                          <td className="py-1.5 px-2 text-center">
-                            {b.paymentStatus === "paid" ? (
-                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-500 text-white uppercase">LUNAS</span>
-                            ) : b.paymentStatus === "dp_paid" ? (
-                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-blue-600 text-white uppercase">DP PAID</span>
-                            ) : (
-                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500 text-black uppercase">BLM BAYAR</span>
-                            )}
-                          </td>
-                          <td className="py-4 px-4 whitespace-nowrap">
-                            <div className="flex flex-col gap-1.5">
-                              {b.paymentStatus === "unpaid" && (
-                                <>
-                                  <button onClick={() => handlePayment(b.id, "dp_paid")} className="w-full py-1.5 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
-                                    <Check className="w-3 h-3" /><span>Terima DP</span>
-                                  </button>
-                                  <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
-                                    <Check className="w-3 h-3" /><span>Terima Lunas</span>
-                                  </button>
-                                </>
-                              )}
-                              {b.paymentStatus === "dp_paid" && (
-                                <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
-                                  <Check className="w-3 h-3" /><span>Konfirmasi Lunas</span>
-                                </button>
-                              )}
-                              <button onClick={() => onOpenInvoice(b)} className="w-full py-1.5 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded-lg font-bold text-[11px] uppercase cursor-pointer flex items-center justify-center gap-1.5">
-                                <FileText className="w-3.5 h-3.5 text-zinc-400" /><span>Detail</span>
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      )))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 pt-4 border-t border-zinc-900 mt-4">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Prev</button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                    <button key={page} onClick={() => setCurrentPage(page)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${currentPage === page ? "bg-emerald-600 text-white" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{page}</button>
-                  ))}
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Next</button>
                   <span className="text-xs text-zinc-500 ml-2">{activeList.length} total</span>
                 </div>
               )}
@@ -890,7 +744,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
             </div>
           )}
 
-          {/* TAB 3: PACKAGES CRUD */}
+          {/* TAB 2: PACKAGES CRUD */}
           {activeTab === "packages" && (
             <div className="space-y-6 animate-fade-in">
               
@@ -973,7 +827,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
             </div>
           )}
 
-          {/* TAB 4: ADDONS CRUD */}
+          {/* TAB 3: ADDONS CRUD */}
           {activeTab === "addons" && (
             <div className="space-y-6 animate-fade-in">
               
@@ -1030,7 +884,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
             </div>
           )}
 
-          {/* TAB 5: RECAP & EXCEL EXPORT PANEL */}
+          {/* TAB 4: RECAP & EXCEL EXPORT PANEL */}
           {activeTab === "recap" && (
             <div className="space-y-8 animate-fade-in text-zinc-150">
               
@@ -1196,7 +1050,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
             </div>
           )}
 
-          {/* TAB 6: COUPONS PANEL */}
+          {/* TAB 5: COUPONS PANEL */}
           {activeTab === "coupons" && (
             <div className="space-y-6 animate-fade-in text-zinc-150">
               
