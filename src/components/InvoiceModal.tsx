@@ -187,7 +187,7 @@ const S: Record<string, React.CSSProperties> = {
     fontFamily: '"Hanken Grotesk", system-ui, sans-serif',
     fontSize: 13,
     lineHeight: 1.5,
-    overflow: "hidden",
+    overflow: "visible",
     boxShadow: "0 24px 70px rgba(0,0,0,.35)",
   },
 
@@ -401,9 +401,19 @@ const SCOPED_CSS = `
 @media print {
   @page { size: A4; margin: 0; }
   html, body { margin: 0; padding: 0; background: #fff; }
-  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; }
+  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; transform: none !important; }
   .inv-root:last-child { page-break-after: auto; }
   .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+@media screen and (max-width: 820px) {
+  .inv-overlay { padding: 8px !important; }
+  .inv-toolbar { width: 100% !important; flex-wrap: wrap; justify-content: center; }
+  .inv-root { transform-origin: top center; transform: scale(0.45); width: 100% !important; min-height: auto !important; margin-bottom: -320px !important; }
+  .inv-root + .inv-root { margin-top: -320px !important; }
+}
+@media screen and (max-width: 500px) {
+  .inv-root { transform: scale(0.32); margin-bottom: -480px !important; }
+  .inv-root + .inv-root { margin-top: -480px !important; }
 }
 `;
 
