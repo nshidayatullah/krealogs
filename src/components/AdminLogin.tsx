@@ -194,7 +194,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               </span>
             ) : (
               <>
-                <span>Masuk Panel Admin</span>
+                <span>Login</span>
                 <LogIn className="w-4 h-4" />
               </>
             )}
