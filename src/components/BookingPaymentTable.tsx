@@ -81,7 +81,7 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {sorted.length === 0 ? (
         <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">Tidak ditemukan data pembayaran.</div>
       ) : (
         <div className="overflow-x-auto">
@@ -153,7 +153,7 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-2.5 py-1 rounded text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer transition">Prev</button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} onClick={() => setPage(p)} className={`px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer transition ${page === p ? "bg-emerald-600 text-white" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{p}</button>)}
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-2.5 py-1 rounded text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer transition">Next</button>
-          <span className="text-[10px] text-zinc-500">{filtered.length} total</span>
+          <span className="text-[10px] text-zinc-500">{sorted.length} total</span>
         </div>
       )}
     </div>
