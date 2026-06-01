@@ -2,6 +2,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
+import crypto from "crypto";
 import pg from "pg";
 import fs from "fs";
 import { Request, Response, NextFunction } from "express";
@@ -21,6 +22,7 @@ const pool = new Pool({
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
+const CSRF_SECRET = JWT_SECRET;
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
 
@@ -69,6 +71,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+
+app.get("/api/auth/csrf", (req, res) => {
+  const token = crypto.randomBytes(32).toString("hex");
+  const csrfCookie = jwt.sign({ csrf: token }, CSRF_SECRET, { expiresIn: "24h" });
+  res.cookie("csrf_token", csrfCookie, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 86400000 });
+  res.json({ csrfToken: token });
+});
 
 app.get("/api/favicon.ico", (req, res) => res.status(204).end());
 app.get("/favicon.ico", (req, res) => res.status(204).end());
