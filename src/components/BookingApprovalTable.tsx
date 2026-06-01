@@ -13,10 +13,16 @@ interface Props {
 }
 
 export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
-  const [sort, setSort] = useState<"newest" | "oldest" | "name-asc" | "name-desc">("newest");
+  const [sortKey, setSortKey] = useState<"date" | "name">("date");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
+
+  const toggleSort = (key: "date" | "name") => {
+    if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortKey(key); setSortDir("asc"); }
+  };
 
   const searched = bookings.filter(b => {
     if (!searchQuery.trim()) return true;
@@ -25,17 +31,15 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
   });
 
   const sorted = [...searched].sort((a, b) => {
-    if (sort === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    if (sort === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    if (sort === "name-asc") return a.customerName.localeCompare(b.customerName);
-    if (sort === "name-desc") return b.customerName.localeCompare(a.customerName);
-    return 0;
+    const dir = sortDir === "asc" ? 1 : -1;
+    if (sortKey === "date") return dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return dir * a.customerName.localeCompare(b.customerName);
   });
 
   const totalPages = Math.ceil(sorted.length / PER_PAGE);
   const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  useEffect(() => { setPage(1); }, [sort, searchQuery]);
+  useEffect(() => { setPage(1); }, [sortKey, sortDir, searchQuery]);
 
   const handleApproval = (id: string, approvalStatus: "approved" | "rejected") => {
     const isApprove = approvalStatus === "approved";
@@ -66,15 +70,7 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Urut</span>
-          <select value={sort} onChange={e => setSort(e.target.value as any)} title="Urutkan" className="text-[10px] bg-zinc-950 border border-zinc-800 text-zinc-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500/50">
-            <option value="newest">Terbaru</option>
-            <option value="oldest">Terlama</option>
-            <option value="name-asc">Nama A-Z</option>
-            <option value="name-desc">Nama Z-A</option>
-          </select>
-        </div>
+        <div />
         <div className="relative">
           <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
@@ -89,8 +85,12 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
-                <th className="py-2 px-2 rounded-l">Klien</th>
-                <th className="py-2 px-2">Acara</th>
+                <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
+                  Klien {sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("date")}>
+                  Acara {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
                 <th className="py-2 px-2">Paket</th>
                 <th className="py-2 px-2">Add-Ons</th>
                 <th className="py-2 px-2 text-right">Biaya</th>
