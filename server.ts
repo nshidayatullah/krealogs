@@ -13,11 +13,24 @@ if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
 
-const CSRF_SECRET = process.env.JWT_SECRET || "csrf-fallback-secret";
+const JWT_SECRET = process.env.JWT_SECRET;
+const CSRF_SECRET = process.env.CSRF_SECRET;
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
+if (!JWT_SECRET || JWT_SECRET.length < 32) {
+  throw new Error("JWT_SECRET environment variable is required (min 32 chars)");
+}
+if (!CSRF_SECRET || CSRF_SECRET.length < 32) {
+  throw new Error("CSRF_SECRET environment variable is required (min 32 chars)");
+}
+if (JWT_SECRET === CSRF_SECRET) {
+  throw new Error("JWT_SECRET and CSRF_SECRET must be different");
+}
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
+
+function sanitize(str: string): string {
+  return str.replace(/[<>&"'`]/g, "").trim();
+}
 
 function mapBookingRow(b: any): Booking {
   const s = (b.status || "pending").toLowerCase();
@@ -100,8 +113,21 @@ async function startServer() {
   const PORT = parseInt(process.env.PORT || "3000", 10);
 
   app.set("trust proxy", 1);
-  app.use(express.json());
+  app.use(express.json({ limit: "1mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "1mb" }));
   app.use(cookieParser());
+
+  const isProduction = process.env.NODE_ENV === "production" || process.env.VERCEL === "1";
+
+  app.use((req, res, next) => {
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "DENY");
+    res.setHeader("X-XSS-Protection", "0");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+    res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'");
+    next();
+  });
 
   const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -116,7 +142,7 @@ async function startServer() {
     const csrfCookie = jwt.sign({ csrf: token }, CSRF_SECRET, { expiresIn: "24h" });
     res.cookie("csrf_token", csrfCookie, {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -142,7 +168,7 @@ async function startServer() {
     const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: "24h" });
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: isProduction,
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -233,11 +259,14 @@ async function startServer() {
     }
 
     const cleanPhone = bookingData.customerPhone.trim().replace(/[^0-9+]/g, "");
+    bookingData.customerName = sanitize(bookingData.customerName);
+    bookingData.customerCity = sanitize(bookingData.customerCity);
+    bookingData.venueLocation = sanitize(bookingData.venueLocation);
 
     const newBooking: Booking = {
       ...bookingData,
       customerPhone: cleanPhone,
-      id: `BOOK-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `BOOK-${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
       createdAt: new Date().toISOString(),
       approvalStatus: "pending",
       paymentStatus: "unpaid"
@@ -274,23 +303,42 @@ async function startServer() {
       return res.status(400).json({ error: "whatsapp parameter is required" });
     }
 
-    const cleanInput = String(whatsapp).trim().replace(/[^0-9+]/g, "");
-    if (!cleanInput) {
+    const rawInput = String(whatsapp).trim();
+    if (!rawInput || rawInput.length < 4) {
       return res.json([]);
     }
 
-    const searchNum = cleanInput.replace(/[^0-9]/g, "");
+    // Extract digits for phone matching
+    const searchNum = rawInput.replace(/[^0-9]/g, "");
+    const hasLetters = /[a-zA-Z]/.test(rawInput);
+
+    // Only allow pure phone search (must not contain letters, and must have at least 4 digits)
+    if (hasLetters || searchNum.length < 4) {
+      return res.json([]);
+    }
+
+    // Normalize: strip leading country code (62) or leading zero to get core digits
+    let coreNum = searchNum;
+    if (coreNum.startsWith("62")) {
+      coreNum = coreNum.slice(2);
+    } else if (coreNum.startsWith("0")) {
+      coreNum = coreNum.slice(1);
+    }
 
     try {
-      const { rows } = await pool.query(
+      // Phone number search only
+      const result = await pool.query(
         `SELECT * FROM bookings 
-         WHERE regexp_replace(customer_phone, '[^0-9]', '', 'g') LIKE $1 
-         OR $2 LIKE '%' || regexp_replace(customer_phone, '[^0-9]', '', 'g') || '%'`,
-        [`%${searchNum}%`, searchNum]
+         WHERE 
+           regexp_replace(customer_phone, '[^0-9]', '', 'g') LIKE '%' || $1 || '%'
+           OR regexp_replace(customer_phone, '[^0-9]', '', 'g') LIKE '%' || $2 || '%'
+         ORDER BY created_at DESC`,
+        [coreNum, searchNum]
       );
-      res.json(rows.map(mapBookingRow).slice(0, 10));
+
+      res.json(result.rows.map(mapBookingRow).slice(0, 20));
     } catch (error) {
-      console.error(error);
+      console.error("Search error:", error);
       res.status(500).json({ error: "Error searching bookings" });
     }
   });

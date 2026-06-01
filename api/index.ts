@@ -343,7 +343,7 @@ app.post("/api/spreadsheet/config", requireAdmin, requireCsrf, async (req, res) 
   } catch { res.status(500).json({ error: "Failed to update spreadsheet config" }); }
 });
 
-app.post("/api/migrate", async (req: Request, res: Response) => {
+app.post("/api/migrate", requireAdmin, async (req: Request, res: Response) => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS packages (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL, features TEXT[], type VARCHAR(50) NOT NULL DEFAULT 'both', category VARCHAR(50) NOT NULL DEFAULT 'regular')`);
     await pool.query(`CREATE TABLE IF NOT EXISTS addons (id VARCHAR(100) PRIMARY KEY, name VARCHAR(255) NOT NULL, description TEXT, price INT NOT NULL)`);
