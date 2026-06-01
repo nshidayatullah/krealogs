@@ -75,6 +75,7 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  app.set("trust proxy", 1);
   app.use(express.json());
   app.use(cookieParser());
 
@@ -91,7 +92,7 @@ async function startServer() {
     const csrfCookie = jwt.sign({ csrf: token }, CSRF_SECRET, { expiresIn: "24h" });
     res.cookie("csrf_token", csrfCookie, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
@@ -117,7 +118,7 @@ async function startServer() {
     const token = jwt.sign({ username: ADMIN_USERNAME }, JWT_SECRET, { expiresIn: "24h" });
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: false,
       sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
