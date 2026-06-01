@@ -768,7 +768,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     if (!w) return;
     w.document.write(
       `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
-        `<title>${docTitle}</title><style>${SCOPED_CSS}\nbody{margin:0;background:#fff;display:flex;justify-content:center;}</style>` +
+        `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
+        `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
+        `</style>` +
         `</head><body>${node.outerHTML}</body></html>`,
     );
     w.document.close();
