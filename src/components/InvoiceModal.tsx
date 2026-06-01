@@ -403,8 +403,6 @@ const SCOPED_CSS = `
 @media print {
   @page { size: A4; margin: 0mm !important; }
   html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; min-height: auto !important; }
-  body > * { display: none !important; }
-  .inv-root, .inv-root * { display: revert !important; visibility: visible !important; }
   .inv-overlay, .inv-toolbar { display: none !important; }
   .inv-root { box-shadow: none !important; width: 794px !important; min-height: 1123px !important; max-width: 794px !important; page-break-after: always; transform: none !important; margin: 0 auto !important; position: static !important; overflow: visible !important; }
   .inv-root:last-child { page-break-after: auto; }
