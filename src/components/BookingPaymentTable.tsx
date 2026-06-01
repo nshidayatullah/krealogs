@@ -13,25 +13,30 @@ interface Props {
 }
 
 export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
-  const [filter, setFilter] = useState<"all" | "unpaid" | "dp_paid" | "paid">("all");
+  const [sort, setSort] = useState<"newest" | "oldest" | "name-asc" | "name-desc">("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
 
   const approved = bookings.filter(b => b.approvalStatus === "approved");
-  const filtered = approved.filter(b => {
-    if (filter !== "all" && b.paymentStatus !== filter) return false;
-    return true;
-  }).filter(b => {
+  const searched = approved.filter(b => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.trim().toLowerCase();
     return b.customerName.toLowerCase().includes(q) || b.customerPhone.replace(/[^0-9+]/g, "").includes(q.replace(/[^0-9+]/g, ""));
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const sorted = [...searched].sort((a, b) => {
+    if (sort === "newest") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    if (sort === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+    if (sort === "name-asc") return a.customerName.localeCompare(b.customerName);
+    if (sort === "name-desc") return b.customerName.localeCompare(a.customerName);
+    return 0;
+  });
 
-  useEffect(() => { setPage(1); }, [filter, searchQuery]);
+  const totalPages = Math.ceil(sorted.length / PER_PAGE);
+  const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+
+  useEffect(() => { setPage(1); }, [sort, searchQuery]);
 
   const handlePayment = (id: string, paymentStatus: "dp_paid" | "paid") => {
     const isPaid = paymentStatus === "paid";
@@ -51,8 +56,8 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
           if (r.ok && d.success) {
             setBookings((prev: Booking[]) => prev.map(b => b.id === id ? d.booking : b));
             showToast(isPaid ? "Lunas dikonfirmasi!" : "DP dikonfirmasi!", "success");
-          } else showToast(d.error || "Gagal", "error");
-        } catch { showToast("Koneksi error", "error"); }
+          } else { console.error("Payment error:", d, "status:", r.status); showToast(d.error || "Gagal", "error"); }
+        } catch (e) { console.error("Payment exception:", e); showToast("Koneksi error", "error"); }
       }
     });
   };
@@ -61,14 +66,13 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Status Bayar</span>
-          <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl">
-            {(["all", "unpaid", "dp_paid", "paid"] as const).map(f => (
-              <button key={f} onClick={() => setFilter(f)} className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer transition ${filter === f ? "bg-zinc-800 text-white shadow-md" : "text-zinc-400 hover:text-white"}`}>
-                {f === "all" ? "Semua" : f === "unpaid" ? "Blm Bayar" : f === "dp_paid" ? "DP Paid" : "Lunas"}
-              </button>
-            ))}
-          </div>
+          <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Urut</span>
+          <select value={sort} onChange={e => setSort(e.target.value as any)} title="Urutkan" className="text-[10px] bg-zinc-950 border border-zinc-800 text-zinc-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-emerald-500/50">
+            <option value="newest">Terbaru</option>
+            <option value="oldest">Terlama</option>
+            <option value="name-asc">Nama A-Z</option>
+            <option value="name-desc">Nama Z-A</option>
+          </select>
         </div>
         <div className="relative">
           <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
