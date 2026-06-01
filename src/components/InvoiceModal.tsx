@@ -790,8 +790,11 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   };
 
   return (
-    <div style={S.overlay} onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div style={S.overlay} onMouseDown={(e) => e.target === e.target.currentTarget && onClose()}>
       <style>{SCOPED_CSS}</style>
+
+      {/* ===== INVOICE (Multi-page) ===== */}
+      <div ref={invoiceRef}>{pageRows.map((pageSlice, i) => renderPage(i, pageSlice, i === pageRows.length - 1))}</div>
 
       <div style={S.toolbar}>
         <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handlePrint}>
@@ -801,9 +804,6 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
           Tutup
         </button>
       </div>
-
-      {/* ===== INVOICE (Multi-page) ===== */}
-      <div ref={invoiceRef}>{pageRows.map((pageSlice, i) => renderPage(i, pageSlice, i === pageRows.length - 1))}</div>
     </div>
   );
 }
