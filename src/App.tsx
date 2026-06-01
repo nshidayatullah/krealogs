@@ -4,6 +4,7 @@ import CustomerPage from "./components/CustomerPage";
 import AdminLogin from "./components/AdminLogin";
 import AdminApproval from "./components/AdminApproval";
 import AdminPayment from "./components/AdminPayment";
+import AdminPackages from "./components/AdminPackages";
 import InvoiceModal from "./components/InvoiceModal";
 import Toast from "./components/Toast";
 import { Booking } from "./types";
@@ -128,6 +129,15 @@ function AppContent() {
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
               <AdminPayment onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
+            ) : (
+              <Navigate to="/admin/login" replace />
+            )
+          } />
+          <Route path="/admin/packages" element={
+            authLoading ? (
+              <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
+            ) : isAdminAuthenticated ? (
+              <AdminPackages onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
             ) : (
               <Navigate to="/admin/login" replace />
             )
