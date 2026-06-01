@@ -9,3 +9,10 @@ coverage/
 !PRD.md
 dns-zone.txt
 testsprite_tests/tmp/config.json
+
+# Vibe coding artifacts
+.opencode/
+testsprite_tests/
+README-DEPLOY.md
+.vercel/
+.vite/
