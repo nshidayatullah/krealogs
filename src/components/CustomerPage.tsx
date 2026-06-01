@@ -488,7 +488,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-zinc-900/40 rounded-full filter blur-3xl opacity-60"></div>
 
         <div className="relative max-w-2xl space-y-4">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-zinc-950/80 text-amber-450 font-mono text-[10px] rounded-full border border-zinc-850 tracking-wider uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-zinc-950/80 text-amber-450 font-mono text-[10px] rounded-full border border-zinc-850 tracking-wider uppercase">
             <span>KREALOGS.COM CINEMATOGRAPHY</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-light tracking-tight text-white leading-tight">
@@ -501,7 +501,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
       {/* Success Banner */}
       {submitSuccess && (
         <div className="p-6 md:p-8 bg-zinc-950/70 rounded-2xl border border-emerald-500/20 shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 animate-fade-in">
-          <div className="flex items-start space-x-4">
+          <div className="flex items-start gap-4">
             <div className="p-3 bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 rounded-xl shrink-0 mt-0.5">
               <CheckCircle className="w-6 h-6" />
             </div>
@@ -584,7 +584,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
                 {searchResults.map((b) => (
                   <div key={b.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/80 hover:border-zinc-700 transition flex items-start justify-between gap-4 shadow-lg">
                     <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-2">
                         <span className="font-mono text-xs font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{b.id}</span>
                         {getStatusBadge(b)}
                       </div>
@@ -965,7 +965,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
 
                                     {/* Absolute Bottom Left Qty Counter */}
                                     {isSelected && (
-                                      <div className="absolute bottom-3 left-[42px] flex items-center space-x-1.5 bg-white p-0.5 rounded-lg border border-zinc-200 shadow-sm z-10" onClick={(e) => e.stopPropagation()}>
+                                      <div className="absolute bottom-3 left-[42px] flex items-center gap-1.5 bg-white p-0.5 rounded-lg border border-zinc-200 shadow-sm z-10" onClick={(e) => e.stopPropagation()}>
                                         <button
                                           type="button"
                                           onClick={() => updateAddonQtyForDay(bd.id, a.id, -1)}
