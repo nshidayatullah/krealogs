@@ -406,14 +406,14 @@ const SCOPED_CSS = `
   .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 @media screen and (max-width: 820px) {
-  .inv-overlay { padding: 8px !important; }
-  .inv-toolbar { width: 100% !important; flex-wrap: wrap; justify-content: center; }
-  .inv-root { transform-origin: top center; transform: scale(0.45); width: 100% !important; min-height: auto !important; margin-bottom: -320px !important; }
-  .inv-root + .inv-root { margin-top: -320px !important; }
+  .inv-overlay { padding: 4px !important; justify-content: flex-start !important; }
+  .inv-toolbar { width: 100% !important; flex-wrap: wrap; justify-content: center; position: sticky !important; top: 0; z-index: 10; padding: 8px 4px !important; }
+  .inv-root { transform-origin: top center; transform: scale(0.55); width: 100% !important; min-height: auto !important; margin-bottom: -280px !important; }
+  .inv-root + .inv-root { margin-top: -280px !important; }
 }
 @media screen and (max-width: 500px) {
-  .inv-root { transform: scale(0.32); margin-bottom: -480px !important; }
-  .inv-root + .inv-root { margin-top: -480px !important; }
+  .inv-root { transform: scale(0.42); margin-bottom: -380px !important; }
+  .inv-root + .inv-root { margin-top: -380px !important; }
 }
 `;
 
