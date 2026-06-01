@@ -452,6 +452,9 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
     });
   };
 
+  // Search
+  const [searchQuery, setSearchQuery] = useState("");
+
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 15;
@@ -467,7 +470,13 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
     return b.paymentStatus === paymentFilter;
   });
 
-  const activeList = activeTab === "approval" ? filteredApproval : filteredPayment;
+  const searched = (activeTab === "approval" ? filteredApproval : filteredPayment).filter((b) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.trim().toLowerCase();
+    return b.customerName.toLowerCase().includes(q) || b.customerPhone.replace(/[^0-9+]/g, "").includes(q.replace(/[^0-9+]/g, ""));
+  });
+
+  const activeList = searched;
   const totalPages = Math.ceil(activeList.length / ITEMS_PER_PAGE);
   const paginatedBookings = activeList.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -476,7 +485,7 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [approvalFilter, paymentFilter, activeTab]);
+  }, [approvalFilter, paymentFilter, activeTab, searchQuery]);
 
   return (
     <div className="text-zinc-150">
@@ -613,7 +622,13 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
                   <p className="text-xs text-zinc-400 mt-1">Setujui atau tolak pemesanan dari kustomer.</p>
                 </div>
 
-                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
+                    {searchQuery && <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
+                  </div>
+                  <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
                   {["all", "pending", "approved", "rejected"].map((filter) => (
                     <button
                       key={filter}
@@ -744,7 +759,13 @@ export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileS
                   <p className="text-xs text-zinc-400 mt-1">Catat pembayaran DP atau pelunasan dari kustomer yang sudah disetujui.</p>
                 </div>
 
-                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
+                    {searchQuery && <button onClick={() => setSearchQuery("")} className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
+                  </div>
+                  <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
                   {["all", "unpaid", "dp_paid", "paid"].map((filter) => (
                     <button
                       key={filter}
