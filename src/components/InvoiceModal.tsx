@@ -410,8 +410,16 @@ const SCOPED_CSS = `
 }
 @media screen and (max-width: 820px) {
   .inv-overlay { padding: 4px !important; justify-content: flex-start !important; }
-  .inv-toolbar { width: 100% !important; flex-wrap: wrap; justify-content: center; position: sticky !important; top: 0; z-index: 10; padding: 8px 4px !important; }
+  .inv-toolbar { width: 100% !important; flex-wrap: wrap; justify-content: center; padding: 8px 4px !important; position: relative !important; }
   .inv-root { transform-origin: top center; transform: scale(0.55); width: 100% !important; min-height: auto !important; margin-bottom: -40px !important; }
+  .inv-root + .inv-root { margin-top: 2px !important; }
+}
+@media screen and (min-width: 821px) and (max-height: 900px) {
+  .inv-root { transform-origin: top center; transform: scale(0.25); margin-bottom: -420px !important; }
+  .inv-root + .inv-root { margin-top: -420px !important; }
+}
+@media screen and (max-width: 500px) {
+  .inv-root { transform: scale(0.42); margin-bottom: -40px !important; }
   .inv-root + .inv-root { margin-top: 2px !important; }
 }
 @media screen and (min-width: 821px) and (max-height: 900px) {
