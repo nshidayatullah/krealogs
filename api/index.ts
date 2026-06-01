@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import crypto from "crypto";
 import pg from "pg";
 import fs from "fs";
+import path from "path";
 import { Request, Response, NextFunction } from "express";
 
 const { Pool } = pg;
@@ -355,5 +356,15 @@ app.post("/api/migrate", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Migration failed", message: error.message });
   }
 });
+
+const staticPath = path.join(__dirname, "..", "dist");
+if (fs.existsSync(staticPath)) {
+  app.use(express.static(staticPath));
+  app.get("*", (req, res) => {
+    if (!req.path.startsWith("/api")) {
+      res.sendFile(path.join(staticPath, "index.html"));
+    }
+  });
+}
 
 export default app;
