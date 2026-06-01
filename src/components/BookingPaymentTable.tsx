@@ -96,24 +96,24 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
             <tbody className="divide-y divide-zinc-900">
               {paginated.map(b => b && (
                 <tr key={b.id} className="hover:bg-zinc-900/10 transition">
-                  <td className="py-1 px-2 leading-[13px]">
+                  <td className="py-1 px-2 leading-3.25">
                     <span className="font-sans text-[9px] bg-zinc-900 border border-zinc-800 font-bold px-1 py-0.5 rounded text-zinc-350 block w-fit mb-0.5">{b.id}</span>
                     <div className="text-white font-bold text-[10px]">{b.customerName}</div>
                     <div className="text-zinc-400 text-[9px]">{b.customerPhone}</div>
                     <div className="text-zinc-500 text-[9px]">{b.customerCity}</div>
                   </td>
-                  <td className="py-1 px-2 leading-[13px]">
+                  <td className="py-1 px-2 leading-3.25">
                     <span className="text-[9px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded block w-fit font-sans mb-0.5">{b.eventType === "wedding" ? `Wedding${b.weddingType ? " ("+b.weddingType+")" : ""}` : "Event"}</span>
                     <div className="text-zinc-200 text-[10px]">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</div>
-                    <div className="text-zinc-450 text-[9px] truncate max-w-[140px]">{b.venueLocation}</div>
+                    <div className="text-zinc-450 text-[9px] truncate max-w-35">{b.venueLocation}</div>
                   </td>
-                  <td className="py-1 px-2 leading-[13px]"><span className="text-white text-[10px]">{b.packageName}</span></td>
-                  <td className="py-1 px-2 leading-[13px]">
+                  <td className="py-1 px-2 leading-3.25"><span className="text-white text-[10px]">{b.packageName}</span></td>
+                  <td className="py-1 px-2 leading-3.25">
                     {b.addonDetails && b.addonDetails.length > 0 ? (
-                      <div>{Object.entries(b.addonDetails.reduce((acc: Record<string, number>, a) => { acc[a.name] = (acc[a.name] || 0) + 1; return acc; }, {})).map(([name, qty]) => <div key={name} className="text-[9px] text-zinc-400 font-sans leading-[13px]">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>)}</div>
+                      <div>{Object.entries(b.addonDetails.reduce((acc: Record<string, number>, a) => { acc[a.name] = (acc[a.name] || 0) + 1; return acc; }, {})).map(([name, qty]) => <div key={name} className="text-[9px] text-zinc-400 font-sans leading-3.25">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>)}</div>
                     ) : <span className="text-[9px] text-zinc-600 font-sans">—</span>}
                   </td>
-                  <td className="py-1 px-2 text-right leading-[13px]">
+                  <td className="py-1 px-2 text-right leading-3.25">
                     <div className="text-amber-400 text-[10px] font-sans">Rp {b.totalPrice.toLocaleString("id-ID")}</div>
                     <div className="text-[9px] text-emerald-400">Masuk: Rp {b.amountPaid.toLocaleString("id-ID")}</div>
                     {b.amountPaid < b.totalPrice && <div className="text-[9px] text-zinc-400">Sisa: Rp {b.remainingPayment.toLocaleString("id-ID")}</div>}
