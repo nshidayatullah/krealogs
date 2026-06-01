@@ -17,10 +17,8 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/db ./src/db
-COPY --from=builder /app/src/types.ts ./src/types.ts
+COPY --from=builder /app/src ./src
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
-COPY --from=builder /app/package.json ./package.json
 
 EXPOSE 3000
 
