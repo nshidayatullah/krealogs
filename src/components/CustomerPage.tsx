@@ -7,9 +7,10 @@ import { formatEventDate } from "../utils/dateFormatter";
 
 interface CustomerPageProps {
   onOpenInvoice: (booking: Booking) => void;
+  onShowToast?: (message: string, type: "success" | "error") => void;
 }
 
-export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
+export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPageProps) {
   // DB States
   const [packages, setPackages] = useState<Package[]>([]);
   const [addons, setAddons] = useState<Addon[]>([]);
@@ -389,6 +390,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       }
 
       setSubmitSuccess(result.booking);
+      onShowToast?.("Registrasi pemesanan berhasil dikirim!", "success");
       // Reset form
       setNamaLengkap("");
       setNoWhatsapp("");

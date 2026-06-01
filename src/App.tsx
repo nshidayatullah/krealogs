@@ -108,7 +108,7 @@ function AppContent() {
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         <Routes>
-          <Route path="/" element={<CustomerPage onOpenInvoice={handleOpenInvoice} />} />
+          <Route path="/" element={<CustomerPage onOpenInvoice={handleOpenInvoice} onShowToast={(msg, type) => setToast({ message: msg, type })} />} />
           <Route path="/admin/login" element={
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
