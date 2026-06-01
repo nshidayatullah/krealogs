@@ -3,7 +3,7 @@ import { Package, Addon, Booking } from "../types";
 import { User, Phone, MapPin, Calendar, FileText, Search, Check, AlertCircle, Camera, Sparkles, DollarSign, CheckCircle, HelpCircle, ArrowRight, ChevronLeft, ChevronRight, Ticket, X, Receipt } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { formatEventDate } from "../utils/dateFormatter";
-import brandLogo from "../assets/images/krealogs_logo_1780149664590.png";
+
 
 interface CustomerPageProps {
   onOpenInvoice: (booking: Booking) => void;
@@ -58,13 +58,11 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchResults, setSearchResults] = useState<Booking[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [searchError, setSearchError] = useState("");
 
   // Refresh data on mount
   useEffect(() => {
-    Promise.all([
-      fetch("/api/packages").then(r => r.json()),
-      fetch("/api/addons").then(r => r.json()),
-    ])
+    Promise.all([fetch("/api/packages").then((r) => r.json()), fetch("/api/addons").then((r) => r.json())])
       .then(([packagesData, addonsData]) => {
         setPackages(packagesData || []);
         setAddons(addonsData || []);
@@ -421,24 +419,47 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
   // Search Booking
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchWhatsapp.trim()) return;
+    const trimmed = searchWhatsapp.trim();
+    if (!trimmed) return;
+
+    const phoneDigits = trimmed.replace(/[^0-9]/g, "");
+    if (/[a-zA-Z]/.test(trimmed) || phoneDigits.length < 4) {
+      setSearchError("Nomor WhatsApp tidak valid. Masukkan minimal 4 digit angka.");
+      setSearchResults([]);
+      setHasSearched(true);
+      return;
+    }
 
     setSearchLoading(true);
     setHasSearched(true);
+    setSearchError("");
     try {
-      const response = await fetch(`/api/bookings/search?whatsapp=${encodeURIComponent(searchWhatsapp)}`);
+      const response = await fetch(`/api/bookings/search?whatsapp=${encodeURIComponent(trimmed)}`);
       if (response.ok) {
         const data = await response.json();
         setSearchResults(data);
+        if (data.length === 0) {
+          setSearchError("");
+        }
       } else {
+        const errData = await response.json().catch(() => ({}));
+        setSearchError(errData.error || "Terjadi kesalahan saat mencari data.");
         setSearchResults([]);
       }
     } catch (err) {
       console.error("Search error:", err);
+      setSearchError("Koneksi ke server gagal. Periksa koneksi internet Anda.");
       setSearchResults([]);
     } finally {
       setSearchLoading(false);
     }
+  };
+
+  const handleClearSearch = () => {
+    setSearchWhatsapp("");
+    setSearchResults([]);
+    setHasSearched(false);
+    setSearchError("");
   };
 
   const getStatusBadge = (b: Booking) => {
@@ -500,13 +521,13 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       )}
 
       {/* Search status - Cek Status Pemesanan */}
-      <section className="bg-zinc-950/30 rounded-3xl p-6 md:p-8 border border-zinc-800 space-y-6">
+      <section className="bg-[#0c0c0e] rounded-3xl p-6 md:p-8 border border-zinc-800 space-y-6 shadow-xl">
         <div>
           <h2 className="text-lg font-bold text-white flex items-center gap-2">
             <Search className="w-5 h-5 text-amber-500" />
             Cek Status Pemesanan Anda
           </h2>
-          <p className="text-xs text-zinc-500 mt-1">Gunakan nomor ponsel kustomer untuk mengunduh invoice resmi yang disetujui serta melacak progres.</p>
+          <p className="text-xs text-zinc-400 mt-1">Gunakan nomor WhatsApp Anda untuk mengunduh invoice resmi serta melacak progres pemesanan.</p>
         </div>
 
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
@@ -514,16 +535,24 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
             <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input
               type="text"
-              placeholder="Masukkan nomor WhatsApp terdaftar (contoh: 08123456789)"
+              placeholder="Nomor WhatsApp (cth: 08123456789)"
               value={searchWhatsapp}
-              onChange={(e) => setSearchWhatsapp(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-500 font-mono"
+              onChange={(e) => setSearchWhatsapp(e.target.value.replace(/[^0-9+]/g, ""))}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") handleClearSearch();
+              }}
+              className="w-full pl-10 pr-10 py-3 bg-zinc-900/60 hover:bg-zinc-900 border border-zinc-800 focus:border-amber-500 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-500 font-mono"
             />
+            {searchWhatsapp && (
+              <button type="button" onClick={handleClearSearch} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer" aria-label="Hapus pencarian">
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
           <button
             type="submit"
-            disabled={searchLoading}
-            className="px-6 py-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-950 font-bold rounded-xl text-xs uppercase tracking-wider transition cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-600"
+            disabled={searchLoading || !searchWhatsapp.trim()}
+            className="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-sans shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           >
             {searchLoading ? "Mencari..." : "Cek Status"}
           </button>
@@ -532,33 +561,42 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
         {/* Search Results Display */}
         {hasSearched && (
           <div className="pt-4 border-t border-zinc-900 space-y-4">
-            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Hasil Pencarian</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Hasil Pencarian</h3>
+              {searchResults.length > 0 && <span className="text-[10px] text-zinc-600 font-mono">{searchResults.length} pesanan ditemukan</span>}
+            </div>
 
-            {searchResults.length === 0 ? (
+            {searchError ? (
+              <div className="p-6 text-center text-zinc-400 text-xs border border-dashed border-rose-800/40 rounded-xl bg-rose-950/10">
+                <AlertCircle className="w-5 h-5 mx-auto text-rose-600 mb-2" />
+                {searchError}
+              </div>
+            ) : searchResults.length === 0 ? (
               <div className="p-6 text-center text-zinc-400 text-xs border border-dashed border-zinc-800 rounded-xl bg-zinc-950/20">
                 <AlertCircle className="w-5 h-5 mx-auto text-zinc-600 mb-2" />
-                Nomor WhatsApp tidak cocok dengan pesanan terdaftar. Pastikan nomor sudah benar.
+                <p className="font-medium text-zinc-300 mb-1">Tidak ada pesanan ditemukan</p>
+                <p className="text-zinc-500">Nomor WhatsApp tidak cocok dengan pesanan terdaftar. Pastikan nomor sudah benar.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {searchResults.map((b) => (
-                  <div key={b.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40 hover:border-zinc-700 transition flex items-start justify-between gap-4">
+                  <div key={b.id} className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/80 hover:border-zinc-700 transition flex items-start justify-between gap-4 shadow-lg">
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-mono text-xs font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{b.id}</span>
                         {getStatusBadge(b)}
                       </div>
                       <div>
-                        <p className="text-xs text-white font-medium">{b.customerName}</p>
-                        <p className="text-[10px] text-zinc-400 font-mono">
+                        <p className="text-xs text-white font-bold tracking-wide">{b.customerName}</p>
+                        <p className="text-[10px] text-zinc-300 font-mono">
                           {b.customerPhone} ({b.customerCity})
                         </p>
                       </div>
-                      <p className="text-[11px] text-zinc-500">
+                      <p className="text-[11px] text-zinc-400 font-medium">
                         {b.packageName} • {formatEventDate(b.eventDate, { day: "numeric", month: "short", year: "numeric" })}
                       </p>
-                      <p className="text-[11px] text-zinc-400">
-                        Total Tagihan: <span className="text-amber-500 font-mono font-bold">Rp {b.totalPrice.toLocaleString("id-ID")}</span>
+                      <p className="text-[11px] text-zinc-300">
+                        Total Tagihan: <span className="text-amber-400 font-mono font-bold">Rp {b.totalPrice.toLocaleString("id-ID")}</span>
                       </p>
                     </div>
 
@@ -769,7 +807,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                               <button
                                 type="button"
                                 onClick={() => removeBookingDay(bd.id)}
-                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-sans uppercase tracking-wider shadow-md"
                               >
                                 Hapus Hari Ini
                               </button>
@@ -962,7 +1000,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     <button
                       type="button"
                       onClick={addBookingDay}
-                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition cursor-pointer font-sans uppercase tracking-wider shadow-md"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-black rounded-xl text-xs font-extrabold transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer font-sans uppercase tracking-wider shadow-md"
                     >
                       + Tambah Hari
                     </button>

@@ -171,7 +171,7 @@ input[type="range"] {
 }
 
 /* Brand Logo Adjustment: convert white logo to high-contrast black for light theme */
-img[src*="krealogs_logo"] {
+img[src*="/krealogs_logo"] {
   filter: brightness(0) !important;
   object-fit: contain !important;
 }

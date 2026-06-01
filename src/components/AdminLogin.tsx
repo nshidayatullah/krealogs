@@ -12,7 +12,7 @@ import {
   CheckCircle2, 
   ShieldCheck
 } from "lucide-react";
-import brandLogo from "../assets/images/krealogs_logo_1780149664590.png";
+
 
 interface AdminLoginProps {
   onLoginSuccess: () => void;
@@ -94,7 +94,7 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
               <ShieldCheck className="w-7 h-7 text-emerald-600 animate-pulse" />
             ) : (
               <img
-                src={brandLogo}
+                src="/krealogs_logo.png"
                 alt="Krealogs Logo"
                 className="h-full w-auto object-contain"
                 referrerPolicy="no-referrer"

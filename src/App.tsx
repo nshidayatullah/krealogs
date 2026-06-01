@@ -7,12 +7,13 @@ import AdminPayment from "./components/AdminPayment";
 import AdminPackages from "./components/AdminPackages";
 import AdminAddons from "./components/AdminAddons";
 import AdminCoupons from "./components/AdminCoupons";
+import AdminDashboard from "./components/AdminDashboard";
 import AdminRecap from "./components/AdminRecap";
 import InvoiceModal from "./components/InvoiceModal";
 import Toast from "./components/Toast";
 import { Booking } from "./types";
 import { LogOut } from "lucide-react";
-import brandLogo from "./assets/images/krealogs_logo_1780149664590.png";
+
 
 function AppContent() {
   const navigate = useNavigate();
@@ -83,7 +84,7 @@ function AppContent() {
               </button>
             )}
             <img
-              src={brandLogo}
+              src="/krealogs_logo.png"
               alt="Krealogs Logo"
               className="h-8 w-auto object-contain"
               referrerPolicy="no-referrer"
@@ -117,7 +118,16 @@ function AppContent() {
               <AdminLogin onLoginSuccess={handleLoginSuccess} />
             )
           } />
-          <Route path="/admin" element={<Navigate to="/admin/approval" replace />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route path="/admin/dashboard" element={
+            authLoading ? (
+              <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
+            ) : isAdminAuthenticated ? (
+              <AdminDashboard onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
+            ) : (
+              <Navigate to="/admin/login" replace />
+            )
+          } />
           <Route path="/admin/approval" element={
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>

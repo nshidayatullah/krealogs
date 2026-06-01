@@ -8,3 +8,4 @@ coverage/
 !.env.example
 !PRD.md
 dns-zone.txt
+testsprite_tests/tmp/config.json

@@ -18,6 +18,7 @@ export default function AdminLayout({ bookings, packagesCount, addonsCount, coup
   const currentPath = location.pathname;
 
   const menu = [
+    { path: "/admin/dashboard", label: "Dashboard", color: "emerald" },
     { path: "/admin/approval", label: "Persetujuan", badge: bookings.filter(b => b.approvalStatus === "pending").length, color: "amber" },
     { path: "/admin/payment", label: "Pembayaran", badge: bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length, color: "emerald" },
     { type: "divider" as const },
@@ -50,7 +51,7 @@ export default function AdminLayout({ bookings, packagesCount, addonsCount, coup
             </div>
             {menu.map((m: any, i) =>
               m.type === "divider" ? <div key={i} className="border-t border-zinc-900 my-1" /> : (
-                <button key={m.path} onClick={() => nav(m.path)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20") : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+                <button key={m.path} onClick={() => nav(m.path)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20") : "text-zinc-400 hover:text-white hover:bg-white/5"}`}>
                   <span className="flex-1">{m.label}</span>
                   {m.badge !== undefined && <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-600 text-white" : "bg-amber-500 text-black") : "bg-zinc-800 text-zinc-400"}`}>{m.badge}</span>}
                 </button>
@@ -68,7 +69,7 @@ export default function AdminLayout({ bookings, packagesCount, addonsCount, coup
           </div>
           {menu.map((m: any, i) =>
             m.type === "divider" ? <div key={i} className="border-t border-zinc-900 my-1" /> : (
-              <button key={m.path} onClick={() => nav(m.path)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20") : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <button key={m.path} onClick={() => nav(m.path)} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20") : "text-zinc-400 hover:text-white hover:bg-white/5"}`}>
                 <span className="flex-1">{m.label}</span>
                 {m.badge !== undefined && <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${isActive(m.path) ? (m.color === "emerald" ? "bg-emerald-600 text-white" : "bg-amber-500 text-black") : "bg-zinc-800 text-zinc-400"}`}>{m.badge}</span>}
               </button>
@@ -78,26 +79,6 @@ export default function AdminLayout({ bookings, packagesCount, addonsCount, coup
 
         {/* Main Content */}
         <div className="flex-1 min-w-0 space-y-6">
-          {/* Upper Status Cards */}
-          <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
-              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide block font-sans">TOTAL BOOKING</span>
-              <p className="text-2xl font-sans font-bold text-white mt-1">{bookings.length}</p>
-            </div>
-            <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
-              <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-wide block font-sans">REVIEW PENDING</span>
-              <p className="text-2xl font-sans font-bold text-amber-500 mt-1">{bookings.filter((b) => b.approvalStatus === "pending").length}</p>
-            </div>
-            <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
-              <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">APPROVED ORDERS</span>
-              <p className="text-2xl font-sans font-bold text-emerald-400 mt-1">{bookings.filter((b) => b.approvalStatus === "approved").length}</p>
-            </div>
-            <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
-              <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">EST. REVENUE</span>
-              <p className="text-lg font-sans font-bold text-[#f3f4f6] mt-1">Rp {bookings.filter((b) => b.approvalStatus === "approved").reduce((sum, b) => sum + b.totalPrice, 0).toLocaleString("id-ID")}</p>
-            </div>
-          </section>
-
           {children}
         </div>
       </div>
