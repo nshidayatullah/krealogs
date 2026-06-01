@@ -15,6 +15,7 @@ interface Props {
 export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
   const [sortKey, setSortKey] = useState<"date" | "name">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
@@ -22,6 +23,21 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
   const toggleSort = (key: "date" | "name") => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
+  };
+
+  const doSearch = () => {
+    setSearchQuery(searchInput);
+    setPage(1);
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearchQuery("");
+    setPage(1);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") doSearch();
   };
 
   const approved = bookings.filter(b => b.approvalStatus === "approved");
@@ -68,12 +84,11 @@ export default function BookingPaymentTable({ bookings, csrfToken, onOpenInvoice
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 justify-between">
-        <div />
-        <div className="relative">
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-          <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-36 pl-8 pr-3 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50 transition" />
-          {searchQuery && <button onClick={() => setSearchQuery("")} title="Hapus pencarian" className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
+      <div className="flex flex-wrap items-center gap-2 justify-end">
+        <div className="relative flex items-center gap-1">
+          <input type="text" placeholder="Cari nama / WA..." value={searchInput} onChange={e => setSearchInput(e.target.value)} onKeyDown={handleKeyDown} className="w-36 pl-2.5 pr-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-emerald-500/50 transition" />
+          {searchQuery && <button onClick={clearSearch} title="Hapus pencarian" className="text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
+          <button onClick={doSearch} className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[10px] font-bold transition cursor-pointer">Cari</button>
         </div>
       </div>
 
