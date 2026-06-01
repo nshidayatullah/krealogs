@@ -441,19 +441,20 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "paid":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase tracking-widest">Lunas (Kwitansi)</span>;
-      case "approved":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-650 border border-amber-500/20 uppercase tracking-widest">Invoice (Belum Bayar)</span>;
-      case "dp_paid":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-700 border border-amber-550/30 uppercase tracking-widest">Invoice (DP Terbayar)</span>;
-      case "rejected":
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 uppercase tracking-widest">Ditolak</span>;
-      default:
-        return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-500/10 text-zinc-500 border border-zinc-500/20 uppercase tracking-widest animate-pulse">Menunggu Review Jadwal</span>;
+  const getStatusBadge = (b: Booking) => {
+    if (b.approvalStatus === "pending") {
+      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-500/10 text-zinc-500 border border-zinc-500/20 uppercase tracking-widest animate-pulse">Menunggu Review Jadwal</span>;
     }
+    if (b.approvalStatus === "rejected") {
+      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-rose-500/10 text-rose-600 border border-rose-500/20 uppercase tracking-widest">Ditolak</span>;
+    }
+    if (b.paymentStatus === "paid") {
+      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 uppercase tracking-widest">Lunas (Kwitansi)</span>;
+    }
+    if (b.paymentStatus === "dp_paid") {
+      return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 text-amber-700 border border-amber-550/30 uppercase tracking-widest">Invoice (DP Terbayar)</span>;
+    }
+    return <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold rounded bg-amber-500/10 text-amber-650 border border-amber-500/20 uppercase tracking-widest">Invoice (Belum Bayar)</span>;
   };
 
   return (
@@ -545,7 +546,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2">
                         <span className="font-mono text-xs font-bold text-white bg-zinc-900 px-2 py-0.5 rounded border border-zinc-800">{b.id}</span>
-                        {getStatusBadge(b.status)}
+                        {getStatusBadge(b)}
                       </div>
                       <div>
                         <p className="text-xs text-white font-medium">{b.customerName}</p>
@@ -562,7 +563,14 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                     </div>
 
                     <div className="flex flex-col items-end justify-between h-full gap-4">
-                      {b.status === "paid" ? (
+                      {b.approvalStatus === "rejected" ? (
+                        <span className="text-[10px] text-rose-600 font-medium italic">Ditolak</span>
+                      ) : b.approvalStatus === "pending" ? (
+                        <span className="text-[10px] text-zinc-500 font-medium italic flex items-center gap-1 animate-pulse">
+                          <HelpCircle className="w-3.5 h-3.5 text-zinc-450" />
+                          Pending Review
+                        </span>
+                      ) : b.paymentStatus === "paid" ? (
                         <button
                           onClick={() => onOpenInvoice(b)}
                           className="px-3 py-2 bg-emerald-600 hover:bg-emerald-555 text-white text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1"
@@ -570,18 +578,11 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
                           <FileText className="w-3.5 h-3.5" />
                           Kwitansi Pelunasan
                         </button>
-                      ) : b.status === "approved" || b.status === "dp_paid" ? (
+                      ) : (
                         <button onClick={() => onOpenInvoice(b)} className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-bold uppercase rounded-lg transition tracking-wide cursor-pointer flex items-center gap-1">
                           <FileText className="w-3.5 h-3.5" />
                           Invoice Resmi
                         </button>
-                      ) : b.status === "rejected" ? (
-                        <span className="text-[10px] text-rose-600 font-medium italic">Ditolak</span>
-                      ) : (
-                        <span className="text-[10px] text-zinc-500 font-medium italic flex items-center gap-1 animate-pulse">
-                          <HelpCircle className="w-3.5 h-3.5 text-zinc-450" />
-                          Pending Review
-                        </span>
                       )}
                     </div>
                   </div>

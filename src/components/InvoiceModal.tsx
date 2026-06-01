@@ -174,12 +174,12 @@ const S: Record<string, React.CSSProperties> = {
   },
 
   /* band */
-  band: { background: PALETTE.terra, color: "#fff", padding: "46px 60px 38px" },
+  band: { background: PALETTE.terra, color: "#fff", padding: "30px 48px 24px" },
   bandTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
-  logo: { width: 158, height: "auto", display: "block" },
+  logo: { width: 140, height: "auto", display: "block" },
   tag: {
-    marginTop: 12,
-    fontSize: 9.5,
+    marginTop: 8,
+    fontSize: 8.5,
     letterSpacing: ".26em",
     textTransform: "uppercase",
     fontWeight: 600,
@@ -188,67 +188,67 @@ const S: Record<string, React.CSSProperties> = {
   word: {
     fontFamily: '"Space Grotesk", sans-serif',
     fontWeight: 700,
-    fontSize: 32,
+    fontSize: 26,
     letterSpacing: ".02em",
     lineHeight: 1,
     textAlign: "right",
   },
-  bandMeta: { display: "flex", gap: 46, justifyContent: "flex-end", marginTop: 18 },
+  bandMeta: { display: "flex", gap: 36, justifyContent: "flex-end", marginTop: 12 },
   bm: { textAlign: "right" },
   bmK: {
-    fontSize: 8.5,
+    fontSize: 7.5,
     letterSpacing: ".2em",
     textTransform: "uppercase",
     color: "rgba(255,255,255,.7)",
     fontWeight: 700,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  bmV: { fontSize: 13, fontWeight: 600, color: "#fff", whiteSpace: "nowrap" },
+  bmV: { fontSize: 11, fontWeight: 600, color: "#fff", whiteSpace: "nowrap" },
 
   /* body */
-  body: { padding: "38px 60px 0", display: "flex", flexDirection: "column", flex: 1 },
-  parties: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 34 },
-  card: { border: `1px solid ${PALETTE.line}`, borderRadius: 10, padding: "18px 20px" },
-  cardDark: { background: PALETTE.cream, border: "1px solid transparent", borderRadius: 10, padding: "18px 20px" },
+  body: { padding: "24px 48px 0", display: "flex", flexDirection: "column", flex: 1 },
+  parties: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 },
+  card: { border: `1px solid ${PALETTE.line}`, borderRadius: 8, padding: "12px 16px" },
+  cardDark: { background: PALETTE.cream, border: "1px solid transparent", borderRadius: 8, padding: "12px 16px" },
   plabel: {
-    fontSize: 10,
+    fontSize: 8.5,
     letterSpacing: ".2em",
     textTransform: "uppercase",
     color: PALETTE.terra,
     fontWeight: 700,
-    marginBottom: 9,
+    marginBottom: 6,
   },
-  pname: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 18, marginBottom: 6 },
-  pline: { fontSize: 12, color: PALETTE.inkSoft },
+  pname: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 15, marginBottom: 4 },
+  pline: { fontSize: 11, color: PALETTE.inkSoft },
 
   thead: {
     display: "grid",
-    gridTemplateColumns: "1fr 48px 124px 124px",
-    gap: 10,
+    gridTemplateColumns: "1fr 48px 100px 100px",
+    gap: 8,
     background: PALETTE.ink,
     color: "#fff",
-    padding: "12px 18px",
+    padding: "8px 14px",
     borderRadius: "4px 4px 0 0",
   },
-  th: { fontSize: 10, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, color: "rgba(255,255,255,.78)" },
+  th: { fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, color: "rgba(255,255,255,.78)" },
   thR: { textAlign: "right" },
   thC: { textAlign: "center" },
   row: {
     display: "grid",
-    gridTemplateColumns: "1fr 48px 124px 124px",
-    gap: 10,
-    padding: "16px 18px",
+    gridTemplateColumns: "1fr 48px 100px 100px",
+    gap: 8,
+    padding: "10px 14px",
     borderBottom: `1px solid ${PALETTE.line}`,
     alignItems: "start",
   },
-  iname: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 14, marginBottom: 5 },
-  imeta: { fontSize: 11, color: PALETTE.inkSoft, lineHeight: 1.5 },
-  cell: { fontSize: 13 },
+  iname: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 12, marginBottom: 3 },
+  imeta: { fontSize: 10, color: PALETTE.inkSoft, lineHeight: 1.4 },
+  cell: { fontSize: 11 },
   cellR: { textAlign: "right" },
   cellC: { textAlign: "center" },
   cellB: { fontWeight: 700 },
 
-  totals: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: 22, gap: 30 },
+  totals: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: 14, gap: 24 },
 
   voucher: {
     position: "relative",
@@ -289,52 +289,52 @@ const S: Record<string, React.CSSProperties> = {
   },
   voucherNote: { fontSize: 10.5, color: PALETTE.inkSoft, whiteSpace: "nowrap" },
 
-  totalsInner: { width: 320 },
-  trow: { display: "flex", justifyContent: "space-between", padding: "8px 2px", fontSize: 13, color: PALETTE.inkSoft },
+  totalsInner: { width: 280 },
+  trow: { display: "flex", justifyContent: "space-between", padding: "5px 2px", fontSize: 11.5, color: PALETTE.inkSoft },
   trowV: { color: PALETTE.ink, fontWeight: 600 },
   trowDisc: { color: PALETTE.terra, fontWeight: 600 },
   tbox: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 6,
     background: PALETTE.terra,
     color: "#fff",
-    padding: "3px 20px",
+    padding: "2px 16px",
     borderRadius: 4,
   },
-  tboxK: { fontSize: 10, letterSpacing: ".2em", textTransform: "uppercase", fontWeight: 700 },
-  tboxV: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 16, textAlign: "right" },
+  tboxK: { fontSize: 9, letterSpacing: ".2em", textTransform: "uppercase", fontWeight: 700 },
+  tboxV: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 14, textAlign: "right" },
 
-  dp: { marginTop: 12, display: "flex", flexDirection: "column", gap: 8 },
+  dp: { marginTop: 8, display: "flex", flexDirection: "column", gap: 5 },
   dpDue: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "baseline",
     background: "rgba(208,88,72,.09)",
     borderRadius: 4,
-    padding: "10px 14px",
+    padding: "7px 12px",
   },
-  dpLbl: { fontSize: 10.5, letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 700, color: PALETTE.terraDeep },
-  dpAmt: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 15, color: PALETTE.terraDeep },
-  dpRest: { display: "flex", justifyContent: "space-between", padding: "0 14px", fontSize: 12, color: PALETTE.inkSoft, whiteSpace: "nowrap" },
+  dpLbl: { fontSize: 9, letterSpacing: ".04em", textTransform: "uppercase", fontWeight: 700, color: PALETTE.terraDeep },
+  dpAmt: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 700, fontSize: 13, color: PALETTE.terraDeep },
+  dpRest: { display: "flex", justifyContent: "space-between", padding: "0 12px", fontSize: 11, color: PALETTE.inkSoft, whiteSpace: "nowrap" },
   dpRestV: { fontWeight: 600, color: PALETTE.ink },
 
-  foot: { marginTop: "auto", display: "grid", gridTemplateColumns: "1fr auto", gap: 40, alignItems: "end", padding: "30px 0 40px" },
-  pay: { borderLeft: `3px solid ${PALETTE.terra}`, paddingLeft: 18 },
-  payLabel: { fontSize: 8.5, letterSpacing: ".2em", textTransform: "uppercase", color: PALETTE.terra, fontWeight: 700, marginBottom: 10 },
-  payGrid: { display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 16px", fontSize: 12 },
+  foot: { marginTop: "auto", display: "grid", gridTemplateColumns: "1fr auto", gap: 30, alignItems: "end", padding: "20px 0 28px" },
+  pay: { borderLeft: `3px solid ${PALETTE.terra}`, paddingLeft: 14 },
+  payLabel: { fontSize: 7.5, letterSpacing: ".2em", textTransform: "uppercase", color: PALETTE.terra, fontWeight: 700, marginBottom: 7 },
+  payGrid: { display: "grid", gridTemplateColumns: "auto 1fr", gap: "3px 14px", fontSize: 11 },
   payK: { color: PALETTE.inkSoft, whiteSpace: "nowrap" },
   payVPlain: { fontWeight: 600 },
   payVMono: { fontWeight: 600, fontFamily: '"Space Mono", monospace' },
-  sign: { textAlign: "center", minWidth: 290 },
+  sign: { textAlign: "center", minWidth: 240 },
   signInner: { position: "relative", display: "inline-block" },
   signContent: { position: "relative", zIndex: 2 },
-  stampImg: { position: "absolute", left: 0, top: "50%", transform: "translateY(-70%) translateX(-33%) rotate(-20deg)", height: 135, opacity: 0.25, pointerEvents: "none", zIndex: 1 },
-  signImg: { height: 100, marginBottom: -40, objectFit: "contain", opacity: 0.85, display: "block", marginLeft: "auto", marginRight: "auto" },
-  signName: { fontFamily: '"Hanken Grotesk", sans-serif', fontSize: 15, fontWeight: 400, marginBottom: 6, whiteSpace: "nowrap" },
-  signRule: { width: "100%", height: 1, background: PALETTE.lineStrong, margin: "0 auto 8px" },
-  signRole: { fontSize: 9.5, letterSpacing: ".14em", textTransform: "uppercase", color: PALETTE.inkSoft, fontWeight: 600 },
+  stampImg: { position: "absolute", left: 0, top: "50%", transform: "translateY(-70%) translateX(-33%) rotate(-20deg)", height: 110, opacity: 0.25, pointerEvents: "none", zIndex: 1 },
+  signImg: { height: 80, marginBottom: -30, objectFit: "contain", opacity: 0.85, display: "block", marginLeft: "auto", marginRight: "auto" },
+  signName: { fontFamily: '"Hanken Grotesk", sans-serif', fontSize: 13, fontWeight: 400, marginBottom: 4, whiteSpace: "nowrap" },
+  signRule: { width: "100%", height: 1, background: PALETTE.lineStrong, margin: "0 auto 6px" },
+  signRole: { fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", color: PALETTE.inkSoft, fontWeight: 600 },
 };
 
 /* ------------------------------------------------------------------ */
@@ -415,8 +415,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   if (!isOpen || !booking) return null;
 
   /* ----- derive view model ----- */
-  const status = (booking.status || "").toLowerCase();
-  const watermark = status === "paid" ? "LUNAS" : status === "dp_paid" ? "DP TERBAYAR" : "";
+  const approvalStatus = booking.approvalStatus || "pending";
+  const paymentStatus = booking.paymentStatus || "unpaid";
+  const watermark = paymentStatus === "paid" ? "LUNAS" : paymentStatus === "dp_paid" ? "DP TERBAYAR" : approvalStatus === "rejected" ? "DITOLAK" : approvalStatus === "pending" ? "PENDING" : "";
   const docTitle = `Invoice ${invoiceNumber(booking)}${watermark ? " — " + watermark : ""}`;
 
   const bookingMeta = (): string[] =>
@@ -512,8 +513,17 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
 
       {/* ===== INVOICE (Modern Corporate) ===== */}
       <div className="inv-root" style={S.root} ref={invoiceRef}>
-        {status === "paid" && (
+        {paymentStatus === "paid" && (
           <img src="/Stempel Lunas.png" alt="Lunas" className="inv-stamp-full" />
+        )}
+        {approvalStatus === "pending" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>PENDING</div>
+        )}
+        {approvalStatus === "rejected" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(180,40,40,0.12)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DITOLAK</div>
+        )}
+        {paymentStatus === "dp_paid" && (
+          <div style={{ position: "absolute", top: "40%", left: "50%", transform: "translate(-50%, -50%) rotate(-30deg)", fontSize: 48, fontWeight: 900, color: "rgba(36,31,28,0.06)", letterSpacing: 8, pointerEvents: "none", whiteSpace: "nowrap" }}>DP TERBAYAR</div>
         )}
 
         {/* band */}

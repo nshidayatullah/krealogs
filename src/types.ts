@@ -28,6 +28,9 @@ export interface BookingDay {
   }[];
 }
 
+export type ApprovalStatus = 'pending' | 'approved' | 'rejected';
+export type PaymentStatus = 'unpaid' | 'dp_paid' | 'paid';
+
 export interface Booking {
   id: string;
   customerName: string;
@@ -51,7 +54,8 @@ export interface Booking {
   totalPrice: number;
   amountPaid: number;
   remainingPayment: number;
-  status: 'pending' | 'approved' | 'dp_paid' | 'paid' | 'rejected';
+  approvalStatus: ApprovalStatus;
+  paymentStatus: PaymentStatus;
   createdAt: string;
   approvedAt?: string;
   rejectedAt?: string;

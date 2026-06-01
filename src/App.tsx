@@ -16,6 +16,7 @@ function AppContent() {
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState<Booking | null>(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
@@ -66,7 +67,16 @@ function AppContent() {
       <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-zinc-200 no-print">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           
-          <div className="flex items-center select-none">
+          <div className="flex items-center gap-3 select-none">
+            {isAdminRoute && isAdminAuthenticated && (
+              <button
+                onClick={() => setMobileSidebarOpen(true)}
+                className="lg:hidden p-2 bg-zinc-100 hover:bg-zinc-200 rounded-xl text-zinc-600 transition cursor-pointer"
+                aria-label="Buka menu"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+              </button>
+            )}
             <img
               src={brandLogo}
               alt="Krealogs Logo"
@@ -97,7 +107,7 @@ function AppContent() {
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} />
+              <AdminPage onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
             ) : (
               <AdminLogin onLoginSuccess={handleLoginSuccess} />
             )
@@ -106,7 +116,7 @@ function AppContent() {
             authLoading ? (
               <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
-              <AdminPage onOpenInvoice={handleOpenInvoice} />
+              <AdminPage onOpenInvoice={handleOpenInvoice} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen} />
             ) : (
               <AdminLogin onLoginSuccess={handleLoginSuccess} />
             )

@@ -22,11 +22,14 @@ const pool = new Pool({
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
-const CSRF_SECRET = JWT_SECRET;
+const CSRF_SECRET = process.env.JWT_SECRET || "csrf-fallback-secret";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
 
 function mapBookingRow(b: any) {
+  const s = (b.status || "pending").toLowerCase();
+  const approvalStatus = ["pending", "approved", "rejected"].includes(s) ? s : s === "dp_paid" || s === "paid" ? "approved" : "pending";
+  const paymentStatus = s === "paid" ? "paid" : s === "dp_paid" ? "dp_paid" : "unpaid";
   return {
     id: b.id,
     customerName: b.customer_name,
@@ -46,7 +49,8 @@ function mapBookingRow(b: any) {
     totalPrice: Number(b.total_price),
     amountPaid: Number(b.amount_paid),
     remainingPayment: Number(b.remaining_payment),
-    status: b.status,
+    approvalStatus,
+    paymentStatus,
     createdAt: b.created_at,
     approvedAt: b.approved_at || undefined,
     rejectedAt: b.rejected_at || undefined,
@@ -63,6 +67,26 @@ function requireAdmin(req: Request, res: Response, next: NextFunction) {
     next();
   } catch {
     return res.status(401).json({ error: "Unauthorized" });
+  }
+}
+
+function requireCsrf(req: Request, res: Response, next: NextFunction) {
+  if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
+    return next();
+  }
+  const headerToken = req.headers["x-csrf-token"] as string;
+  const cookieToken = req.cookies?.csrf_token;
+  if (!headerToken || !cookieToken) {
+    return res.status(403).json({ error: "CSRF token missing" });
+  }
+  try {
+    const decoded = jwt.verify(cookieToken, CSRF_SECRET) as { csrf: string };
+    if (decoded.csrf !== headerToken) {
+      return res.status(403).json({ error: "CSRF token mismatch" });
+    }
+    next();
+  } catch {
+    return res.status(403).json({ error: "Invalid CSRF token" });
   }
 }
 
@@ -184,7 +208,7 @@ app.get("/api/db", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Terjadi kesalahan internal server" }); }
 });
 
-app.post("/api/packages", requireAdmin, async (req, res) => {
+app.post("/api/packages", requireAdmin, requireCsrf, async (req, res) => {
   const p = req.body;
   if (!p.id || !p.name || p.price === undefined) return res.status(400).json({ error: "Missing required properties" });
   try {
@@ -193,7 +217,7 @@ app.post("/api/packages", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to create package" }); }
 });
 
-app.put("/api/packages/:id", requireAdmin, async (req, res) => {
+app.put("/api/packages/:id", requireAdmin, requireCsrf, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM packages WHERE id = $1", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: "Package not found" });
@@ -203,7 +227,7 @@ app.put("/api/packages/:id", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to update package" }); }
 });
 
-app.delete("/api/packages/:id", requireAdmin, async (req, res) => {
+app.delete("/api/packages/:id", requireAdmin, requireCsrf, async (req, res) => {
   try {
     const r = await pool.query("DELETE FROM packages WHERE id = $1", [req.params.id]);
     if (r.rowCount === 0) return res.status(404).json({ error: "Package not found" });
@@ -211,7 +235,7 @@ app.delete("/api/packages/:id", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to delete package" }); }
 });
 
-app.post("/api/addons", requireAdmin, async (req, res) => {
+app.post("/api/addons", requireAdmin, requireCsrf, async (req, res) => {
   const a = req.body;
   if (!a.id || !a.name || a.price === undefined) return res.status(400).json({ error: "Missing required properties" });
   try {
@@ -220,7 +244,7 @@ app.post("/api/addons", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to create addon" }); }
 });
 
-app.put("/api/addons/:id", requireAdmin, async (req, res) => {
+app.put("/api/addons/:id", requireAdmin, requireCsrf, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM addons WHERE id = $1", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: "Add-on not found" });
@@ -230,7 +254,7 @@ app.put("/api/addons/:id", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to update addon" }); }
 });
 
-app.delete("/api/addons/:id", requireAdmin, async (req, res) => {
+app.delete("/api/addons/:id", requireAdmin, requireCsrf, async (req, res) => {
   try {
     const r = await pool.query("DELETE FROM addons WHERE id = $1", [req.params.id]);
     if (r.rowCount === 0) return res.status(404).json({ error: "Add-on not found" });
@@ -238,7 +262,7 @@ app.delete("/api/addons/:id", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to delete addon" }); }
 });
 
-app.post("/api/coupons", requireAdmin, async (req, res) => {
+app.post("/api/coupons", requireAdmin, requireCsrf, async (req, res) => {
   const { code, discountPercent, validUntil, isActive } = req.body;
   if (!code || discountPercent === undefined || !validUntil) return res.status(400).json({ error: "Missing required properties" });
   const dp = Number(discountPercent);
@@ -249,7 +273,7 @@ app.post("/api/coupons", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Gagal membuat kupon baru" }); }
 });
 
-app.put("/api/coupons/:code", requireAdmin, async (req, res) => {
+app.put("/api/coupons/:code", requireAdmin, requireCsrf, async (req, res) => {
   const { discountPercent, validUntil, isActive } = req.body;
   const dp = Number(discountPercent);
   if (dp < 0 || dp > 100) return res.status(400).json({ error: "discountPercent must be between 0 and 100" });
@@ -259,7 +283,7 @@ app.put("/api/coupons/:code", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Gagal memperbarui kupon" }); }
 });
 
-app.delete("/api/coupons/:code", requireAdmin, async (req, res) => {
+app.delete("/api/coupons/:code", requireAdmin, requireCsrf, async (req, res) => {
   try {
     const r = await pool.query("DELETE FROM coupons WHERE UPPER(code)=UPPER($1)", [req.params.code.toUpperCase().trim()]);
     if (r.rowCount === 0) return res.status(404).json({ error: "Kupon tidak ditemukan" });
@@ -274,24 +298,38 @@ app.get("/api/bookings", requireAdmin, async (req, res) => {
   } catch { res.status(500).json({ error: "Failed to fetch bookings" }); }
 });
 
-app.post("/api/bookings/:id/status", requireAdmin, async (req, res) => {
-  const { status } = req.body;
-  if (!status || !["approved","rejected","pending","paid","dp_paid"].includes(status)) return res.status(400).json({ error: "Invalid status value" });
+app.post("/api/bookings/:id/approval", requireAdmin, requireCsrf, async (req, res) => {
+  const { approvalStatus } = req.body;
+  if (!approvalStatus || !["approved", "rejected"].includes(approvalStatus)) return res.status(400).json({ error: "Invalid approvalStatus" });
   try {
     const { rows } = await pool.query("SELECT * FROM bookings WHERE id = $1", [req.params.id]);
     if (rows.length === 0) return res.status(404).json({ error: "Booking tidak ditemukan" });
     const now = new Date().toISOString();
-    let approvedAt = rows[0].approved_at;
-    let rejectedAt = rows[0].rejected_at;
-    if (status === "approved") approvedAt = now;
-    else if (status === "rejected") rejectedAt = now;
-    await pool.query("UPDATE bookings SET status=$1, approved_at=$2, rejected_at=$3 WHERE id=$4", [status, approvedAt, rejectedAt, req.params.id]);
+    const approvedAt = approvalStatus === "approved" ? now : rows[0].approved_at;
+    const rejectedAt = approvalStatus === "rejected" ? now : rows[0].rejected_at;
+    const dbStatus = approvalStatus === "rejected" ? "rejected" : (rows[0].payment_status || "unpaid") === "paid" ? "paid" : (rows[0].payment_status || "unpaid") === "dp_paid" ? "dp_paid" : "approved";
+    await pool.query("UPDATE bookings SET status=$1, approval_status=$2, approved_at=$3, rejected_at=$4 WHERE id=$5", [dbStatus, approvalStatus, approvedAt, rejectedAt, req.params.id]);
     const { rows: updated } = await pool.query("SELECT * FROM bookings WHERE id = $1", [req.params.id]);
     res.json({ success: true, booking: mapBookingRow(updated[0]) });
-  } catch { res.status(500).json({ error: "Failed to update booking status" }); }
+  } catch { res.status(500).json({ error: "Gagal memperbarui status persetujuan" }); }
 });
 
-app.post("/api/spreadsheet/config", requireAdmin, async (req, res) => {
+app.post("/api/bookings/:id/payment", requireAdmin, requireCsrf, async (req, res) => {
+  const { paymentStatus } = req.body;
+  if (!paymentStatus || !["dp_paid", "paid"].includes(paymentStatus)) return res.status(400).json({ error: "Invalid paymentStatus" });
+  try {
+    const { rows } = await pool.query("SELECT * FROM bookings WHERE id = $1", [req.params.id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Booking tidak ditemukan" });
+    if (rows[0].approval_status !== "approved") return res.status(400).json({ error: "Booking harus disetujui terlebih dahulu" });
+    const amountPaid = paymentStatus === "paid" ? Number(rows[0].total_price) : Number(rows[0].amount_paid);
+    const remainingPayment = paymentStatus === "paid" ? 0 : Number(rows[0].remaining_payment);
+    await pool.query("UPDATE bookings SET status=$1, payment_status=$2, amount_paid=$3, remaining_payment=$4 WHERE id=$5", [paymentStatus, paymentStatus, amountPaid, remainingPayment, req.params.id]);
+    const { rows: updated } = await pool.query("SELECT * FROM bookings WHERE id = $1", [req.params.id]);
+    res.json({ success: true, booking: mapBookingRow(updated[0]) });
+  } catch { res.status(500).json({ error: "Gagal memperbarui status pembayaran" }); }
+});
+
+app.post("/api/spreadsheet/config", requireAdmin, requireCsrf, async (req, res) => {
   const { spreadsheetId, spreadsheetUrl, lastSyncedAt } = req.body;
   try {
     const { rows } = await pool.query("SELECT * FROM spreadsheet_config WHERE id = 1");
@@ -312,6 +350,8 @@ app.post("/api/migrate", async (req: Request, res: Response) => {
     await pool.query(`CREATE TABLE IF NOT EXISTS bookings (id VARCHAR(100) PRIMARY KEY, customer_name VARCHAR(255) NOT NULL, customer_phone VARCHAR(50) NOT NULL, customer_city VARCHAR(100) NOT NULL, event_type VARCHAR(50) NOT NULL, wedding_type VARCHAR(100), event_date VARCHAR(50) NOT NULL, venue_location TEXT NOT NULL, package_id VARCHAR(100) REFERENCES packages(id), package_name VARCHAR(255) NOT NULL, package_price INT NOT NULL, addons VARCHAR(100)[] NOT NULL, addon_details JSONB NOT NULL, days JSONB, payment_method VARCHAR(50) NOT NULL, total_price INT NOT NULL, amount_paid INT NOT NULL, remaining_payment INT NOT NULL, status VARCHAR(50) NOT NULL DEFAULT 'pending', created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP, approved_at TIMESTAMP WITH TIME ZONE, rejected_at TIMESTAMP WITH TIME ZONE)`);
     await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(50)`);
     await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS discount_amount INT DEFAULT 0`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) NOT NULL DEFAULT 'pending'`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) NOT NULL DEFAULT 'unpaid'`);
     await pool.query(`CREATE TABLE IF NOT EXISTS spreadsheet_config (id INT PRIMARY KEY DEFAULT 1, spreadsheet_id VARCHAR(255), spreadsheet_url TEXT, last_synced_at TIMESTAMP WITH TIME ZONE, CONSTRAINT single_row CHECK (id = 1))`);
     await pool.query(`CREATE TABLE IF NOT EXISTS coupons (code VARCHAR(100) PRIMARY KEY, discount_percent INT NOT NULL, valid_until DATE NOT NULL, is_active BOOLEAN DEFAULT TRUE)`);
 

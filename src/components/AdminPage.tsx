@@ -31,21 +31,31 @@ import { motion, AnimatePresence } from "motion/react";
 
 interface AdminPageProps {
   onOpenInvoice: (booking: Booking) => void;
+  mobileSidebarOpen: boolean;
+  setMobileSidebarOpen: (open: boolean) => void;
 }
 
-export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
+export default function AdminPage({ onOpenInvoice, mobileSidebarOpen, setMobileSidebarOpen }: AdminPageProps) {
   // DB States
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [addons, setAddons] = useState<Addon[]>([]);
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [dbLoading, setDbLoading] = useState(true);
+  const [csrfToken, setCsrfToken] = useState("");
+
+  useEffect(() => {
+    fetch("/api/auth/csrf").then(r => r.json()).then(d => setCsrfToken(d.csrfToken)).catch(() => {});
+  }, []);
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"bookings" | "packages" | "addons" | "recap" | "coupons">("bookings");
+  const [activeTab, setActiveTab] = useState<"approval" | "payment" | "packages" | "addons" | "recap" | "coupons">("approval");
 
-  // Filter Bookings
-  const [bookingFilter, setBookingFilter] = useState<"all" | "pending" | "approved" | "dp_paid" | "paid" | "rejected">("all");
+  // Filter Approval
+  const [approvalFilter, setApprovalFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
+
+  // Filter Payment
+  const [paymentFilter, setPaymentFilter] = useState<"all" | "unpaid" | "dp_paid" | "paid">("all");
 
   // Package Form Modal State
   const [isPkgModalOpen, setIsPkgModalOpen] = useState(false);
@@ -120,61 +130,66 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
     loadData();
   }, []);
 
-  // Accept / Reject Actions
-  const handleBookingStatus = (id: string, status: "approved" | "rejected" | "dp_paid" | "paid") => {
-    const isApprove = status === "approved";
-    const isPaid = status === "paid";
-    const isDPPaid = status === "dp_paid";
-    const isReject = status === "rejected";
-
-    let title = "";
-    let message = "";
-    if (isApprove) {
-      title = "Setujui Pemesanan";
-      message = "Apakah Anda yakin ingin menyetujui jadwal & kru pesanan ini? Tindakan ini akan menerbitkan Invoice Resmi Belum Bayar yang dapat diakses kustomer.";
-    } else if (isReject) {
-      title = "Tolak Pemesanan";
-      message = "Apakah Anda yakin ingin menolak pemesanan ini? Kustomer tidak akan dapat mengakses dokumen apa pun.";
-    } else if (isDPPaid) {
-      title = "Konfirmasi DP Diterima";
-      message = "Apakah Anda yakin telah menerima pembayaran DP dari kustomer? Status akan diperbarui menjadi DP Paid dan Invoice berstempel DP TERBAYAR akan terbit.";
-    } else if (isPaid) {
-      title = "Konfirmasi Lunas Diterima";
-      message = "Apakah Anda yakin telah menerima pelunasan pembayaran dari kustomer? Status akan diperbarui menjadi Paid dan Kwitansi Resmi berstempel LUNAS akan terbit.";
-    }
+  const handleApproval = (id: string, approvalStatus: "approved" | "rejected") => {
+    const isApprove = approvalStatus === "approved";
+    const isReject = approvalStatus === "rejected";
 
     setConfirmModal({
       isOpen: true,
-      title,
-      message,
+      title: isApprove ? "Setujui Pemesanan" : "Tolak Pemesanan",
+      message: isApprove
+        ? "Apakah Anda yakin ingin menyetujui jadwal & kru pesanan ini? Tindakan ini akan menerbitkan Invoice Resmi Belum Bayar yang dapat diakses kustomer."
+        : "Apakah Anda yakin ingin menolak pemesanan ini? Kustomer tidak akan dapat mengakses dokumen apa pun.",
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         try {
-          const response = await fetch(`/api/bookings/${id}/status`, {
+          const response = await fetch(`/api/bookings/${id}/approval`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ status })
+            headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+            body: JSON.stringify({ approvalStatus })
           });
           const result = await response.json();
           if (response.ok && result.success) {
-            setBookings(bookings.map((b) => (b.id === id ? { ...b, status, approvedAt: status === "approved" ? new Date().toISOString() : b.approvedAt } : b)));
-            showToast(
-              isPaid
-                ? "Pelunasan berhasil dikonfirmasi!"
-                : isDPPaid
-                  ? "Pembayaran DP berhasil dikonfirmasi!"
-                  : isApprove
-                    ? "Pemesanan berhasil disetujui!"
-                    : "Pemesanan berhasil ditolak!",
-              "success"
-            );
+            setBookings(bookings.map((b) => (b.id === id ? result.booking : b)));
+            showToast(isApprove ? "Pemesanan berhasil disetujui!" : "Pemesanan berhasil ditolak!", "success");
           } else {
-            showToast(result.error || "Gagal mengubah status pesanan", "error");
+            showToast(result.error || "Gagal mengubah status", "error");
           }
         } catch (err) {
-          console.error("Booking edit status error:", err);
+          console.error("Approval error:", err);
+          showToast("Terjadi kesalahan koneksi", "error");
+        }
+      }
+    });
+  };
+
+  const handlePayment = (id: string, paymentStatus: "dp_paid" | "paid") => {
+    const isPaid = paymentStatus === "paid";
+    const isDPPaid = paymentStatus === "dp_paid";
+
+    setConfirmModal({
+      isOpen: true,
+      title: isPaid ? "Konfirmasi Lunas Diterima" : "Konfirmasi DP Diterima",
+      message: isPaid
+        ? "Apakah Anda yakin telah menerima pelunasan pembayaran dari kustomer? Status akan diperbarui menjadi Paid dan Kwitansi Resmi berstempel LUNAS akan terbit."
+        : "Apakah Anda yakin telah menerima pembayaran DP dari kustomer? Status akan diperbarui menjadi DP Paid dan Invoice berstempel DP TERBAYAR akan terbit.",
+      onConfirm: async () => {
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        try {
+          const response = await fetch(`/api/bookings/${id}/payment`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
+            body: JSON.stringify({ paymentStatus })
+          });
+          const result = await response.json();
+          if (response.ok && result.success) {
+            setBookings(bookings.map((b) => (b.id === id ? result.booking : b)));
+            showToast(isPaid ? "Pelunasan berhasil dikonfirmasi!" : "Pembayaran DP berhasil dikonfirmasi!", "success");
+          } else {
+            showToast(result.error || "Gagal mengubah status", "error");
+          }
+        } catch (err) {
+          console.error("Payment error:", err);
           showToast("Terjadi kesalahan koneksi", "error");
         }
       }
@@ -228,7 +243,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
         body: JSON.stringify(pkgPayload)
       });
 
@@ -251,7 +266,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         try {
-          const response = await fetch(`/api/packages/${id}`, { method: "DELETE" });
+          const response = await fetch(`/api/packages/${id}`, { method: "DELETE", headers: { "x-csrf-token": csrfToken } });
           if (response.ok) {
             loadData();
             showToast("Paket berhasil dihapus!", "success");
@@ -303,7 +318,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
         body: JSON.stringify(addonPayload)
       });
 
@@ -326,7 +341,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         try {
-          const response = await fetch(`/api/addons/${id}`, { method: "DELETE" });
+          const response = await fetch(`/api/addons/${id}`, { method: "DELETE", headers: { "x-csrf-token": csrfToken } });
           if (response.ok) {
             loadData();
             showToast("Add-on berhasil dihapus!", "success");
@@ -392,7 +407,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
 
       const response = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken },
         body: JSON.stringify(couponPayload)
       });
 
@@ -422,7 +437,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       onConfirm: async () => {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
         try {
-          const response = await fetch(`/api/coupons/${code}`, { method: "DELETE" });
+          const response = await fetch(`/api/coupons/${code}`, { method: "DELETE", headers: { "x-csrf-token": csrfToken } });
           if (response.ok) {
             loadData();
             showToast("Kupon berhasil dihapus!", "success");
@@ -437,96 +452,150 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
     });
   };
 
-  // Excel & CSV recap exporting hooks are loaded directly from utils/excelExport.ts
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 15;
 
-  const filteredBookings = bookings.filter((b) => {
-    if (bookingFilter === "all") return true;
-    return b.status === bookingFilter;
+  const filteredApproval = bookings.filter((b) => {
+    if (approvalFilter === "all") return b.approvalStatus !== "approved" || b.paymentStatus === "unpaid";
+    return b.approvalStatus === approvalFilter;
   });
 
+  const filteredPayment = bookings.filter((b) => {
+    if (b.approvalStatus !== "approved") return false;
+    if (paymentFilter === "all") return b.paymentStatus !== "unpaid";
+    return b.paymentStatus === paymentFilter;
+  });
+
+  const activeList = activeTab === "approval" ? filteredApproval : filteredPayment;
+  const totalPages = Math.ceil(activeList.length / ITEMS_PER_PAGE);
+  const paginatedBookings = activeList.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [approvalFilter, paymentFilter, activeTab]);
+
   return (
-    <div className="space-y-8 text-zinc-150">
+    <div className="text-zinc-150">
       
-      {/* Upper Status Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {/* Mobile sidebar overlay */}
+      {mobileSidebarOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileSidebarOpen(false)} />
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-[#0c0c0e] border-r border-zinc-850 shadow-2xl p-4 space-y-1 overflow-y-auto">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-zinc-900 mb-2">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-sans">Menu Admin</span>
+              <button onClick={() => setMobileSidebarOpen(false)} className="p-1 text-zinc-400 hover:text-white transition cursor-pointer">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <button onClick={() => { setActiveTab("approval"); setCurrentPage(1); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "approval" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span className="flex-1">Persetujuan</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "approval" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
+            </button>
+            <button onClick={() => { setActiveTab("payment"); setCurrentPage(1); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "payment" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <span className="flex-1">Pembayaran</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "payment" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
+            </button>
+            <div className="border-t border-zinc-900 my-1" />
+            <button onClick={() => { setActiveTab("packages"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "packages" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+              <span className="flex-1">Paket</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "packages" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{packages.length}</span>
+            </button>
+            <button onClick={() => { setActiveTab("addons"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "addons" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+              <span className="flex-1">Add-Ons</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "addons" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{addons.length}</span>
+            </button>
+            <button onClick={() => { setActiveTab("coupons"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "coupons" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+              <span className="flex-1">Kupon</span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "coupons" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{coupons.length}</span>
+            </button>
+            <div className="border-t border-zinc-900 my-1" />
+            <button onClick={() => { setActiveTab("recap"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "recap" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+              <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+              <span className="flex-1">Rekap & Ekspor</span>
+            </button>
+          </aside>
+        </div>
+      )}
+
+      <div className="flex gap-6 items-start">
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:block w-56 shrink-0 bg-[#0c0c0e] rounded-2xl border border-zinc-850 shadow-lg p-3 space-y-1 sticky top-6">
+        <div className="px-3 py-2.5 border-b border-zinc-900 mb-1">
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider font-sans">Menu Admin</span>
+        </div>
         
-        <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-xs font-bold text-zinc-500 uppercase tracking-wide block font-sans">TOTAL BOOKING</span>
-          <p className="text-3xl font-sans font-bold text-white mt-1.5">{bookings.length}</p>
-        </div>
+        <button onClick={() => { setActiveTab("approval"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "approval" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span className="flex-1">Persetujuan</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "approval" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "pending").length}</span>
+        </button>
 
-        <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-xs font-bold text-amber-500/80 uppercase tracking-wide block font-sans">REVIEW PENDING</span>
-          <p className="text-3xl font-sans font-bold text-amber-500 mt-1.5">
-            {bookings.filter((b) => b.status === "pending").length}
-          </p>
-        </div>
+        <button onClick={() => { setActiveTab("payment"); setCurrentPage(1); }} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "payment" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span className="flex-1">Pembayaran</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "payment" ? "bg-emerald-600 text-white" : "bg-zinc-800 text-zinc-400"}`}>{bookings.filter(b => b.approvalStatus === "approved" && b.paymentStatus !== "unpaid").length}</span>
+        </button>
 
-        <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg">
-          <span className="text-xs font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">APPROVED ORDERS</span>
-          <p className="text-3xl font-sans font-bold text-emerald-400 mt-1.5">
-            {bookings.filter((b) => ["approved", "dp_paid", "paid"].includes(b.status)).length}
-          </p>
-        </div>
+        <div className="border-t border-zinc-900 my-1" />
 
-        <div className="bg-[#0c0c0e] p-5 rounded-2xl border border-zinc-850 shadow-lg flex items-center justify-between">
-          <div className="space-y-1">
-            <span className="text-xs font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">ESTIMASI REVENUE</span>
-            <p className="text-2xl font-sans font-bold text-[#f3f4f6]" title="Total nilai kontrak pesanan disetujui">
-              Rp {bookings
-                .filter((b) => ["approved", "dp_paid", "paid"].includes(b.status))
-                .reduce((sum, b) => sum + b.totalPrice, 0)
-                .toLocaleString("id-ID")}
-            </p>
-          </div>
-          <div className="p-2.5 bg-emerald-500/10 rounded-xl">
-            <TrendingUp className="w-5 h-5 text-emerald-400" />
-          </div>
-        </div>
-      </section>
+        <button onClick={() => setActiveTab("packages")} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "packages" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+          <span className="flex-1">Paket</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "packages" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{packages.length}</span>
+        </button>
 
-      {/* Admin Tab Handles */}
-      <section className="bg-zinc-950 p-1.5 border border-zinc-850 rounded-2xl shadow-inner flex flex-wrap gap-1 mb-6">
-        <button
-          onClick={() => setActiveTab("bookings")}
-          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "bookings" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Pemesanan Masuk ({bookings.length})
+        <button onClick={() => setActiveTab("addons")} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "addons" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+          <span className="flex-1">Add-Ons</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "addons" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{addons.length}</span>
         </button>
-        <button
-          onClick={() => setActiveTab("packages")}
-          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "packages" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Kelola Paket ({packages.length})
+
+        <button onClick={() => setActiveTab("coupons")} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "coupons" ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
+          <span className="flex-1">Kupon</span>
+          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${activeTab === "coupons" ? "bg-amber-500 text-black" : "bg-zinc-800 text-zinc-400"}`}>{coupons.length}</span>
         </button>
-        <button
-          onClick={() => setActiveTab("addons")}
-          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "addons" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Kelola Add-Ons ({addons.length})
+
+        <div className="border-t border-zinc-900 my-1" />
+
+        <button onClick={() => setActiveTab("recap")} className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-left transition cursor-pointer ${activeTab === "recap" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "text-zinc-400 hover:text-white hover:bg-zinc-900"}`}>
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+          <span className="flex-1">Rekap & Ekspor</span>
         </button>
-        <button
-          onClick={() => setActiveTab("coupons")}
-          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "coupons" ? "bg-amber-500 text-black shadow-lg" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Kupon Diskon ({coupons.length})
-        </button>
-        <button
-          onClick={() => setActiveTab("recap")}
-          className={`flex-1 min-w-[120px] py-3 px-4 rounded-xl text-xs font-bold text-center cursor-pointer transition ${
-            activeTab === "recap" ? "bg-emerald-600 text-white shadow-lg" : "text-zinc-400 hover:text-white"
-          }`}
-        >
-          Rekap & Ekspor Excel
-        </button>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 min-w-0 space-y-6">
+
+      {/* Upper Status Cards */}
+      <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
+          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide block font-sans">TOTAL BOOKING</span>
+          <p className="text-2xl font-sans font-bold text-white mt-1">{bookings.length}</p>
+        </div>
+        <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
+          <span className="text-[10px] font-bold text-amber-500/80 uppercase tracking-wide block font-sans">REVIEW PENDING</span>
+          <p className="text-2xl font-sans font-bold text-amber-500 mt-1">{bookings.filter((b) => b.approvalStatus === "pending").length}</p>
+        </div>
+        <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
+          <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">APPROVED ORDERS</span>
+          <p className="text-2xl font-sans font-bold text-emerald-400 mt-1">{bookings.filter((b) => b.approvalStatus === "approved").length}</p>
+        </div>
+        <div className="bg-[#0c0c0e] p-4 rounded-2xl border border-zinc-850 shadow-lg">
+          <span className="text-[10px] font-bold text-emerald-500/80 uppercase tracking-wide block font-sans">EST. REVENUE</span>
+          <p className="text-lg font-sans font-bold text-[#f3f4f6] mt-1" title="Total nilai kontrak pesanan disetujui">Rp {bookings.filter((b) => b.approvalStatus === "approved").reduce((sum, b) => sum + b.totalPrice, 0).toLocaleString("id-ID")}</p>
+        </div>
       </section>
 
       {dbLoading ? (
@@ -534,46 +603,167 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
       ) : (
         <div className="bg-[#0c0c0e] rounded-3xl border border-zinc-850 shadow-2xl p-4 md:p-8">
           
-          {/* TAB 1: BOOKING CONTROLS */}
-          {activeTab === "bookings" && (
+          {/* TAB 1: APPROVAL */}
+          {activeTab === "approval" && (
             <div className="space-y-6 animate-fade-in">
               
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Kelola Pemesanan Jasa</h2>
-                  <p className="text-xs text-zinc-400 mt-1">Lakukan konfirmasi atau penolakan serta periksa nota kustomer.</p>
+                  <h2 className="text-xl font-bold text-white">Persetujuan Pemesanan</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Setujui atau tolak pemesanan dari kustomer.</p>
                 </div>
 
                 <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
-                  {["all", "pending", "approved", "dp_paid", "paid", "rejected"].map((filter) => (
+                  {["all", "pending", "approved", "rejected"].map((filter) => (
                     <button
                       key={filter}
-                      onClick={() => setBookingFilter(filter as any)}
+                      onClick={() => setApprovalFilter(filter as any)}
                       className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition shrink-0 ${
-                        bookingFilter === filter 
+                        approvalFilter === filter 
                           ? "bg-zinc-800 text-white shadow-md" 
                           : "text-zinc-400 hover:text-white"
                       }`}
                     >
-                      {filter === "all"
-                        ? "Semua"
-                        : filter === "pending"
-                          ? "Menunggu"
-                          : filter === "approved"
-                            ? "Approved"
-                            : filter === "dp_paid"
-                              ? "DP Paid"
-                              : filter === "paid"
-                                ? "Lunas"
-                                : "Ditolak"}
+                      {filter === "all" ? "Perlu Disetujui" : filter === "pending" ? "Menunggu" : filter === "approved" ? "Disetujui" : "Ditolak"}
                     </button>
                   ))}
                 </div>
               </div>
 
-              {filteredBookings.length === 0 ? (
+              {filteredApproval.length === 0 ? (
                 <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
-                  Tidak ditemukan pesanan dengan status: <strong className="text-amber-500">{bookingFilter.toUpperCase()}</strong>
+                  Tidak ditemukan pesanan.
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
+                        <th className="py-2 px-2 rounded-l">Klien</th>
+                        <th className="py-2 px-2">Acara</th>
+                        <th className="py-2 px-2">Paket</th>
+                        <th className="py-2 px-2">Add-Ons</th>
+                        <th className="py-2 px-2 text-right">Biaya</th>
+                        <th className="py-2 px-2 text-center">Status</th>
+                        <th className="py-2 px-2 text-center rounded-r">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-900">
+                      {paginatedBookings.map((b) => ( b && (
+                        <tr key={b.id} className="hover:bg-zinc-900/10 transition">
+                          <td className="py-1 px-2 leading-[13px]">
+                            <span className="font-sans text-[9px] bg-zinc-900 border border-zinc-800 font-bold px-1 py-0.5 rounded text-zinc-350 block w-fit mb-0.5">{b.id}</span>
+                            <div className="text-white font-bold text-[10px]">{b.customerName}</div>
+                            <div className="text-zinc-400 text-[9px]">{b.customerPhone}</div>
+                            <div className="text-zinc-500 text-[9px]">{b.customerCity}</div>
+                          </td>
+                          <td className="py-1 px-2 leading-[13px]">
+                            <span className="text-[9px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded block w-fit font-sans mb-0.5">{b.eventType === "wedding" ? `Wedding${b.weddingType ? " ("+b.weddingType+")" : ""}` : "Event"}</span>
+                            <div className="text-zinc-200 text-[10px]">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</div>
+                            <div className="text-zinc-450 text-[9px] truncate max-w-[140px]">{b.venueLocation}</div>
+                          </td>
+                          <td className="py-1 px-2 leading-[13px]">
+                            <span className="text-white text-[10px]">{b.packageName}</span>
+                          </td>
+                          <td className="py-1 px-2 leading-[13px]">
+                            <div className="flex flex-wrap gap-x-1">
+                              {b.days && b.days.length > 1 && (
+                                <span className="text-[9px] text-zinc-500 font-sans">{b.days.length} hari</span>
+                              )}
+                            </div>
+                            {b.addonDetails && b.addonDetails.length > 0 ? (
+                              <div>{b.addonDetails.reduce((acc: Record<string, number>, a) => {
+                                const key = a.name;
+                                acc[key] = (acc[key] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>) && Object.entries(
+                                b.addonDetails.reduce((acc: Record<string, number>, a) => {
+                                  acc[a.name] = (acc[a.name] || 0) + 1;
+                                  return acc;
+                                 }, {} as Record<string, number>)
+                               ).map(([name, qty]) => (
+                                 <div key={name} className="text-[9px] text-zinc-400 font-sans leading-[13px]">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>
+                               ))}</div>
+                            ) : (
+                              <span className="text-[9px] text-zinc-600 font-sans">—</span>
+                            )}
+                          </td>
+                          <td className="py-1 px-2 text-right leading-[13px]">
+                            <span className="font-sans text-amber-400 text-[10px]">Rp {b.totalPrice.toLocaleString("id-ID")}</span>
+                          </td>
+                          <td className="py-1 px-2 text-center">
+                            {b.approvalStatus === "rejected" ? (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase">DITOLAK</span>
+                            ) : b.approvalStatus === "pending" ? (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 uppercase animate-pulse">PENDING</span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-600 text-white uppercase">DISETUJUI</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 whitespace-nowrap">
+                            <div className="flex flex-col gap-1.5">
+                              {b.approvalStatus === "pending" && (
+                                <>
+                                  <button onClick={() => handleApproval(b.id, "approved")} className="w-full py-1.5 px-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5"><Check className="w-3 h-3" /><span>Setujui</span></button>
+                                  <button onClick={() => handleApproval(b.id, "rejected")} className="w-full py-1.5 px-2.5 bg-rose-700 hover:bg-rose-600 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5"><X className="w-3 h-3" /><span>Tolak</span></button>
+                                </>
+                              )}
+                              {b.approvalStatus === "approved" && (
+                                <button onClick={() => onOpenInvoice(b)} className="w-full py-1.5 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded-lg font-bold text-[11px] uppercase cursor-pointer flex items-center justify-center gap-1.5"><FileText className="w-3.5 h-3.5 text-zinc-400" /><span>Detail</span></button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4 border-t border-zinc-900 mt-4">
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Prev</button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button key={page} onClick={() => setCurrentPage(page)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${currentPage === page ? "bg-amber-500 text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{page}</button>
+                  ))}
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Next</button>
+                  <span className="text-xs text-zinc-500 ml-2">{filteredApproval.length} total</span>
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* TAB 2: PAYMENT */}
+          {activeTab === "payment" && (
+            <div className="space-y-6 animate-fade-in">
+              
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-900 pb-5">
+                <div>
+                  <h2 className="text-xl font-bold text-white">Konfirmasi Pembayaran</h2>
+                  <p className="text-xs text-zinc-400 mt-1">Catat pembayaran DP atau pelunasan dari kustomer yang sudah disetujui.</p>
+                </div>
+
+                <div className="flex items-center space-x-1 border border-zinc-800 bg-zinc-950 p-1 rounded-xl overflow-x-auto max-w-full whitespace-nowrap no-scrollbar">
+                  {["all", "unpaid", "dp_paid", "paid"].map((filter) => (
+                    <button
+                      key={filter}
+                      onClick={() => setPaymentFilter(filter as any)}
+                      className={`px-3 py-1.5 rounded-lg text-xs capitalize font-bold cursor-pointer transition shrink-0 ${
+                        paymentFilter === filter 
+                          ? "bg-zinc-800 text-white shadow-md" 
+                          : "text-zinc-400 hover:text-white"
+                      }`}
+                    >
+                      {filter === "all" ? "Semua" : filter === "unpaid" ? "Belum Bayar" : filter === "dp_paid" ? "DP Paid" : "Lunas"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {filteredPayment.length === 0 ? (
+                <div className="py-16 text-center text-zinc-500 text-xs border border-dashed border-zinc-850 rounded-2xl">
+                  Tidak ditemukan data pembayaran.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
@@ -582,146 +772,79 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                       <tr className="border-b border-zinc-850 text-xs font-sans uppercase text-zinc-500 bg-black/20">
                         <th className="py-3 px-4 rounded-l">Klien / Kontak</th>
                         <th className="py-3 px-4">Rincian Acara</th>
-                        <th className="py-3 px-4">Layanan / Paket</th>
+                        <th className="py-3 px-4">Paket</th>
+                        <th className="py-3 px-4">Add-Ons</th>
                         <th className="py-3 px-4 text-right">Biaya Pembayaran</th>
                         <th className="py-3 px-4 text-center">Status</th>
-                        <th className="py-3 px-4 text-center rounded-r">Kelola & Aksi</th>
+                        <th className="py-3 px-4 text-center rounded-r">Aksi</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-900">
-                      {filteredBookings.map((b) => ( b && (
+                      {paginatedBookings.map((b) => ( b && (
                         <tr key={b.id} className="hover:bg-zinc-900/10 transition">
-                          <td className="py-4 px-4 space-y-1">
-                            <span className="font-sans text-xs bg-zinc-900 border border-zinc-800 font-bold px-2 py-0.5 rounded text-zinc-350 block w-fit">
-                              {b.id}
-                            </span>
-                            <span className="font-bold text-white block mt-1.5">{b.customerName}</span>
-                            <span className="text-zinc-400 block font-sans">{b.customerPhone}</span>
-                            <span className="text-xs text-zinc-500 block">{b.customerCity}</span>
+                          <td className="py-2 px-3 space-y-0.5">
+                            <span className="font-sans text-[10px] bg-zinc-900 border border-zinc-800 font-bold px-1.5 py-0.5 rounded text-zinc-350 block w-fit">{b.id}</span>
+                            <span className="font-bold text-white block text-xs">{b.customerName}</span>
+                            <span className="text-zinc-400 block text-[10px]">{b.customerPhone}</span>
+                            <span className="text-[10px] text-zinc-500 block">{b.customerCity}</span>
                           </td>
-                          <td className="py-4 px-4 space-y-1">
-                            <span className="text-xs font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-2 py-0.5 rounded block w-fit font-sans">
-                              {b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event"}
-                            </span>
-                            <span className="text-zinc-200 block font-normal">
-                              {formatEventDate(b.eventDate, {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                              })}
-                            </span>
-                            <span className="text-xs text-zinc-450 block leading-tight truncate max-w-[200px]">{b.venueLocation}</span>
+                          <td className="py-2 px-3 space-y-0.5">
+                            <span className="text-[10px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-1.5 py-0.5 rounded block w-fit font-sans">{b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event"}</span>
+                            <span className="text-zinc-200 block text-[11px]">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</span>
+                            <span className="text-[10px] text-zinc-450 block leading-tight truncate max-w-[160px]">{b.venueLocation}</span>
                           </td>
-                          <td className="py-4 px-4 space-y-1.5">
-                            <span className="font-medium text-white block">{b.packageName}</span>
-                            {b.addonDetails && b.addonDetails.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {b.addonDetails.map((a) => (
-                                  <span key={a.id} className="text-xs bg-zinc-900 text-zinc-400 border border-zinc-850 px-1.5 py-0.5 rounded font-sans">
-                                    +{a.name}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
+                          <td className="py-2 px-3">
+                            <span className="font-medium text-white text-[11px]">{b.packageName}</span>
                           </td>
-                          <td className="py-4 px-4 text-right space-y-1">
-                            <span className="font-sans font-medium text-amber-400 block">
-                              Rp {b.totalPrice.toLocaleString("id-ID")}
-                            </span>
-                            <span className="text-xs text-emerald-400 block">
-                              Masuk: Rp {b.amountPaid.toLocaleString("id-ID")} ({b.amountPaid < b.totalPrice ? `DP ${Math.round((b.amountPaid / b.totalPrice) * 100)}%` : "Lunas"})
-                            </span>
-                            {b.amountPaid < b.totalPrice && (
-                              <span className="text-xs text-zinc-400 block">
-                                Sisa tagihan: Rp {b.remainingPayment.toLocaleString("id-ID")}
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-4 px-4 text-center">
-                            {b.status === "paid" ? (
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-emerald-500 text-white uppercase tracking-wide">
-                                LUNAS (RECEIPT)
-                              </span>
-                            ) : b.status === "dp_paid" ? (
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-blue-600 text-white uppercase tracking-wide">
-                                DP PAID (INVOICE)
-                              </span>
-                            ) : b.status === "approved" ? (
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-amber-500 text-black uppercase tracking-wide">
-                                INVOICE (UNPAID)
-                              </span>
-                            ) : b.status === "rejected" ? (
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-rose-500/10 text-rose-400 border border-rose-500/20 uppercase tracking-wide">
-                                REJECTED
-                              </span>
+                          <td className="py-1.5 px-2 leading-[13px]">
+                            {b.addonDetails && b.addonDetails.length > 0 ? (
+                              <div>{Object.entries(
+                                b.addonDetails.reduce((acc: Record<string, number>, a) => {
+                                  acc[a.name] = (acc[a.name] || 0) + 1;
+                                  return acc;
+                                 }, {} as Record<string, number>)
+                               ).map(([name, qty]) => (
+                                 <div key={name} className="text-[9px] text-zinc-400 font-sans leading-[13px]">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>
+                               ))}</div>
                             ) : (
-                              <span className="px-2 py-0.5 text-xs font-bold rounded bg-zinc-500/10 text-zinc-400 border border-zinc-500/20 uppercase tracking-wide">
-                                PENDING
-                              </span>
+                              <span className="text-[9px] text-zinc-600 font-sans">—</span>
+                            )}
+                          </td>
+                          <td className="py-1.5 px-2 text-right leading-[13px]">
+                            <div className="text-amber-400 text-[10px] font-sans">Rp {b.totalPrice.toLocaleString("id-ID")}</div>
+                            <div className="text-[9px] text-emerald-400">Masuk: Rp {b.amountPaid.toLocaleString("id-ID")}</div>
+                            {b.amountPaid < b.totalPrice && (
+                              <div className="text-[9px] text-zinc-400">Sisa: Rp {b.remainingPayment.toLocaleString("id-ID")}</div>
+                            )}
+                          </td>
+                          <td className="py-1.5 px-2 text-center">
+                            {b.paymentStatus === "paid" ? (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-emerald-500 text-white uppercase">LUNAS</span>
+                            ) : b.paymentStatus === "dp_paid" ? (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-blue-600 text-white uppercase">DP PAID</span>
+                            ) : (
+                              <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-amber-500 text-black uppercase">BLM BAYAR</span>
                             )}
                           </td>
                           <td className="py-4 px-4 whitespace-nowrap">
-                            <div className="flex items-center justify-center gap-2">
-                              {b.status === "pending" && (
+                            <div className="flex flex-col gap-1.5">
+                              {b.paymentStatus === "unpaid" && (
                                 <>
-                                  <button
-                                    onClick={() => handleBookingStatus(b.id, "approved")}
-                                    className="p-1 px-2.5 bg-emerald-700 hover:bg-emerald-600 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
-                                    title="Setujui Booking"
-                                  >
-                                    <Check className="w-3 h-3" />
-                                    <span>Setujui</span>
+                                  <button onClick={() => handlePayment(b.id, "dp_paid")} className="w-full py-1.5 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
+                                    <Check className="w-3 h-3" /><span>Terima DP</span>
                                   </button>
-                                  <button
-                                    onClick={() => handleBookingStatus(b.id, "rejected")}
-                                    className="p-1 px-2.5 bg-rose-700 hover:bg-rose-600 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
-                                    title="Tolak Booking"
-                                  >
-                                    <X className="w-3 h-3" />
-                                    <span>Tolak</span>
+                                  <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
+                                    <Check className="w-3 h-3" /><span>Terima Lunas</span>
                                   </button>
                                 </>
                               )}
-
-                              {b.status === "approved" && (
-                                <>
-                                  <button
-                                    onClick={() => handleBookingStatus(b.id, "dp_paid")}
-                                    className="p-1 px-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
-                                    title="Konfirmasi Pembayaran DP"
-                                  >
-                                    <Check className="w-3 h-3" />
-                                    <span>Terima DP</span>
-                                  </button>
-                                  <button
-                                    onClick={() => handleBookingStatus(b.id, "paid")}
-                                    className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
-                                    title="Konfirmasi Pembayaran Lunas"
-                                  >
-                                    <Check className="w-3 h-3" />
-                                    <span>Terima Lunas</span>
-                                  </button>
-                                </>
-                              )}
-
-                              {b.status === "dp_paid" && (
-                                <button
-                                  onClick={() => handleBookingStatus(b.id, "paid")}
-                                  className="p-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded font-bold text-xs uppercase transition cursor-pointer flex items-center space-x-1"
-                                  title="Konfirmasi Pelunasan"
-                                >
-                                  <Check className="w-3 h-3" />
-                                  <span>Konfirmasi Lunas</span>
+                              {b.paymentStatus === "dp_paid" && (
+                                <button onClick={() => handlePayment(b.id, "paid")} className="w-full py-1.5 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[11px] uppercase transition cursor-pointer flex items-center justify-center gap-1.5">
+                                  <Check className="w-3 h-3" /><span>Konfirmasi Lunas</span>
                                 </button>
                               )}
-
-                              <button
-                                onClick={() => onOpenInvoice(b)}
-                                className="p-1 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded font-bold text-xs uppercase cursor-pointer flex items-center space-x-1"
-                                title="Lihat Invoice Pemesanan"
-                              >
-                                <FileText className="w-3.5 h-3.5 text-zinc-400" />
-                                <span>Detail</span>
+                              <button onClick={() => onOpenInvoice(b)} className="w-full py-1.5 px-2.5 bg-zinc-900 border border-zinc-800 hover:border-zinc-70 transition text-zinc-300 rounded-lg font-bold text-[11px] uppercase cursor-pointer flex items-center justify-center gap-1.5">
+                                <FileText className="w-3.5 h-3.5 text-zinc-400" /><span>Detail</span>
                               </button>
                             </div>
                           </td>
@@ -732,10 +855,21 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                 </div>
               )}
 
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-4 border-t border-zinc-900 mt-4">
+                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Prev</button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button key={page} onClick={() => setCurrentPage(page)} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer ${currentPage === page ? "bg-emerald-600 text-white" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{page}</button>
+                  ))}
+                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="px-3 py-1.5 rounded-lg text-xs font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 disabled:cursor-not-allowed transition cursor-pointer">Next</button>
+                  <span className="text-xs text-zinc-500 ml-2">{activeList.length} total</span>
+                </div>
+              )}
+
             </div>
           )}
 
-          {/* TAB 2: PACKAGES CRUD */}
+          {/* TAB 3: PACKAGES CRUD */}
           {activeTab === "packages" && (
             <div className="space-y-6 animate-fade-in">
               
@@ -818,7 +952,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             </div>
           )}
 
-          {/* TAB 3: ADDONS CRUD */}
+          {/* TAB 4: ADDONS CRUD */}
           {activeTab === "addons" && (
             <div className="space-y-6 animate-fade-in">
               
@@ -875,7 +1009,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             </div>
           )}
 
-          {/* TAB 4: RECAP & EXCEL EXPORT PANEL */}
+          {/* TAB 5: RECAP & EXCEL EXPORT PANEL */}
           {activeTab === "recap" && (
             <div className="space-y-8 animate-fade-in text-zinc-150">
               
@@ -893,7 +1027,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   <div className="space-y-1">
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">APPROVED REVENUE</span>
                     <p className="text-xl font-bold text-emerald-400 font-sans">
-                      Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.totalPrice, 0).toLocaleString("id-ID")}
+                      Rp {bookings.filter(b => b.approvalStatus === "approved").reduce((sum, b) => sum + b.totalPrice, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
                   <div className="p-2 bg-emerald-500/10 rounded-xl">
@@ -905,7 +1039,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   <div className="space-y-1">
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">DP TERKUMPUL</span>
                     <p className="text-xl font-bold text-white font-sans">
-                      Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.amountPaid, 0).toLocaleString("id-ID")}
+                      Rp {bookings.filter(b => b.approvalStatus === "approved").reduce((sum, b) => sum + b.amountPaid, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
                   <div className="p-2 bg-zinc-905 rounded-xl border border-zinc-850">
@@ -917,7 +1051,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                   <div className="space-y-1">
                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wide font-sans">SISA PIUTANG</span>
                     <p className="text-xl font-bold text-amber-500 font-sans">
-                      Rp {bookings.filter(b => b.status === "approved").reduce((sum, b) => sum + b.remainingPayment, 0).toLocaleString("id-ID")}
+                      Rp {bookings.filter(b => b.approvalStatus === "approved").reduce((sum, b) => sum + b.remainingPayment, 0).toLocaleString("id-ID")}
                     </p>
                   </div>
                   <div className="p-2 bg-amber-500/10 rounded-xl">
@@ -1017,13 +1151,13 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
                           <td className="py-3 text-right font-sans font-bold text-white">Rp {b.totalPrice.toLocaleString("id-ID")}</td>
                           <td className="py-3 text-center">
                             <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold font-sans ${
-                              b.status === "paid" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" :
-                              b.status === "dp_paid" ? "bg-blue-500/10 text-blue-400 border border-blue-500/10" :
-                              b.status === "approved" ? "bg-amber-500/10 text-amber-400 border border-amber-500/10" :
-                              b.status === "rejected" ? "bg-rose-500/10 text-rose-400 border border-rose-500/10" :
-                              "bg-zinc-500/10 text-zinc-400 border border-zinc-500/10"
+                              b.approvalStatus === "rejected" ? "bg-rose-500/10 text-rose-400 border border-rose-500/10" :
+                              b.approvalStatus === "pending" ? "bg-zinc-500/10 text-zinc-400 border border-zinc-500/10" :
+                              b.paymentStatus === "paid" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/10" :
+                              b.paymentStatus === "dp_paid" ? "bg-blue-500/10 text-blue-400 border border-blue-500/10" :
+                              "bg-amber-500/10 text-amber-400 border border-amber-500/10"
                             }`}>
-                              {b.status.toUpperCase()}
+                              {b.approvalStatus === "rejected" ? "DITOLAK" : b.approvalStatus === "pending" ? "PENDING" : b.paymentStatus === "paid" ? "LUNAS" : b.paymentStatus === "dp_paid" ? "DP PAID" : "APPROVED"}
                             </span>
                           </td>
                         </tr>
@@ -1041,7 +1175,7 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
             </div>
           )}
 
-          {/* TAB 5: COUPONS PANEL */}
+          {/* TAB 6: COUPONS PANEL */}
           {activeTab === "coupons" && (
             <div className="space-y-6 animate-fade-in text-zinc-150">
               
@@ -1466,6 +1600,8 @@ export default function AdminPage({ onOpenInvoice }: AdminPageProps) {
         )}
       </AnimatePresence>
 
+        </div>{/* end flex-1 */}
+      </div>{/* end flex desktop */}
     </div>
   );
 }

@@ -1,3 +1,6 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import { pool } from '../db';
 import { Package, Addon } from '../types';
 
@@ -252,10 +255,12 @@ async function runMigration() {
     `);
     console.log("Table 'coupons' ready.");
 
-    // 6. Add coupon columns to bookings if not exist
+    // 6. Add new columns to bookings if not exist
     await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(50)`);
     await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS discount_amount INT DEFAULT 0`);
-    console.log("Booking coupon columns ready.");
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS approval_status VARCHAR(50) NOT NULL DEFAULT 'pending'`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS payment_status VARCHAR(50) NOT NULL DEFAULT 'unpaid'`);
+    console.log("Booking columns ready.");
 
     // 7. Seed Packages if empty
     const { rows: pkgs } = await pool.query("SELECT COUNT(*) FROM packages");

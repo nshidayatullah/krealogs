@@ -87,7 +87,7 @@ export function exportBookingsToCSV(bookings: Booking[]) {
       b.totalPrice,
       b.amountPaid,
       b.remainingPayment,
-      b.status.toUpperCase(),
+      b.approvalStatus === "rejected" ? "DITOLAK" : b.approvalStatus === "pending" ? "PENDING" : b.paymentStatus === "paid" ? "LUNAS" : b.paymentStatus === "dp_paid" ? "DP PAID" : "APPROVED",
       formattedApprovedDate
     ];
 
