@@ -160,8 +160,8 @@ const S: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "center",
     gap: 10,
-    marginTop: 14,
-    marginBottom: 14,
+    marginTop: 6,
+    marginBottom: 6,
   },
   btn: {
     border: "none",
