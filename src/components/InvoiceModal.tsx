@@ -793,42 +793,22 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  /* ----- print without new tab ----- */
+  /* ----- print using hidden iframe ----- */
   const handlePrint = () => {
     const node = invoiceRef.current;
     if (!node) return;
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "none";
-    iframe.style.opacity = "0";
-    iframe.style.pointerEvents = "none";
-    document.body.appendChild(iframe);
-    const doc = iframe.contentWindow?.document;
-    if (!doc) { document.body.removeChild(iframe); return; }
-    doc.open();
-    doc.write(
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    printWindow.document.write(
       `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
         `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
         `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
-        `*{visibility:visible}` +
         `</style>` +
         `</head><body>${node.outerHTML}</body></html>`,
     );
-    doc.close();
-    const trigger = () => {
-      iframe.contentWindow?.focus();
-      iframe.contentWindow?.print();
-      setTimeout(() => { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 500);
-    };
-    const fonts = (doc as any).fonts;
-    if (fonts && fonts.ready) {
-      fonts.ready.then(() => setTimeout(trigger, 250)).catch(() => setTimeout(trigger, 600));
-    } else {
-      iframe.onload = () => setTimeout(trigger, 400);
-      setTimeout(trigger, 800);
-    }
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => printWindow.print(), 500);
   };
 
   return (
