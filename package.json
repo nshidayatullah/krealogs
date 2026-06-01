@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "migrate": "tsx src/db/migrate.ts",
-    "prebuild": "if [ \"$VERCEL\" != \"1\" ]; then npm run migrate; fi",
+
     "build:frontend": "vite build",
     "build:server": "esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
     "build": "npm run build:frontend && npm run build:server",
