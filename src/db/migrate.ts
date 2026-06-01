@@ -241,7 +241,23 @@ async function runMigration() {
     `);
     console.log("Table 'spreadsheet_config' ready.");
 
-    // 5. Seed Packages if empty
+    // 5. Create Coupons table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS coupons (
+        code VARCHAR(100) PRIMARY KEY,
+        discount_percent INT NOT NULL,
+        valid_until DATE NOT NULL,
+        is_active BOOLEAN DEFAULT TRUE
+      );
+    `);
+    console.log("Table 'coupons' ready.");
+
+    // 6. Add coupon columns to bookings if not exist
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS coupon_code VARCHAR(50)`);
+    await pool.query(`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS discount_amount INT DEFAULT 0`);
+    console.log("Booking coupon columns ready.");
+
+    // 7. Seed Packages if empty
     const { rows: pkgs } = await pool.query("SELECT COUNT(*) FROM packages");
     if (parseInt(pkgs[0].count, 10) === 0) {
       console.log("Seeding initial packages...");
@@ -256,7 +272,7 @@ async function runMigration() {
       console.log("Packages table already has data, skipping seeding.");
     }
 
-    // 6. Seed Addons if empty
+    // 8. Seed Addons if empty
     const { rows: ads } = await pool.query("SELECT COUNT(*) FROM addons");
     if (parseInt(ads[0].count, 10) === 0) {
       console.log("Seeding initial addons...");
@@ -271,7 +287,18 @@ async function runMigration() {
       console.log("Addons table already has data, skipping seeding.");
     }
 
-    // 7. Seed initial spreadsheet config if empty
+    // 9. Seed initial spreadsheet config if empty
+
+    // 10. Seed default coupon if empty
+    const { rows: cpns } = await pool.query("SELECT COUNT(*) FROM coupons");
+    if (parseInt(cpns[0].count, 10) === 0) {
+      console.log("Seeding default coupon...");
+      await pool.query(
+        "INSERT INTO coupons (code, discount_percent, valid_until, is_active) VALUES ($1, $2, $3, $4)",
+        ["KREALOVE10", 10, "2027-12-31", true]
+      );
+      console.log("Default coupon seeded.");
+    }
     const { rows: config } = await pool.query("SELECT COUNT(*) FROM spreadsheet_config");
     if (parseInt(config[0].count, 10) === 0) {
       console.log("Initializing spreadsheet config...");
