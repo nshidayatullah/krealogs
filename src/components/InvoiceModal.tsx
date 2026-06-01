@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import html2pdf from "html2pdf.js";
 import type { Booking, BookingDay } from "../types";
 
 /* ------------------------------------------------------------------ */
@@ -760,33 +761,18 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  /* ----- print in a new tab ----- */
-  const handlePrint = () => {
+  /* ----- download PDF ----- */
+  const handleDownload = () => {
     const node = invoiceRef.current;
     if (!node) return;
-    const w = window.open("", "_blank", "width=900,height=1200");
-    if (!w) return;
-    w.document.write(
-      `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
-        `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
-        `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
-        `</style>` +
-        `</head><body>${node.outerHTML}</body></html>`,
-    );
-    w.document.close();
-    const trigger = () => {
-      w.focus();
-      w.print();
-      setTimeout(() => w.close(), 300);
-    };
-    // Wait for fonts/images before printing.
-    const fonts = (w.document as any).fonts;
-    if (fonts && fonts.ready) {
-      fonts.ready.then(() => setTimeout(trigger, 250)).catch(() => setTimeout(trigger, 600));
-    } else {
-      w.onload = () => setTimeout(trigger, 400);
-      setTimeout(trigger, 800);
-    }
+    const opt = {
+      margin: 0,
+      filename: `${(booking.customerName || "invoice").replace(/\s+/g, "_")}_Krealogs.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    } as any;
+    html2pdf().set(opt).from(node).save();
   };
 
   return (
@@ -794,7 +780,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       <style>{SCOPED_CSS}</style>
 
       <div style={S.toolbar}>
-        <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handlePrint}>
+        <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handleDownload}>
           Unduh PDF
         </button>
         <button type="button" style={{ ...S.btn, ...S.btnClose }} onClick={onClose}>
