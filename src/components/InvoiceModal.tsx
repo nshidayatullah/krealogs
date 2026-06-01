@@ -401,7 +401,9 @@ const SCOPED_CSS = `
 @media print {
   @page { size: A4; margin: 0; }
   html, body { margin: 0; padding: 0; background: #fff; }
-  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; transform: none !important; }
+  .inv-overlay { padding: 0 !important; align-items: flex-start !important; }
+  .inv-toolbar { display: none !important; }
+  .inv-root { box-shadow: none !important; width: 794px; min-height: 1123px; page-break-after: always; transform: none !important; margin: 0 !important; }
   .inv-root:last-child { page-break-after: auto; }
   .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
