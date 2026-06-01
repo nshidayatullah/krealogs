@@ -415,8 +415,8 @@ const SCOPED_CSS = `
   .inv-root + .inv-root { margin-top: -280px !important; }
 }
 @media screen and (min-width: 821px) and (max-height: 900px) {
-  .inv-root { transform-origin: top center; transform: scale(0.3); margin-bottom: -390px !important; }
-  .inv-root + .inv-root { margin-top: -390px !important; }
+  .inv-root { transform-origin: top center; transform: scale(0.25); margin-bottom: -420px !important; }
+  .inv-root + .inv-root { margin-top: -420px !important; }
 }
 @media screen and (max-width: 500px) {
   .inv-root { transform: scale(0.42); margin-bottom: -380px !important; }
