@@ -96,8 +96,8 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
               <div className="pt-4 border-t border-zinc-900 flex justify-between items-center">
                 <div><span className="text-xs font-medium text-zinc-500 block uppercase font-sans">HARGA</span><span className="text-base font-sans font-bold text-amber-400">Rp {p.price.toLocaleString("id-ID")}</span></div>
                 <div className="flex space-x-2">
-                  <button onClick={() => openPkg(p)} className="p-2 text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition cursor-pointer"><Edit className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => deletePkg(p.id)} className="p-2 text-rose-450 hover:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => openPkg(p)} title="Ubah Paket" className="p-2 text-zinc-300 hover:text-white bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg transition cursor-pointer"><Edit className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => deletePkg(p.id)} title="Hapus Paket" className="p-2 text-rose-450 hover:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-lg transition cursor-pointer"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
             </div>
@@ -116,33 +116,33 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-700">Nama Paket</label>
-                <input value={pkgName} onChange={e => setPkgName(e.target.value)} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs" required />
+                <input value={pkgName} onChange={e => setPkgName(e.target.value)} placeholder="Nama paket" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs" required />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-700">Tipe</label>
-                  <select value={pkgType} onChange={e => setPkgType(e.target.value as any)} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs">
+                  <select value={pkgType} onChange={e => setPkgType(e.target.value as any)} title="Tipe" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs">
                     <option value="wedding">Wedding</option><option value="event">Event</option><option value="both">Wedding & Event</option>
                   </select>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-700">Kategori</label>
-                  <select value={pkgCategory} onChange={e => setPkgCategory(e.target.value as any)} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs">
+                  <select value={pkgCategory} onChange={e => setPkgCategory(e.target.value as any)} title="Kategori" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs">
                     <option value="regular">Regular</option><option value="signature">Signature</option>
                   </select>
                 </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-700">Deskripsi</label>
-                <textarea value={pkgDesc} onChange={e => setPkgDesc(e.target.value)} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs resize-none h-20" />
+                <textarea value={pkgDesc} onChange={e => setPkgDesc(e.target.value)} placeholder="Deskripsi paket" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs resize-none h-20" />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-700">Harga (IDR)</label>
-                <input type="number" value={pkgPrice} onChange={e => setPkgPrice(Number(e.target.value))} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs" required />
+                <input type="number" value={pkgPrice} onChange={e => setPkgPrice(Number(e.target.value))} placeholder="0" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs" required />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold text-zinc-700">Fitur (pisahkan dengan baris baru)</label>
-                <textarea value={pkgFetStr} onChange={e => setPkgFetStr(e.target.value)} className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs resize-none h-24" />
+                <textarea value={pkgFetStr} onChange={e => setPkgFetStr(e.target.value)} placeholder="Fitur per baris" className="w-full px-4 py-2 rounded-xl border border-zinc-300 focus:border-amber-500 focus:outline-none text-xs resize-none h-24" />
               </div>
               <div className="flex justify-end gap-2 pt-4 border-t border-zinc-200">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold cursor-pointer transition">Batal</button>
