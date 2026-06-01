@@ -41,9 +41,12 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
     setIsLoading(true);
 
     try {
+      const csrfRes = await fetch("/api/auth/csrf");
+      const csrfData = await csrfRes.json();
+
       const response = await fetch("/api/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrfData.csrfToken },
         body: JSON.stringify({ username, password }),
       });
 
@@ -138,35 +141,30 @@ export default function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
           )}
 
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-zinc-405 text-zinc-400 block font-mono uppercase tracking-wider">
-              Username
-            </label>
+            <label className="text-xs font-medium text-zinc-300 block">Username</label>
             <div className="relative">
               <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
               <input
                 id="login-username"
                 type="text"
                 disabled={isLoading || isSuccess}
-                placeholder="cth: admin"
+                placeholder="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-zinc-950 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-650"
+                className="w-full pl-10 pr-4 py-3 bg-zinc-950 border border-zinc-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/30 rounded-xl focus:outline-none transition text-xs text-white placeholder-zinc-500"
               />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-semibold text-zinc-400 block font-mono uppercase tracking-wider">
-                Materi Sandi / Password
-              </label>
-            </div>
+            <label className="text-xs font-medium text-zinc-300 block">Password</label>
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
               <input
                 id="login-password"
                 type={showPassword ? "text" : "password"}
                 disabled={isLoading || isSuccess}
+                placeholder="******"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

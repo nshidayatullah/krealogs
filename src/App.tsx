@@ -4,6 +4,7 @@ import CustomerPage from "./components/CustomerPage";
 import AdminPage from "./components/AdminPage";
 import AdminLogin from "./components/AdminLogin";
 import InvoiceModal from "./components/InvoiceModal";
+import Toast from "./components/Toast";
 import { Booking } from "./types";
 import { LogOut } from "lucide-react";
 import brandLogo from "./assets/images/krealogs_logo_1780149664590.png";
@@ -14,6 +15,7 @@ function AppContent() {
   const isAdminRoute = location.pathname.startsWith("/admin");
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const [selectedInvoiceBooking, setSelectedInvoiceBooking] = useState<Booking | null>(null);
   const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
@@ -93,7 +95,7 @@ function AppContent() {
           <Route path="/" element={<CustomerPage onOpenInvoice={handleOpenInvoice} />} />
           <Route path="/admin/login" element={
             authLoading ? (
-              <div className="flex items-center justify-center py-20 text-zinc-500 text-xs">Memeriksa sesi...</div>
+              <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
               <AdminPage onOpenInvoice={handleOpenInvoice} />
             ) : (
@@ -102,7 +104,7 @@ function AppContent() {
           } />
           <Route path="/admin" element={
             authLoading ? (
-              <div className="flex items-center justify-center py-20 text-zinc-500 text-xs">Memeriksa sesi...</div>
+              <div className="flex items-center justify-center py-20"><div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
             ) : isAdminAuthenticated ? (
               <AdminPage onOpenInvoice={handleOpenInvoice} />
             ) : (
@@ -123,6 +125,13 @@ function AppContent() {
           setIsInvoiceOpen(false);
           setSelectedInvoiceBooking(null);
         }}
+      />
+
+      <Toast
+        message={toast?.message || ""}
+        type={toast?.type || "success"}
+        visible={!!toast}
+        onClose={() => setToast(null)}
       />
 
     </div>

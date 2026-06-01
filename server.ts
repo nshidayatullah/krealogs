@@ -3,6 +3,8 @@ import path from "path";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import cookieParser from "cookie-parser";
+import rateLimit from "express-rate-limit";
+import crypto from "crypto";
 import dotenv from "dotenv";
 import { Package, Addon, Booking } from "./src/types";
 import { pool } from "./src/db";
@@ -10,6 +12,8 @@ import { pool } from "./src/db";
 if (process.env.NODE_ENV !== "production") {
   dotenv.config();
 }
+
+const CSRF_SECRET = process.env.JWT_SECRET || "csrf-fallback-secret";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
@@ -74,11 +78,31 @@ async function startServer() {
   app.use(express.json());
   app.use(cookieParser());
 
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    message: { error: "Terlalu banyak percobaan login. Coba lagi dalam 15 menit." },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
+  app.get("/api/auth/csrf", (req, res) => {
+    const token = crypto.randomBytes(32).toString("hex");
+    const csrfCookie = jwt.sign({ csrf: token }, CSRF_SECRET, { expiresIn: "24h" });
+    res.cookie("csrf_token", csrfCookie, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.json({ csrfToken: token });
+  });
+
   // ------------------------------------
   // Auth Endpoints
   // ------------------------------------
 
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", loginLimiter, async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password) {
       return res.status(400).json({ error: "Username dan password wajib diisi" });

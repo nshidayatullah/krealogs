@@ -305,6 +305,22 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
       return;
     }
 
+    const phoneDigits = noWhatsapp.replace(/[^0-9]/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      setSubmitError("Nomor WhatsApp tidak valid. Masukkan 10-15 digit angka.");
+      return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(namaLengkap)) {
+      setSubmitError("Nama lengkap hanya boleh mengandung huruf dan spasi.");
+      return;
+    }
+
+    if (!/^[a-zA-Z\s]+$/.test(domisili)) {
+      setSubmitError("Domisili hanya boleh mengandung huruf dan spasi.");
+      return;
+    }
+
     if (paymentMethod !== "full") {
       const parsedAmount = isCustomDpActive ? parseInt(customDpAmount.replace(/[^0-9]/g, ""), 10) || 0 : Math.round(finalPrice * (dpPercentage / 100));
 
@@ -1248,7 +1264,7 @@ export default function CustomerPage({ onOpenInvoice }: CustomerPageProps) {
 
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !isFormComplete}
                       className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-xl text-xs uppercase tracking-wider transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:bg-zinc-800 disabled:text-zinc-650"
                     >
                       {isSubmitting ? "Memproses Data..." : "KONFIRMASI PEMESANAN"}
