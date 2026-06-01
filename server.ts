@@ -15,16 +15,6 @@ if (process.env.NODE_ENV !== "production") {
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const CSRF_SECRET = process.env.CSRF_SECRET;
-
-if (!JWT_SECRET || JWT_SECRET.length < 32) {
-  throw new Error("JWT_SECRET environment variable is required (min 32 chars)");
-}
-if (!CSRF_SECRET || CSRF_SECRET.length < 32) {
-  throw new Error("CSRF_SECRET environment variable is required (min 32 chars)");
-}
-if (JWT_SECRET === CSRF_SECRET) {
-  throw new Error("JWT_SECRET and CSRF_SECRET must be different");
-}
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
 const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH || "";
 
@@ -109,6 +99,16 @@ function requireCsrf(req: express.Request, res: express.Response, next: express.
 }
 
 async function startServer() {
+  if (!JWT_SECRET || JWT_SECRET.length < 32) {
+    throw new Error("JWT_SECRET environment variable is required (min 32 chars)");
+  }
+  if (!CSRF_SECRET || CSRF_SECRET.length < 32) {
+    throw new Error("CSRF_SECRET environment variable is required (min 32 chars)");
+  }
+  if (JWT_SECRET === CSRF_SECRET) {
+    throw new Error("JWT_SECRET and CSRF_SECRET must be different");
+  }
+
   const app = express();
   const PORT = parseInt(process.env.PORT || "3000", 10);
 
