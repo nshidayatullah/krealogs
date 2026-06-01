@@ -149,7 +149,7 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
           <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-2.5 py-1 rounded text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer transition">Prev</button>
           {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => <button key={p} onClick={() => setPage(p)} className={`px-2.5 py-1 rounded text-[10px] font-bold cursor-pointer transition ${page === p ? "bg-amber-500 text-black" : "bg-zinc-900 border border-zinc-800 text-zinc-400 hover:bg-zinc-800"}`}>{p}</button>)}
           <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page === totalPages} className="px-2.5 py-1 rounded text-[10px] font-bold bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 disabled:opacity-30 cursor-pointer transition">Next</button>
-          <span className="text-[10px] text-zinc-500">{filtered.length} total</span>
+          <span className="text-[10px] text-zinc-500">{sorted.length} total</span>
         </div>
       )}
     </div>
