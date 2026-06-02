@@ -35,8 +35,8 @@ const DEFAULT_CONFIG: InvoiceConfig = {
 const LOGO_URL = "/krealogs-logo-white.png";
 
 const PALETTE = {
-  terra: "#d05848",
-  terraDeep: "#b3402c",
+  terra: "#CC5946",
+  terraDeep: "#CC5946",
   ink: "#241f1c",
   inkSoft: "#6c625b",
   line: "rgba(36,31,28,.12)",
