@@ -19,7 +19,7 @@ export default function Toast({ message, type, visible, onClose }: ToastProps) {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] animate-slide-up">
+    <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
       <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${
         type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
       }`}>
