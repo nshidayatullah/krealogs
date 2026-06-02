@@ -19,8 +19,8 @@ export default function Toast({ message, type, visible, onClose }: ToastProps) {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-slide-up">
-      <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ${
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 animate-slide-up">
+      <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-lg text-sm font-medium ${
         type === "success" ? "bg-emerald-600 text-white" : "bg-red-600 text-white"
       }`}>
         {type === "success" ? <CheckCircle className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
