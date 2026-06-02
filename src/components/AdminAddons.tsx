@@ -107,6 +107,19 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
           </motion.div>
         </div>
       )}
+
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-zinc-200 p-6 space-y-4">
+            <h3 className="text-sm font-bold text-zinc-900">{confirmModal.title}</h3>
+            <p className="text-xs text-zinc-600">{confirmModal.message}</p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))} className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold cursor-pointer transition">Batal</button>
+              <button onClick={confirmModal.onConfirm} className="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold cursor-pointer transition">Hapus</button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </AdminLayout>
   );
 }
