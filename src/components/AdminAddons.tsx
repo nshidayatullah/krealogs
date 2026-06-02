@@ -4,6 +4,7 @@ import { Booking, Package as PkgType, Addon, Coupon } from "../types";
 import AdminLayout from "./AdminLayout";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
+import Toast from "./Toast";
 
 interface Props {
   onOpenInvoice: (booking: Booking) => void;
@@ -44,8 +45,8 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
     const payload = { id: editId || `add-${Date.now()}`, name: addonName, description: addonDesc, price: Number(addonPrice) };
     try {
       const r = await fetch(editId ? `/api/addons/${editId}` : "/api/addons", { method: editId ? "PUT" : "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken }, body: JSON.stringify(payload) });
-      if (r.ok) { setIsModalOpen(false); load(); } else alert("Gagal");
-    } catch {}
+      if (r.ok) { setIsModalOpen(false); load(); showToast(editId ? "Add-on diperbarui!" : "Add-on ditambahkan!", "success"); } else showToast("Gagal menyimpan add-on", "error");
+    } catch { showToast("Koneksi error", "error"); }
   };
 
   const deleteItem = (id: string) => {
@@ -120,6 +121,8 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
           </motion.div>
         </div>
       )}
+
+      <Toast message={toast?.message || ""} type={toast?.type || "success"} visible={!!toast} onClose={() => setToast(null)} />
     </AdminLayout>
   );
 }
