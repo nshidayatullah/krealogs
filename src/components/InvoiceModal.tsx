@@ -77,9 +77,9 @@ function formatDateShort(input: string | number | Date | undefined): string {
 
 function invoiceNumber(b: Booking): string {
   const d = new Date(b.createdAt);
-  const month = isNaN(d.getTime()) ? "I" : ROMAN[d.getMonth()];
-  const year = isNaN(d.getTime()) ? new Date().getFullYear() : d.getFullYear();
-  const seq = String(b.id).replace(/\D/g, "").padStart(3, "0") || String(b.id);
+  const month = isNaN(d.getTime()) ? "V" : ROMAN[d.getMonth()];
+  const year = isNaN(d.getTime()) ? "2026" : String(d.getFullYear());
+  const seq = String(b.id).replace(/\D/g, "").slice(-3).padStart(3, "0");
   return `${seq}/INV/CC/${month}/${year}`;
 }
 
