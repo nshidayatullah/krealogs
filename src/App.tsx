@@ -186,7 +186,7 @@ function AppContent() {
       </main>
 
       <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-400 no-print">
-        <p>© 2026 Krealogs.com Videography. Semua Hak Cipta Dilindungi Undang-Undang.</p>
+        <p>© 2026 Krealogs.com Wedding & Event Content Creator. Semua Hak Cipta Dilindungi Undang-Undang.</p>
       </footer>
 
       <InvoiceModal
