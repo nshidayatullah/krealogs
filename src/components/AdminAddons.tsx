@@ -57,7 +57,7 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
   };
 
   return (
-    <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
+    <><AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6">
         <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white">Kelola Add-Ons</h2><p className="text-xs text-zinc-400 mt-1">Layanan tambahan opsional.</p></div>
@@ -124,5 +124,6 @@ export default function AdminAddons({ onOpenInvoice, mobileSidebarOpen, setMobil
 
       <Toast message={toast?.message || ""} type={toast?.type || "success"} visible={!!toast} onClose={() => setToast(null)} />
     </AdminLayout>
+    </>
   );
 }

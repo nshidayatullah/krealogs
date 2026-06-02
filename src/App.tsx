@@ -20,7 +20,7 @@ function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith("/admin");
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-  const [authLoading, setAuthLoading] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Booking, Package as PkgType, Addon, Coupon } from "../types";
 import AdminLayout from "./AdminLayout";
+import Toast from "./Toast";
 import { Plus, PlusCircle, Edit, Trash2, Ticket } from "lucide-react";
 import { motion } from "motion/react";
 import { formatEventDate } from "../utils/dateFormatter";
@@ -61,7 +62,7 @@ export default function AdminCoupons({ onOpenInvoice, mobileSidebarOpen, setMobi
   };
 
   return (
-    <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
+    <><AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6">
         <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white flex items-center gap-2"><Ticket className="w-5 h-5 text-amber-500" />Kupon Diskon</h2><p className="text-xs text-zinc-400 mt-1">Kelola kode promo dan diskon.</p></div>
@@ -89,6 +90,19 @@ export default function AdminCoupons({ onOpenInvoice, mobileSidebarOpen, setMobi
           })}
         </div>
       </div>
+
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-sm bg-white rounded-2xl shadow-2xl border border-zinc-200 overflow-hidden p-6 space-y-4">
+            <h3 className="text-sm font-bold text-zinc-900">{confirmModal.title}</h3>
+            <p className="text-xs text-zinc-600">{confirmModal.message}</p>
+            <div className="flex justify-end gap-2 pt-2">
+              <button onClick={() => setConfirmModal({ isOpen: false, title: "", message: "", onConfirm: () => {} })} className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl text-xs font-bold cursor-pointer transition">Batal</button>
+              <button onClick={confirmModal.onConfirm} className="px-5 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-bold cursor-pointer transition">Hapus</button>
+            </div>
+          </motion.div>
+        </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
@@ -120,5 +134,7 @@ export default function AdminCoupons({ onOpenInvoice, mobileSidebarOpen, setMobi
         </div>
       )}
     </AdminLayout>
+      <Toast message={toast?.message || ""} type={toast?.type || "success"} visible={!!toast} onClose={() => setToast(null)} />
+    </>
   );
 }

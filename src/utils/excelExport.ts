@@ -1,11 +1,8 @@
+import * as XLSX from "xlsx";
 import { Booking, Package, Addon } from "../types";
 import { formatEventDate } from "./dateFormatter";
 
-/**
- * Utility to download generated files natively in the browser
- */
-function downloadBlob(content: string, fileName: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
+function downloadBlob(blob: Blob, fileName: string) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.setAttribute("href", url);
@@ -16,168 +13,85 @@ function downloadBlob(content: string, fileName: string, mimeType: string) {
   document.body.removeChild(link);
 }
 
-/**
- * Exports all bookings to an Excel-friendly UTF-8 CSV with BOM
- */
-export function exportBookingsToCSV(bookings: Booking[]) {
-  const headers = [
-    "ID Booking",
-    "Tanggal Booking Masuk",
-    "Nama Kustomer",
-    "Nomor WhatsApp",
-    "Kota / Domisili",
-    "Jenis Acara",
-    "Tanggal Pelaksanaan Acara",
-    "Alamat Lengkap Venue",
-    "Paket Utama",
-    "Harga Paket Utama (IDR)",
-    "Add-ons Tambahan",
-    "Metode Pembayaran",
-    "Total Nilai Kontrak (IDR)",
-    "Nominal Terbayar (IDR)",
-    "Sisa Tagihan Pelunasan (IDR)",
-    "Status Pesanan",
-    "Tanggal Disetujui"
-  ];
+export function exportBookingsToXLSX(bookings: Booking[]) {
+  const data = bookings.map((b) => ({
+    "ID Booking": b.id,
+    "Tanggal Booking Masuk": new Date(b.createdAt).toLocaleDateString("id-ID", {
+      year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit",
+    }),
+    "Nama Kustomer": b.customerName,
+    "Nomor WhatsApp": b.customerPhone,
+    "Kota / Domisili": b.customerCity,
+    "Jenis Acara": b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event (Gathering/Komersial)",
+    "Tanggal Pelaksanaan Acara": formatEventDate(b.eventDate, { year: "numeric", month: "long", day: "numeric" }),
+    "Alamat Lengkap Venue": b.venueLocation,
+    "Paket Utama": b.packageName,
+    "Harga Paket Utama (IDR)": b.packagePrice,
+    "Add-ons Tambahan": b.addonDetails?.length
+      ? b.addonDetails.map((a: any) => `${a.name} (+Rp ${a.price.toLocaleString("id-ID")})`).join("; ")
+      : "Tidak ada",
+    "Metode Pembayaran": b.amountPaid < b.totalPrice
+      ? `Sistem DP (${Math.round((b.amountPaid / b.totalPrice) * 100)}%)`
+      : "Pembayaran Lunas (100%)",
+    "Total Nilai Kontrak (IDR)": b.totalPrice,
+    "Nominal Terbayar (IDR)": b.amountPaid,
+    "Sisa Tagihan Pelunasan (IDR)": b.remainingPayment,
+    Kupon: b.couponCode || "-",
+    "Status Pesanan": b.approvalStatus === "rejected" ? "DITOLAK" : b.approvalStatus === "pending" ? "PENDING" : b.paymentStatus === "paid" ? "LUNAS" : b.paymentStatus === "dp_paid" ? "DP PAID" : "APPROVED",
+    "Tanggal Disetujui": b.approvedAt
+      ? new Date(b.approvedAt).toLocaleDateString("id-ID", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+      : "-",
+  }));
 
-  const csvRows = [headers.join(",")];
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Rekap Booking");
 
-  bookings.forEach((b) => {
-    const addonsStr = b.addonDetails && b.addonDetails.length > 0
-      ? b.addonDetails.map((a) => `${a.name} (+Rp ${a.price.toLocaleString("id-ID")})`).join("; ")
-      : "Tidak ada";
+  const colWidths = Object.keys(data[0] || {}).map(() => ({ wch: 25 }));
+  ws["!cols"] = colWidths;
 
-    const formattedEventDate = formatEventDate(b.eventDate, {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-
-    const formattedCreatedDate = new Date(b.createdAt).toLocaleDateString("id-ID", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit"
-    });
-
-    const formattedApprovedDate = b.approvedAt
-      ? new Date(b.approvedAt).toLocaleDateString("id-ID", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit"
-        })
-      : "-";
-
-    const row = [
-      b.id,
-      formattedCreatedDate,
-      b.customerName,
-      b.customerPhone,
-      b.customerCity,
-      b.eventType === "wedding" ? `Wedding (${b.weddingType || "Pernikahan"})` : "Event (Gathering/Komersial)",
-      formattedEventDate,
-      b.venueLocation,
-      b.packageName,
-      b.packagePrice,
-      addonsStr,
-      b.amountPaid < b.totalPrice ? `Sistem DP (${Math.round((b.amountPaid / b.totalPrice) * 100)}%)` : "Pembayaran Lunas (100%)",
-      b.totalPrice,
-      b.amountPaid,
-      b.remainingPayment,
-      b.approvalStatus === "rejected" ? "DITOLAK" : b.approvalStatus === "pending" ? "PENDING" : b.paymentStatus === "paid" ? "LUNAS" : b.paymentStatus === "dp_paid" ? "DP PAID" : "APPROVED",
-      formattedApprovedDate
-    ];
-
-    // Escape cells and wrap in quotes
-    const escapedRow = row.map((val) => {
-      const stringVal = String(val === null || val === undefined ? "" : val);
-      // Double quotes are escaped by doubling them in CSV
-      return `"${stringVal.replace(/"/g, '""')}"`;
-    });
-
-    csvRows.push(escapedRow.join(","));
+  const blob = new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-
-  // Prefixed with \uFEFF UTF-8 BOM so Microsoft Excel reads special characters (such as Rp symbol, dates) without encoding glitches
-  const csvContent = "\uFEFF" + csvRows.join("\r\n");
-  const fileName = `Rekap_Booking_Krealogs_${new Date().toISOString().slice(0, 10)}.csv`;
-  downloadBlob(csvContent, fileName, "text/csv;charset=utf-8;");
+  downloadBlob(blob, `Rekap_Booking_Krealogs_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-/**
- * Exports currently published packages to an Excel-friendly UTF-8 CSV with BOM
- */
-export function exportPackagesToCSV(packages: Package[]) {
-  const headers = [
-    "ID Paket",
-    "Nama Paket",
-    "Tipe Acara",
-    "Harga Paket (IDR)",
-    "Deskripsi Singkat",
-    "Fitur-fitur Layanan"
-  ];
+export function exportPackagesToXLSX(packages: Package[]) {
+  const data = packages.map((p) => ({
+    "ID Paket": p.id,
+    "Nama Paket": p.name,
+    "Tipe Acara": p.type === "wedding" ? "Wedding Only" : p.type === "event" ? "Event Only" : "Wedding & Event",
+    "Harga Paket (IDR)": p.price,
+    "Deskripsi Singkat": p.description,
+    "Fitur-fitur Layanan": p.features?.join("; ") || "",
+  }));
 
-  const csvRows = [headers.join(",")];
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Paket");
+  ws["!cols"] = Object.keys(data[0] || {}).map(() => ({ wch: 30 }));
 
-  packages.forEach((p) => {
-    const featuresStr = p.features ? p.features.join("; ") : "";
-    const roType = p.type === "wedding" ? "Wedding Only" : p.type === "event" ? "Event Only" : "Wedding & Event";
-    
-    const row = [
-      p.id,
-      p.name,
-      roType,
-      p.price,
-      p.description,
-      featuresStr
-    ];
-
-    const escapedRow = row.map((val) => {
-      const stringVal = String(val === null || val === undefined ? "" : val);
-      return `"${stringVal.replace(/"/g, '""')}"`;
-    });
-
-    csvRows.push(escapedRow.join(","));
+  const blob = new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-
-  const csvContent = "\uFEFF" + csvRows.join("\r\n");
-  const fileName = `Daftar_Paket_Krealogs_${new Date().toISOString().slice(0, 10)}.csv`;
-  downloadBlob(csvContent, fileName, "text/csv;charset=utf-8;");
+  downloadBlob(blob, `Daftar_Paket_Krealogs_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
-/**
- * Exports currently published add-ons to an Excel-friendly UTF-8 CSV with BOM
- */
-export function exportAddonsToCSV(addons: Addon[]) {
-  const headers = [
-    "ID Add-On",
-    "Nama Add-On",
-    "Harga Add-On (IDR)",
-    "Deskripsi Tambahan"
-  ];
+export function exportAddonsToXLSX(addons: Addon[]) {
+  const data = addons.map((a) => ({
+    "ID Add-On": a.id,
+    "Nama Add-On": a.name,
+    "Harga Add-On (IDR)": a.price,
+    "Deskripsi Tambahan": a.description || "",
+  }));
 
-  const csvRows = [headers.join(",")];
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Add-Ons");
+  ws["!cols"] = Object.keys(data[0] || {}).map(() => ({ wch: 30 }));
 
-  addons.forEach((a) => {
-    const row = [
-      a.id,
-      a.name,
-      a.price,
-      a.description
-    ];
-
-    const escapedRow = row.map((val) => {
-      const stringVal = String(val === null || val === undefined ? "" : val);
-      return `"${stringVal.replace(/"/g, '""')}"`;
-    });
-
-    csvRows.push(escapedRow.join(","));
+  const blob = new Blob([XLSX.write(wb, { bookType: "xlsx", type: "array" })], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
-
-  const csvContent = "\uFEFF" + csvRows.join("\r\n");
-  const fileName = `Daftar_Addons_Krealogs_${new Date().toISOString().slice(0, 10)}.csv`;
-  downloadBlob(csvContent, fileName, "text/csv;charset=utf-8;");
+  downloadBlob(blob, `Daftar_Addons_Krealogs_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }

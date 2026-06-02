@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Package, Addon, Coupon } from "../types";
 import AdminLayout from "./AdminLayout";
 import BookingApprovalTable from "./BookingApprovalTable";
+import Toast from "./Toast";
 import { motion, AnimatePresence } from "motion/react";
 import { AlertCircle, Check } from "lucide-react";
 
@@ -34,7 +35,7 @@ export default function AdminApproval({ onOpenInvoice, mobileSidebarOpen, setMob
   }, [navigate]);
 
   return (
-    <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
+    <><AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6 animate-fade-in">
         <div className="border-b border-zinc-900 pb-4">
           <h2 className="text-xl font-bold text-white">Persetujuan Pemesanan</h2>
@@ -74,5 +75,7 @@ export default function AdminApproval({ onOpenInvoice, mobileSidebarOpen, setMob
         )}
       </AnimatePresence>
     </AdminLayout>
+      <Toast message={toast?.message || ""} type={toast?.type || "success"} visible={!!toast} onClose={() => setToast(null)} />
+    </>
   );
 }

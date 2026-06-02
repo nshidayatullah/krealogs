@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Booking, Package as PkgType, Addon, Coupon } from "../types";
 import AdminLayout from "./AdminLayout";
+import Toast from "./Toast";
 import { Plus, Edit, Trash2, Check, X, AlertCircle, Package as PkgIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -55,8 +56,8 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
     const payload = { id: editId || `pkg-${Date.now()}`, name: pkgName, description: pkgDesc, price: Number(pkgPrice), type: pkgType, category: pkgCategory, features: feats };
     try {
       const r = await fetch(editId ? `/api/packages/${editId}` : "/api/packages", { method: editId ? "PUT" : "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrfToken }, body: JSON.stringify(payload) });
-      if (r.ok) { setIsModalOpen(false); load(); } else alert("Gagal");
-    } catch {}
+      if (r.ok) { setIsModalOpen(false); load(); showToast(editId ? "Paket diperbarui!" : "Paket ditambahkan!", "success"); } else showToast("Gagal menyimpan", "error");
+    } catch { showToast("Koneksi error", "error"); }
   };
 
   const deletePkg = (id: string) => {
@@ -67,7 +68,7 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
   };
 
   return (
-    <AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
+    <><AdminLayout bookings={bookings} packagesCount={packages.length} addonsCount={addons.length} couponsCount={coupons.length} mobileSidebarOpen={mobileSidebarOpen} setMobileSidebarOpen={setMobileSidebarOpen}>
       <div className="space-y-6 animate-fade-in">
         <div className="flex flex-wrap gap-3 justify-between items-center border-b border-zinc-900 pb-4">
           <div><h2 className="text-xl font-bold text-white">Kelola Paket Utama</h2><p className="text-xs text-zinc-400 mt-1">Daftar paket utama cinematografi yang disuguhkan pelanggan.</p></div>
@@ -153,5 +154,7 @@ export default function AdminPackages({ onOpenInvoice, mobileSidebarOpen, setMob
         </div>
       )}
     </AdminLayout>
+      <Toast message={toast?.message || ""} type={toast?.type || "success"} visible={!!toast} onClose={() => setToast(null)} />
+    </>
   );
 }

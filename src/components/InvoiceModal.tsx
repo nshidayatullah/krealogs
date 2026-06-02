@@ -193,8 +193,20 @@ const S: Record<string, React.CSSProperties> = {
   },
 
   /* band */
-  band: { background: PALETTE.terra, color: "#fff", padding: "30px 48px 24px" },
+  band: { color: "#fff", padding: 0, overflow: "hidden", position: "relative" },
   bandTop: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" },
+  headerBg: {
+    display: "block",
+    width: "100%",
+    height: "auto",
+  },
+  bandOverlay: {
+    position: "absolute",
+    inset: 0,
+    padding: "90px 48px 24px",
+    display: "flex",
+    flexDirection: "column",
+  },
   logo: { width: 140, height: "auto", display: "block" },
   tag: {
     marginTop: 8,
@@ -212,7 +224,7 @@ const S: Record<string, React.CSSProperties> = {
     lineHeight: 1,
     textAlign: "right",
   },
-  bandMeta: { display: "flex", gap: 36, justifyContent: "flex-end", marginTop: 12 },
+  bandMeta: { display: "flex", gap: 36, justifyContent: "flex-end", marginTop: 24 },
   bm: { textAlign: "right" },
   bmK: {
     fontSize: 7.5,
@@ -241,31 +253,21 @@ const S: Record<string, React.CSSProperties> = {
   pline: { fontSize: 11, color: PALETTE.inkSoft },
 
   thead: {
-    display: "grid",
-    gridTemplateColumns: "1fr 48px 100px 100px",
-    gap: 8,
+    width: "100%",
     background: PALETTE.ink,
-    color: "#fff",
-    padding: "8px 14px",
     borderRadius: "4px 4px 0 0",
   },
-  th: { fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, color: "rgba(255,255,255,.78)" },
+  th: { fontSize: 8.5, letterSpacing: ".14em", textTransform: "uppercase", fontWeight: 700, color: "#fff", padding: "8px 10px" },
+  thDesc: { textAlign: "left" as const },
+  thQty: { textAlign: "center" as const, width: 48 },
+  thPrice: { textAlign: "right" as const, width: 100 },
   thR: { textAlign: "right" },
   thC: { textAlign: "center" },
-  row: {
-    display: "grid",
-    gridTemplateColumns: "1fr 48px 100px 100px",
-    gap: 8,
-    padding: "10px 14px",
-    borderBottom: `1px solid ${PALETTE.line}`,
-    alignItems: "start",
-  },
-  iname: { fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 12, marginBottom: 3 },
-  imeta: { fontSize: 10, color: PALETTE.inkSoft, lineHeight: 1.4 },
-  cell: { fontSize: 11 },
-  cellR: { textAlign: "right" },
-  cellC: { textAlign: "center" },
-  cellB: { fontWeight: 700 },
+  rowTable: { width: "100%", borderCollapse: "collapse" as const },
+  td: { padding: "10px", fontSize: 11, borderBottom: `1px solid ${PALETTE.line}`, verticalAlign: "top" as const, color: PALETTE.ink },
+  tdDesc: { textAlign: "left" as const },
+  tdQty: { textAlign: "center" as const, width: 48 },
+  tdPrice: { textAlign: "right" as const, width: 100 },
 
   totals: { display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginTop: 14, gap: 24 },
 
@@ -458,7 +460,6 @@ const SCOPED_CSS = `
 
 export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
   const [config, setConfig] = useState<InvoiceConfig>(DEFAULT_CONFIG);
-  const [pdfLoading, setPdfLoading] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -616,15 +617,14 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
         )}
 
         {/* band */}
-        <div style={{ ...S.band, paddingBottom: isLastPage ? 24 : 18 }}>
-          <div style={S.bandTop}>
-            <div>
-              <img style={S.logo} src={LOGO_URL} alt="Krealogs" />
-              <div style={S.tag}>Wedding &amp; Event Content Creator</div>
+        <div style={{ ...S.band }}>
+          <img style={S.headerBg} src="/Header Invoice.png" alt="" />
+          <div style={{ ...S.bandOverlay, paddingBottom: isLastPage ? 24 : 18 }}>
+            <div style={S.bandTop}>
+              <div />
+              <div style={S.word}>INVOICE</div>
             </div>
-            <div style={S.word}>INVOICE</div>
-          </div>
-          <div style={S.bandMeta}>
+            <div style={S.bandMeta}>
             <div style={S.bm}>
               <div style={S.bmK}>Invoice No.</div>
               <div className="inv-num" style={S.bmV}>
@@ -643,8 +643,9 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                 </div>
               </div>
             )}
-          </div>
-        </div>
+           </div>
+         </div>
+       </div>
 
         {/* body */}
         <div style={{ ...S.body, paddingTop: isLastPage ? 24 : 18 }}>
@@ -667,37 +668,33 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
           )}
 
           {/* table */}
-          <div>
-            <div style={S.thead}>
-              <div style={S.th}>Deskripsi</div>
-              <div style={{ ...S.th, ...S.thC }}>Qty</div>
-              <div style={{ ...S.th, ...S.thR }}>Harga</div>
-              <div style={{ ...S.th, ...S.thR }}>Jumlah</div>
-            </div>
-            {pageRowsSlice.map((r, i) => (
-              <div className="inv-row" style={S.row} key={i}>
-                <div>
-                  <div style={S.iname}>{r.name}</div>
-                  {r.meta.length > 0 && (
-                    <div style={S.imeta}>
-                      {r.meta.map((m, j) => (
-                        <div key={j}>{m}</div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellC }}>
-                  {r.qty}
-                </div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR }}>
-                  {rp(r.price)}
-                </div>
-                <div className="inv-num" style={{ ...S.cell, ...S.cellR, ...S.cellB }}>
-                  {rp(r.qty * r.price)}
-                </div>
-              </div>
-            ))}
-          </div>
+          <table style={{ ...S.thead }}>
+            <thead>
+              <tr>
+                <th style={{ ...S.th, ...S.thDesc }}>Deskripsi</th>
+                <th style={{ ...S.th, ...S.thQty }}>Qty</th>
+                <th style={{ ...S.th, ...S.thPrice }}>Harga</th>
+                <th style={{ ...S.th, ...S.thPrice }}>Jumlah</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pageRowsSlice.map((r, i) => (
+                <tr key={i} className="inv-row" style={i % 2 === 1 ? { backgroundColor: "#fbf7f1" } : {}}>
+                  <td style={{ ...S.td, ...S.tdDesc }}>
+                    <div style={{ fontFamily: '"Space Grotesk", sans-serif', fontWeight: 600, fontSize: 12, marginBottom: 3 }}>{r.name}</div>
+                    {r.meta.length > 0 && (
+                      <div style={{ fontSize: 10, color: PALETTE.inkSoft, lineHeight: 1.4 }}>
+                        {r.meta.map((m, j) => (<div key={j}>{m}</div>))}
+                      </div>
+                    )}
+                  </td>
+                  <td className="inv-num" style={{ ...S.td, ...S.tdQty }}>{r.qty}</td>
+                  <td className="inv-num" style={{ ...S.td, ...S.tdPrice }}>{rp(r.price)}</td>
+                  <td className="inv-num" style={{ ...S.td, ...S.tdPrice, fontWeight: 700 }}>{rp(r.qty * r.price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
           {isLastPage && (
             <>
@@ -793,72 +790,149 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  const handleDownloadPDF = async () => {
-    if (!booking || !config || !invoiceRef.current) return;
+  const handleDownloadPDF = () => {
+    if (!booking || !invoiceRef.current) return;
 
-    const pdfWindow = window.open("", "_blank");
-    if (!pdfWindow) {
-      alert("Izinkan popup untuk membuka PDF");
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      alert("Izinkan popup untuk mencetak/mengunduh PDF");
       return;
     }
-    pdfWindow.document.write(
-      '<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888;font-size:14px">Menyiapkan PDF…</body></html>',
-    );
 
-    setPdfLoading(true);
-    try {
-      const [{ default: jsPDF }, html2canvasMod] = await Promise.all([
-        import("jspdf"),
-        import("html2canvas"),
-      ]);
-      const html2canvas = (html2canvasMod.default || html2canvasMod) as unknown as (
-        element: HTMLElement,
-        options?: Record<string, unknown>,
-      ) => Promise<HTMLCanvasElement>;
+    // Get the origin so absolute image paths resolve correctly
+    const origin = window.location.origin;
 
-      const pages = invoiceRef.current.querySelectorAll<HTMLElement>(".inv-root");
-      if (!pages.length) throw new Error("No invoice pages found");
+    // Serialize the current invoice DOM to HTML string
+    const invoiceHTML = invoiceRef.current.innerHTML;
 
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = 210;
-      const pageHeight = 297;
+    // Build a full HTML page that mirrors the modal exactly
+    const printCSS = `
+      @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap');
 
-      for (let i = 0; i < pages.length; i++) {
-        const el = pages[i];
-        const origTransform = el.style.transform;
-        const origOrigin = el.style.transformOrigin;
-        el.style.transform = "none";
-        el.style.transformOrigin = "0 0";
-
-        const canvas = await html2canvas(el, {
-          scale: 2,
-          useCORS: true,
-          logging: false,
-          width: el.scrollWidth,
-          height: el.scrollHeight,
-        });
-
-        el.style.transform = origTransform;
-        el.style.transformOrigin = origOrigin;
-
-        const imgData = canvas.toDataURL("image/jpeg", 0.95);
-        const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body {
+        margin: 0; padding: 0;
+        background: #fff;
+        font-family: "Hanken Grotesk", system-ui, sans-serif;
       }
 
-      const blob = pdf.output("blob");
-      const url = URL.createObjectURL(blob);
-      pdfWindow.location.href = url;
-    } catch (err) {
-      console.error("PDF generation error:", err);
-      pdfWindow.document.write(
-        '<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#c44;font-size:14px">Gagal membuat PDF</body></html>',
-      );
-    } finally {
-      setPdfLoading(false);
-    }
+      /* Numeric tables */
+      .inv-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+
+      /* Row striping */
+      .inv-row:nth-child(odd) { background: #fbf7f1; }
+
+      /* Voucher notch mask */
+      .inv-voucher {
+        --stub: 64px; --notch: 8px;
+        -webkit-mask:
+          radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
+          radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
+        mask:
+          radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
+          radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
+      }
+      .inv-voucher-body::before {
+        content: ""; position: absolute; left: 0; top: 9px; bottom: 9px;
+        border-left: 1.5px dashed rgba(208,88,72,.55);
+      }
+
+      /* Watermark */
+      .inv-watermark {
+        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+        pointer-events: none; z-index: 5;
+      }
+      .inv-watermark span {
+        font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 132px; letter-spacing: .08em;
+        color: rgba(208,88,72,.10); border: 6px solid rgba(208,88,72,.15);
+        padding: 18px 46px; border-radius: 18px; transform: rotate(-18deg); text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .inv-stamp-full {
+        position: absolute; top: 50%; left: 55%;
+        transform: translate(-50%, calc(-50% + 100px)) rotate(-15deg);
+        height: 200px; opacity: 0.15; pointer-events: none; z-index: 5;
+      }
+
+      /* Each invoice page */
+      .inv-root {
+        width: 794px;
+        min-height: 1123px;
+        background: #fffdfa;
+        color: #241f1c;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        font-family: "Hanken Grotesk", system-ui, sans-serif;
+        font-size: 13px;
+        line-height: 1.5;
+        overflow: visible;
+        margin: 0 auto;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Make sure table borders in print are thin and collapsed exactly like the preview */
+      .inv-root table {
+        border-collapse: collapse !important;
+      }
+      .inv-root td {
+        border-bottom: 1px solid rgba(36,31,28,.12) !important;
+      }
+
+      @media print {
+        @page { size: A4; margin: 0mm !important; }
+        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
+        .inv-root {
+          box-shadow: none !important;
+          width: 794px !important;
+          min-height: 1123px !important;
+          max-width: 794px !important;
+          page-break-after: always;
+          margin: 0 auto !important;
+        }
+        .inv-root:last-child { page-break-after: auto; }
+        .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .no-print { display: none !important; }
+      }
+    `;
+
+    // Replace relative image paths with absolute so they load in the new window
+    const absoluteHTML = invoiceHTML
+      .replace(/src="\/([^"]+)"/g, `src="${origin}/$1"`);
+
+    const fullHTML = `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice - ${booking.customerName}</title>
+  <style>${printCSS}</style>
+</head>
+<body>
+  <div class="no-print" style="text-align:center;padding:16px;font-family:sans-serif;font-size:13px;color:#555;background:#f5f5f5;border-bottom:1px solid #ddd;">
+    Tekan <strong>Ctrl+P</strong> (Windows) atau <strong>⌘+P</strong> (Mac) → pilih <em>"Save as PDF"</em> untuk mengunduh.
+    <button onclick="window.print()" style="margin-left:12px;padding:8px 18px;background:#CC5946;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">🖨 Print / Unduh PDF</button>
+  </div>
+  ${absoluteHTML}
+  <script>
+    // Wait for fonts & images, then auto-trigger print dialog
+    window.addEventListener('load', function() {
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function() {
+          setTimeout(function() { window.print(); }, 600);
+        });
+      } else {
+        setTimeout(function() { window.print(); }, 1200);
+      }
+    });
+  </script>
+</body>
+</html>`;
+
+    printWindow.document.open();
+    printWindow.document.write(fullHTML);
+    printWindow.document.close();
   };
 
   return (
@@ -866,8 +940,8 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       <style>{SCOPED_CSS}</style>
 
       <div style={S.toolbar}>
-        <button type="button" style={{ ...S.btn, ...S.btnPrint, opacity: pdfLoading ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfLoading}>
-          {pdfLoading ? "Menyiapkan PDF..." : "Unduh PDF"}
+        <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handleDownloadPDF}>
+          Unduh PDF
         </button>
         <button type="button" style={{ ...S.btn, ...S.btnClose }} onClick={onClose}>
           Tutup

@@ -13,13 +13,13 @@ interface Props {
 }
 
 export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
-  const [sortKey, setSortKey] = useState<"order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status">("date");
+  const [sortKey, setSortKey] = useState<"order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status" | "coupon">("order");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
 
-  const toggleSort = (key: "order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status") => {
+  const toggleSort = (key: "order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status" | "coupon") => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
   };
@@ -49,6 +49,7 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
     if (sortKey === "addons") return dir * ((a.addonDetails?.length || 0) - (b.addonDetails?.length || 0));
     if (sortKey === "price") return dir * (a.totalPrice - b.totalPrice);
     if (sortKey === "status") return dir * a.approvalStatus.localeCompare(b.approvalStatus);
+    if (sortKey === "coupon") return dir * (a.couponCode || "").localeCompare(b.couponCode || "");
     return 0;
   });
 
@@ -85,11 +86,45 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 justify-end">
+      <div className="flex flex-wrap items-center gap-3 justify-between bg-zinc-950/30 p-2.5 rounded-xl border border-zinc-900">
         <div className="relative flex items-center gap-1">
           <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           <input type="text" placeholder="Cari nama / WA..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setPage(1); }} className="w-36 pl-7 pr-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 transition" />
           {searchQuery && <button onClick={clearSearch} title="Hapus pencarian" className="text-zinc-500 hover:text-zinc-300 transition cursor-pointer"><svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-zinc-500 font-medium">Sortir:</span>
+          <select 
+            value={sortKey} 
+            onChange={e => setSortKey(e.target.value as any)}
+            className="bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] text-zinc-300 py-1.5 px-2.5 focus:outline-none focus:border-amber-500/50 transition cursor-pointer"
+          >
+            <option value="order">Tanggal Order</option>
+            <option value="name">Klien / Customer</option>
+            <option value="date">Tanggal Acara</option>
+            <option value="package">Paket</option>
+            <option value="addons">Jumlah Add-Ons</option>
+            <option value="coupon">Kupon Promo</option>
+            <option value="price">Biaya Total</option>
+            <option value="status">Status Persetujuan</option>
+          </select>
+
+          <button
+            onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")}
+            title={sortDir === "asc" ? "Urutan Naik (Ascending)" : "Urutan Turun (Descending)"}
+            className="flex items-center justify-center p-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-400 hover:text-white hover:border-amber-500/50 transition cursor-pointer"
+          >
+            {sortDir === "asc" ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+            ) : (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 4h13M3 8h9m-9 4h9m5-1v12m0 0l-4-4m4 4l4-4" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
 
@@ -100,30 +135,15 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
           <table className="w-full text-left border-collapse text-xs min-w-[750px]">
             <thead>
               <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
-                <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("order")}>
-                  Tgl. Order {sortKey === "order" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
-                  Klien {sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("date")}>
-                  Acara {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("eventdate")}>
-                  Tgl. Acara {sortKey === "eventdate" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("package")}>
-                  Paket {sortKey === "package" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("addons")}>
-                  Add-Ons {sortKey === "addons" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 text-right cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("price")}>
-                  Biaya {sortKey === "price" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
-                <th className="py-2 px-2 text-center cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("status")}>
-                  Status {sortKey === "status" ? (sortDir === "asc" ? "▲" : "▼") : ""}
-                </th>
+                <th className="py-2 px-2 rounded-l">Tgl. Order</th>
+                <th className="py-2 px-2">Klien</th>
+                <th className="py-2 px-2">Acara</th>
+                <th className="py-2 px-2">Tgl. Acara</th>
+                <th className="py-2 px-2">Paket</th>
+                <th className="py-2 px-2">Add-Ons</th>
+                <th className="py-2 px-2">Kupon</th>
+                <th className="py-2 px-2 text-right">Biaya</th>
+                <th className="py-2 px-2 text-center">Status</th>
                 <th className="py-2 px-2 text-center rounded-r">Aksi</th>
               </tr>
             </thead>
@@ -151,6 +171,11 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
                   <td className="py-1 px-2 leading-3.25">
                     {b.addonDetails && b.addonDetails.length > 0 ? (
                       <div>{Object.entries(b.addonDetails.reduce((acc: Record<string, number>, a) => { acc[a.name] = (acc[a.name] || 0) + 1; return acc; }, {})).map(([name, qty]) => <div key={name} className="text-[9px] text-zinc-400 font-sans leading-3.25">+ {name}{(qty as number) > 1 ? ` ×${qty}` : ""}</div>)}</div>
+                    ) : <span className="text-[9px] text-zinc-600 font-sans">—</span>}
+                  </td>
+                  <td className="py-1 px-2 leading-3.25">
+                    {b.couponCode ? (
+                      <div><span className="text-[9px] font-bold text-emerald-400 font-sans">{b.couponCode}</span></div>
                     ) : <span className="text-[9px] text-zinc-600 font-sans">—</span>}
                   </td>
                   <td className="py-1 px-2 text-right leading-3.25"><span className="font-sans text-amber-400 text-[10px]">Rp {b.totalPrice.toLocaleString("id-ID")}</span></td>

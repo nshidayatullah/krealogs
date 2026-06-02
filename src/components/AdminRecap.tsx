@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Booking, Package as PkgType, Addon, Coupon } from "../types";
 import AdminLayout from "./AdminLayout";
 import { FileSpreadsheet, Download, TrendingUp, Coins, Check } from "lucide-react";
-import { exportBookingsToCSV, exportPackagesToCSV, exportAddonsToCSV } from "../utils/excelExport";
+import { exportBookingsToXLSX, exportPackagesToXLSX, exportAddonsToXLSX } from "../utils/excelExport";
 import { formatEventDate } from "../utils/dateFormatter";
 
 interface Props {
@@ -72,7 +72,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
               <h3 className="text-sm font-bold text-white">Ekspor Rekap Booking</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">Semua data pemesanan termasuk ID, nama, kontak, acara, paket, add-on, status, dan nominal pembayaran.</p>
             </div>
-            <button onClick={() => exportBookingsToCSV(bookings)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download CSV</span></button>
+            <button onClick={() => exportBookingsToXLSX(bookings)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download XLSX</span></button>
           </div>
           <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition min-h-[200px]">
             <div className="space-y-2">
@@ -80,7 +80,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
               <h3 className="text-sm font-bold text-white">Ekspor Daftar Paket</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">Daftar paket utama cinematografi dengan fitur-fitur layanan dan harga masing-masing.</p>
             </div>
-            <button onClick={() => exportPackagesToCSV(packages)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download CSV</span></button>
+            <button onClick={() => exportPackagesToXLSX(packages)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download XLSX</span></button>
           </div>
           <div className="p-5 bg-zinc-950 rounded-2xl border border-zinc-850 flex flex-col justify-between hover:border-emerald-500/20 transition min-h-[200px]">
             <div className="space-y-2">
@@ -88,7 +88,7 @@ export default function AdminRecap({ onOpenInvoice, mobileSidebarOpen, setMobile
               <h3 className="text-sm font-bold text-white">Ekspor Daftar Add-Ons</h3>
               <p className="text-xs text-zinc-400 leading-relaxed">Daftar layanan tambahan yang tersedia untuk kustomisasi paket.</p>
             </div>
-            <button onClick={() => exportAddonsToCSV(addons)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download CSV</span></button>
+            <button onClick={() => exportAddonsToXLSX(addons)} className="w-full mt-4 flex items-center justify-center gap-2 py-2.5 bg-zinc-900 border border-zinc-800 hover:border-amber-500 text-zinc-100 rounded-xl text-xs font-bold transition cursor-pointer"><Download className="w-4 h-4" /><span>Download XLSX</span></button>
           </div>
         </div>
 
