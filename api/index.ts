@@ -41,6 +41,25 @@ function sanitize(str: string): string {
   return str.replace(/[<>&"'`]/g, "").trim();
 }
 
+function generateBookingId(eventType: string, weddingType?: string): string {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  let code: string;
+  if (eventType === "event") {
+    code = "EV";
+  } else {
+    const wt = (weddingType || "").toLowerCase();
+    if (wt.includes("lamaran")) code = "WLA";
+    else if (wt.includes("akad") && wt.includes("resepsi")) code = "WAKRE";
+    else if (wt.includes("akad")) code = "WAK";
+    else if (wt.includes("resepsi")) code = "WRE";
+    else code = "W";
+  }
+  const unique = String(Math.floor(Math.random() * 900) + 100);
+  return `${code}${mm}${yy}${unique}`;
+}
+
 function mapBookingRow(b: any) {
   const s = (b.status || "pending").toLowerCase();
   const approvalStatus = ["pending", "approved", "rejected"].includes(s) ? s : s === "dp_paid" || s === "paid" ? "approved" : "pending";
@@ -206,7 +225,7 @@ app.post("/api/bookings", async (req, res) => {
   const customerName = sanitize(d.customerName);
   const customerCity = sanitize(d.customerCity);
   const venueLocation = sanitize(d.venueLocation);
-  const id = `BOOK-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+  const id = generateBookingId(d.eventType, d.weddingType);
   const createdAt = new Date().toISOString();
 
   try {

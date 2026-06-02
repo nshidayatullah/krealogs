@@ -458,6 +458,7 @@ const SCOPED_CSS = `
 
 export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
   const [config, setConfig] = useState<InvoiceConfig>(DEFAULT_CONFIG);
+  const [pdfLoading, setPdfLoading] = useState(false);
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -492,7 +493,6 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   const approvalStatus = booking.approvalStatus || "pending";
   const paymentStatus = booking.paymentStatus || "unpaid";
   const watermark = paymentStatus === "paid" ? "LUNAS" : paymentStatus === "dp_paid" ? "DP TERBAYAR" : approvalStatus === "rejected" ? "DITOLAK" : approvalStatus === "pending" ? "PENDING" : "";
-  const docTitle = `Invoice ${invoiceNumber(booking)}${watermark ? " — " + watermark : ""}`;
 
   const bookingMeta = (): string[] =>
     [[booking.eventType, booking.weddingType].filter(Boolean).join(" · "), booking.eventDate ? "Tanggal — " + formatDateShort(booking.eventDate) : "", booking.venueLocation ? "Tempat — " + booking.venueLocation : ""].filter(
@@ -793,22 +793,29 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  /* ----- print using hidden iframe ----- */
-  const handlePrint = () => {
-    const node = invoiceRef.current;
-    if (!node) return;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    printWindow.document.write(
-      `<!DOCTYPE html><html lang="id"><head><meta charset="utf-8" />` +
-        `<title>${docTitle}</title><style>${SCOPED_CSS}\n` +
-        `body{margin:0;padding:0;background:#fff;display:flex;flex-direction:column;align-items:center;}` +
-        `</style>` +
-        `</head><body>${node.outerHTML}</body></html>`,
-    );
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
+  const handleDownloadPDF = async () => {
+    if (!booking || !config) return;
+    setPdfLoading(true);
+    try {
+      const [{ pdf }, { default: InvoicePDFDocument }] = await Promise.all([
+        import("@react-pdf/renderer"),
+        import("./InvoicePDFDocument"),
+      ]);
+      const blob = await pdf(<InvoicePDFDocument booking={booking} config={config} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Invoice-${invoiceNumber(booking)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      alert("Gagal membuat PDF. Lihat console untuk detail.");
+    } finally {
+      setPdfLoading(false);
+    }
   };
 
   return (
@@ -816,8 +823,8 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
       <style>{SCOPED_CSS}</style>
 
       <div style={S.toolbar}>
-        <button type="button" style={{ ...S.btn, ...S.btnPrint }} onClick={handlePrint}>
-          Unduh PDF
+        <button type="button" style={{ ...S.btn, ...S.btnPrint, opacity: pdfLoading ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfLoading}>
+          {pdfLoading ? "Menyiapkan PDF..." : "Unduh PDF"}
         </button>
         <button type="button" style={{ ...S.btn, ...S.btnClose }} onClick={onClose}>
           Tutup

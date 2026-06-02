@@ -6,6 +6,9 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
+    optimizeDeps: {
+      include: ["@react-pdf/renderer"],
+    },
     resolve: {
       alias: {
         '@/utils': path.resolve(__dirname, './src/utils'),

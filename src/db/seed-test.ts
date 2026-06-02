@@ -251,8 +251,27 @@ function assignPayment(s: BookingSeed, paymentStatus: "unpaid" | "dp_paid" | "pa
   };
 }
 
+function generateSeedBookingId(eventType: string, weddingType?: string): string {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
+  const yy = String(now.getFullYear()).slice(-2);
+  let code: string;
+  if (eventType === "event") {
+    code = "EV";
+  } else {
+    const wt = (weddingType || "").toLowerCase();
+    if (wt.includes("lamaran")) code = "WLA";
+    else if (wt.includes("akad") && wt.includes("resepsi")) code = "WAKRE";
+    else if (wt.includes("akad")) code = "WAK";
+    else if (wt.includes("resepsi")) code = "WRE";
+    else code = "W";
+  }
+  const unique = String(Math.floor(Math.random() * 900) + 100);
+  return `${code}${mm}${yy}${unique}`;
+}
+
 async function insertBooking(b: BookingSeed) {
-  const id = `TEST-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+  const id = generateSeedBookingId(b.eventType, b.weddingType);
   const dbStatus = b.approvalStatus === "rejected" ? "rejected" : b.paymentStatus === "paid" ? "paid" : b.paymentStatus === "dp_paid" ? "dp_paid" : b.approvalStatus === "approved" ? "approved" : "pending";
   try {
     await pool.query(

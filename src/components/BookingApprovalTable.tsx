@@ -13,13 +13,13 @@ interface Props {
 }
 
 export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoice, showToast, setBookings, setConfirmModal }: Props) {
-  const [sortKey, setSortKey] = useState<"date" | "name" | "package" | "addons" | "price" | "status">("date");
+  const [sortKey, setSortKey] = useState<"order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status">("date");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const PER_PAGE = 15;
 
-  const toggleSort = (key: "date" | "name" | "package" | "addons" | "price" | "status") => {
+  const toggleSort = (key: "order" | "date" | "eventdate" | "name" | "package" | "addons" | "price" | "status") => {
     if (sortKey === key) setSortDir(d => d === "asc" ? "desc" : "asc");
     else { setSortKey(key); setSortDir("asc"); }
   };
@@ -41,7 +41,9 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
 
   const sorted = [...searched].sort((a, b) => {
     const dir = sortDir === "asc" ? 1 : -1;
+    if (sortKey === "order") return dir * (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     if (sortKey === "date") return dir * (new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+    if (sortKey === "eventdate") return dir * (new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
     if (sortKey === "name") return dir * a.customerName.localeCompare(b.customerName);
     if (sortKey === "package") return dir * a.packageName.localeCompare(b.packageName);
     if (sortKey === "addons") return dir * ((a.addonDetails?.length || 0) - (b.addonDetails?.length || 0));
@@ -98,11 +100,17 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
           <table className="w-full text-left border-collapse text-xs min-w-[750px]">
             <thead>
               <tr className="border-b border-zinc-850 text-[10px] font-sans uppercase text-zinc-500 bg-black/20">
-                <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
+                <th className="py-2 px-2 rounded-l cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("order")}>
+                  Tgl. Order {sortKey === "order" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("name")}>
                   Klien {sortKey === "name" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                 </th>
                 <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("date")}>
                   Acara {sortKey === "date" ? (sortDir === "asc" ? "▲" : "▼") : ""}
+                </th>
+                <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("eventdate")}>
+                  Tgl. Acara {sortKey === "eventdate" ? (sortDir === "asc" ? "▲" : "▼") : ""}
                 </th>
                 <th className="py-2 px-2 cursor-pointer select-none hover:text-white transition" onClick={() => toggleSort("package")}>
                   Paket {sortKey === "package" ? (sortDir === "asc" ? "▲" : "▼") : ""}
@@ -122,6 +130,10 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
             <tbody className="divide-y divide-zinc-900">
               {paginated.map(b => b && (
                 <tr key={b.id} className="hover:bg-zinc-900/10 transition">
+                  <td className="py-1 px-2 leading-3.25 align-top">
+                    <div className="text-zinc-200 text-[10px] whitespace-nowrap">{formatEventDate(b.createdAt, { year: "numeric", month: "short", day: "numeric" })}</div>
+                    <div className="text-zinc-500 text-[9px]">{b.createdAt ? new Date(b.createdAt).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : ""}</div>
+                  </td>
                   <td className="py-1 px-2 leading-3.25">
                     <span className="font-sans text-[9px] bg-zinc-900 border border-zinc-800 font-bold px-1 py-0.5 rounded text-zinc-350 block w-fit mb-0.5">{b.id}</span>
                     <div className="text-white font-bold text-[10px]">{b.customerName}</div>
@@ -130,8 +142,10 @@ export default function BookingApprovalTable({ bookings, csrfToken, onOpenInvoic
                   </td>
                   <td className="py-1 px-2 leading-3.25">
                     <span className="text-[9px] font-bold text-zinc-300 capitalize bg-zinc-900 border border-zinc-800 px-1 py-0.5 rounded block w-fit font-sans mb-0.5">{b.eventType === "wedding" ? `Wedding${b.weddingType ? " ("+b.weddingType+")" : ""}` : "Event"}</span>
-                    <div className="text-zinc-200 text-[10px]">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</div>
                     <div className="text-zinc-450 text-[9px] truncate max-w-35">{b.venueLocation}</div>
+                  </td>
+                  <td className="py-1 px-2 leading-3.25 align-top">
+                    <div className="text-zinc-200 text-[10px] whitespace-nowrap">{formatEventDate(b.eventDate, { year: "numeric", month: "short", day: "numeric" })}</div>
                   </td>
                   <td className="py-1 px-2 leading-3.25"><span className="text-white text-[10px]">{b.packageName}</span></td>
                   <td className="py-1 px-2 leading-3.25">
