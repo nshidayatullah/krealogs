@@ -794,25 +794,68 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
   }
 
   const handleDownloadPDF = async () => {
-    if (!booking || !config) return;
+    if (!booking || !config || !invoiceRef.current) return;
+
+    const pdfWindow = window.open("", "_blank");
+    if (!pdfWindow) {
+      alert("Izinkan popup untuk membuka PDF");
+      return;
+    }
+    pdfWindow.document.write(
+      '<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888;font-size:14px">Menyiapkan PDF…</body></html>',
+    );
+
     setPdfLoading(true);
     try {
-      const [{ pdf }, { default: InvoicePDFDocument }] = await Promise.all([
-        import("@react-pdf/renderer"),
-        import("./InvoicePDFDocument"),
+      const [{ default: jsPDF }, html2canvasMod] = await Promise.all([
+        import("jspdf"),
+        import("html2canvas"),
       ]);
-      const blob = await pdf(<InvoicePDFDocument booking={booking} config={config} />).toBlob();
+      const html2canvas = (html2canvasMod.default || html2canvasMod) as unknown as (
+        element: HTMLElement,
+        options?: Record<string, unknown>,
+      ) => Promise<HTMLCanvasElement>;
+
+      const pages = invoiceRef.current.querySelectorAll<HTMLElement>(".inv-root");
+      if (!pages.length) throw new Error("No invoice pages found");
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = 210;
+      const pageHeight = 297;
+
+      for (let i = 0; i < pages.length; i++) {
+        const el = pages[i];
+        const origTransform = el.style.transform;
+        const origOrigin = el.style.transformOrigin;
+        el.style.transform = "none";
+        el.style.transformOrigin = "0 0";
+
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          width: el.scrollWidth,
+          height: el.scrollHeight,
+        });
+
+        el.style.transform = origTransform;
+        el.style.transformOrigin = origOrigin;
+
+        const imgData = canvas.toDataURL("image/jpeg", 0.95);
+        const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, "JPEG", 0, 0, pageWidth, Math.min(imgHeight, pageHeight));
+      }
+
+      const blob = pdf.output("blob");
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `Invoice-${invoiceNumber(booking)}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      pdfWindow.location.href = url;
     } catch (err) {
       console.error("PDF generation error:", err);
-      alert("Gagal membuat PDF. Lihat console untuk detail.");
+      pdfWindow.document.write(
+        '<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#c44;font-size:14px">Gagal membuat PDF</body></html>',
+      );
     } finally {
       setPdfLoading(false);
     }
