@@ -639,7 +639,7 @@ export default function CustomerPage({ onOpenInvoice, onShowToast }: CustomerPag
         <div className="bg-zinc-950 p-6 md:p-8 border-b border-zinc-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h2 className="text-xl font-bold text-white tracking-tight">Isi Formulir & Rancang Biaya</h2>
-            <p className="text-xs text-zinc-400 mt-1">Isi rincian acara Anda untuk mengonfirmasi ketersediaan videografer.</p>
+            <p className="text-xs text-zinc-400 mt-1">Isi rincian acara Anda untuk mengkonfirmasi ketersediaan kru Content Creator.</p>
           </div>
         </div>
 
