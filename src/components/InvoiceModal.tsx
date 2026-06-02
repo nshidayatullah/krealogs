@@ -725,7 +725,7 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
                   </div>
                   {discount > 0 && (
                     <div style={S.trow}>
-                      <span>Diskon{booking.couponCode ? ` · ${booking.couponCode}` : ""}</span>
+                      <span>Diskon{booking.couponCode ? <span style={{ color: PALETTE.terra }}> · {booking.couponCode}</span> : ""}</span>
                       <span className="inv-num" style={S.trowDisc}>
                         &minus;{rp(discount)}
                       </span>
@@ -790,149 +790,73 @@ export default function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalP
     );
   }
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (!booking || !invoiceRef.current) return;
 
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      alert("Izinkan popup untuk mencetak/mengunduh PDF");
-      return;
+    try {
+      const [{ default: jsPDF }, html2canvasMod] = await Promise.all([
+        import("jspdf"),
+        import("html2canvas"),
+      ]);
+      const html2canvas = (html2canvasMod.default || html2canvasMod) as unknown as (
+        element: HTMLElement,
+        options?: Record<string, unknown>,
+      ) => Promise<HTMLCanvasElement>;
+
+      const container = invoiceRef.current;
+      await document.fonts.ready;
+
+      const canvas = await html2canvas(container, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: "#fffdfa",
+        width: container.scrollWidth,
+        height: container.scrollHeight,
+        onclone: (doc: Document) => {
+          const clones = Array.from(doc.querySelectorAll(".inv-root")) as HTMLElement[];
+          clones.forEach((el) => {
+            el.style.transform = "none";
+            el.style.marginBottom = "0";
+            el.style.width = "794px";
+            el.style.minHeight = "1123px";
+            el.style.maxWidth = "794px";
+            el.style.boxShadow = "none";
+          });
+        },
+      });
+
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageWidth = 210;
+      const pageHeight = 297;
+
+      const imgData = canvas.toDataURL("image/jpeg", 0.95);
+      const totalHeight = (canvas.height * pageWidth) / canvas.width;
+
+      let yOffset = 0;
+      while (yOffset * pageHeight < totalHeight) {
+        const h = Math.min(totalHeight - yOffset * pageHeight, pageHeight);
+        const srcY = (yOffset * pageHeight * canvas.height) / totalHeight;
+        const srcH = (h * canvas.height) / totalHeight;
+
+        const pageCanvas = document.createElement("canvas");
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = srcH;
+        const ctx = pageCanvas.getContext("2d")!;
+        ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, pageCanvas.width, pageCanvas.height);
+        const pageImg = pageCanvas.toDataURL("image/jpeg", 0.95);
+
+        if (yOffset > 0) pdf.addPage();
+        pdf.addImage(pageImg, "JPEG", 0, 0, pageWidth, h);
+        yOffset++;
+      }
+
+      const fileName = `${booking.customerName.replace(/[^a-zA-Z0-9 ]/g, "").trim()}-${booking.id}.pdf`;
+      pdf.save(fileName);
+    } catch (err) {
+      console.error("PDF generation error:", err);
+      alert("Gagal membuat PDF");
     }
-
-    // Get the origin so absolute image paths resolve correctly
-    const origin = window.location.origin;
-
-    // Serialize the current invoice DOM to HTML string
-    const invoiceHTML = invoiceRef.current.innerHTML;
-
-    // Build a full HTML page that mirrors the modal exactly
-    const printCSS = `
-      @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap');
-
-      *, *::before, *::after { box-sizing: border-box; }
-      html, body {
-        margin: 0; padding: 0;
-        background: #fff;
-        font-family: "Hanken Grotesk", system-ui, sans-serif;
-      }
-
-      /* Numeric tables */
-      .inv-num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
-
-      /* Row striping */
-      .inv-row:nth-child(odd) { background: #fbf7f1; }
-
-      /* Voucher notch mask */
-      .inv-voucher {
-        --stub: 64px; --notch: 8px;
-        -webkit-mask:
-          radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
-          radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
-        mask:
-          radial-gradient(circle var(--notch) at var(--stub) 0, #0000 98%, #000) 0 0/100% 51% no-repeat,
-          radial-gradient(circle var(--notch) at var(--stub) 100%, #0000 98%, #000) 0 100%/100% 51% no-repeat;
-      }
-      .inv-voucher-body::before {
-        content: ""; position: absolute; left: 0; top: 9px; bottom: 9px;
-        border-left: 1.5px dashed rgba(208,88,72,.55);
-      }
-
-      /* Watermark */
-      .inv-watermark {
-        position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-        pointer-events: none; z-index: 5;
-      }
-      .inv-watermark span {
-        font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: 132px; letter-spacing: .08em;
-        color: rgba(208,88,72,.10); border: 6px solid rgba(208,88,72,.15);
-        padding: 18px 46px; border-radius: 18px; transform: rotate(-18deg); text-transform: uppercase;
-        white-space: nowrap;
-      }
-      .inv-stamp-full {
-        position: absolute; top: 50%; left: 55%;
-        transform: translate(-50%, calc(-50% + 100px)) rotate(-15deg);
-        height: 200px; opacity: 0.15; pointer-events: none; z-index: 5;
-      }
-
-      /* Each invoice page */
-      .inv-root {
-        width: 794px;
-        min-height: 1123px;
-        background: #fffdfa;
-        color: #241f1c;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        font-family: "Hanken Grotesk", system-ui, sans-serif;
-        font-size: 13px;
-        line-height: 1.5;
-        overflow: visible;
-        margin: 0 auto;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-
-      /* Make sure table borders in print are thin and collapsed exactly like the preview */
-      .inv-root table {
-        border-collapse: collapse !important;
-      }
-      .inv-root td {
-        border-bottom: 1px solid rgba(36,31,28,.12) !important;
-      }
-
-      @media print {
-        @page { size: A4; margin: 0mm !important; }
-        html, body { margin: 0 !important; padding: 0 !important; background: #fff !important; }
-        .inv-root {
-          box-shadow: none !important;
-          width: 794px !important;
-          min-height: 1123px !important;
-          max-width: 794px !important;
-          page-break-after: always;
-          margin: 0 auto !important;
-        }
-        .inv-root:last-child { page-break-after: auto; }
-        .inv-root, .inv-root * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-        .no-print { display: none !important; }
-      }
-    `;
-
-    // Replace relative image paths with absolute so they load in the new window
-    const absoluteHTML = invoiceHTML
-      .replace(/src="\/([^"]+)"/g, `src="${origin}/$1"`);
-
-    const fullHTML = `<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Invoice - ${booking.customerName}</title>
-  <style>${printCSS}</style>
-</head>
-<body>
-  <div class="no-print" style="text-align:center;padding:16px;font-family:sans-serif;font-size:13px;color:#555;background:#f5f5f5;border-bottom:1px solid #ddd;">
-    Tekan <strong>Ctrl+P</strong> (Windows) atau <strong>⌘+P</strong> (Mac) → pilih <em>"Save as PDF"</em> untuk mengunduh.
-    <button onclick="window.print()" style="margin-left:12px;padding:8px 18px;background:#CC5946;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:13px;">🖨 Print / Unduh PDF</button>
-  </div>
-  ${absoluteHTML}
-  <script>
-    // Wait for fonts & images, then auto-trigger print dialog
-    window.addEventListener('load', function() {
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(function() {
-          setTimeout(function() { window.print(); }, 600);
-        });
-      } else {
-        setTimeout(function() { window.print(); }, 1200);
-      }
-    });
-  </script>
-</body>
-</html>`;
-
-    printWindow.document.open();
-    printWindow.document.write(fullHTML);
-    printWindow.document.close();
   };
 
   return (
